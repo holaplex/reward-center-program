@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "program",
+    "sdk/reward-center",
+    "sdk/auction-house",
+    "testing-utils"
+]
+
