@@ -1,0 +1,20 @@
+[features]
+seeds = false
+[programs.localnet]
+reward_center = "rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u"
+[programs.devnet]
+reward_center = "rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u"
+[programs.testnet]
+reward_center = "rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u"
+[programs.mainnet]
+reward_center = "rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "mainnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

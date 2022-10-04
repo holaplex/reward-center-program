@@ -1,0 +1,41 @@
+[package]
+name = "mpl-reward-center"
+version = "0.1.1"
+edition = "2021"
+description = "Default Auctioneer implementation"
+authors = ["Holaplex Developers <hola@holaplex.com>"]
+repository = "https://github.com/holaplex/reward-center-program"
+license = "AGPL-3.0"
+readme = "README.md"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+test-bpf = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+solana-program = "~1.9.28"
+anchor-lang = { version = "~0.24.2", features = ["init-if-needed"] }
+anchor-spl = "~0.24.2"
+mpl-auction-house = { version="~1.2.4", features = ["cpi", "no-entrypoint"] }
+mpl-token-metadata = { version="~1.2.7", features = [ "no-entrypoint" ] }
+
+[dev-dependencies]
+anchor-client = "~0.24.2"
+shellexpand = "~2.1.0"
+serde_json = "~1.0"
+mpl-testing-utils= { path = "./../testing-utils" }
+mpl-auction-house-sdk = { path = "./../sdk/auction-house" }
+mpl-reward-center-sdk = {path="./../sdk/reward-center"}
+solana-program-test = "~1.9.15"
+solana-sdk = "~1.9.15"
+env_logger="~0.9.0"
+spl-associated-token-account = { version = "~1.0.3", features = ["no-entrypoint"] }
+mpl-token-metadata = { version="~1.2.7", features = [ "no-entrypoint" ] }
+spl-token = { version = "~3.2",  features = ["no-entrypoint"] }
