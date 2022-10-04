@@ -1342,6 +1342,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "hpl-reward-center"
+version = "0.1.0"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-spl",
+ "env_logger",
+ "hpl-reward-center-sdk",
+ "mpl-auction-house",
+ "mpl-auction-house-sdk",
+ "mpl-testing-utils",
+ "mpl-token-metadata",
+ "serde_json",
+ "shellexpand",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
+name = "hpl-reward-center-sdk"
+version = "0.1.0"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "hpl-reward-center",
+ "mpl-auction-house",
+ "spl-associated-token-account",
+ "spl-token",
+]
+
+[[package]]
 name = "http"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1749,40 +1783,6 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "mpl-auction-house",
-]
-
-[[package]]
-name = "mpl-reward-center"
-version = "0.1.1"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "anchor-spl",
- "env_logger",
- "mpl-auction-house",
- "mpl-auction-house-sdk",
- "mpl-reward-center-sdk",
- "mpl-testing-utils",
- "mpl-token-metadata",
- "serde_json",
- "shellexpand",
- "solana-program",
- "solana-program-test",
- "solana-sdk",
- "spl-associated-token-account",
- "spl-token",
-]
-
-[[package]]
-name = "mpl-reward-center-sdk"
-version = "0.1.0"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "mpl-auction-house",
- "mpl-reward-center",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]
@@ -2748,9 +2748,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fd0db749597d91ff862fd1d55ea87f7855a744a8425a64695b6fca237d1dad1"
+checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
 name = "socket2"
