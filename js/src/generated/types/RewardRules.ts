@@ -5,11 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
+import * as beet from '@metaplex-foundation/beet'
+import { PayoutOperation, payoutOperationBeet } from './PayoutOperation'
 export type RewardRules = {
-  sellerRewardPayoutBasisPoints: number;
-  payoutDivider: number;
-};
+  sellerRewardPayoutBasisPoints: number
+  mathematicalOperand: PayoutOperation
+  payoutNumeral: number
+}
 
 /**
  * @category userTypes
@@ -18,7 +20,8 @@ export type RewardRules = {
 export const rewardRulesBeet = new beet.BeetArgsStruct<RewardRules>(
   [
     ['sellerRewardPayoutBasisPoints', beet.u16],
-    ['payoutDivider', beet.u16],
+    ['mathematicalOperand', payoutOperationBeet],
+    ['payoutNumeral', beet.u16],
   ],
-  'RewardRules',
-);
+  'RewardRules'
+)

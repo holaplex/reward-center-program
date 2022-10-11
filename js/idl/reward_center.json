@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.0",
   "name": "reward_center",
   "instructions": [
     {
@@ -1149,8 +1149,28 @@
             "type": "u16"
           },
           {
-            "name": "payoutDivider",
+            "name": "mathematicalOperand",
+            "type": {
+              "defined": "PayoutOperation"
+            }
+          },
+          {
+            "name": "payoutNumeral",
             "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PayoutOperation",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Multiple"
+          },
+          {
+            "name": "Divide"
           }
         ]
       }

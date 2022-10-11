@@ -5,10 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token';
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import { CancelOfferParams, cancelOfferParamsBeet } from '../types/CancelOfferParams';
+import * as splToken from '@solana/spl-token'
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
+import {
+  CancelOfferParams,
+  cancelOfferParamsBeet,
+} from '../types/CancelOfferParams'
 
 /**
  * @category Instructions
@@ -16,8 +19,8 @@ import { CancelOfferParams, cancelOfferParamsBeet } from '../types/CancelOfferPa
  * @category generated
  */
 export type CancelOfferInstructionArgs = {
-  cancelOfferParams: CancelOfferParams;
-};
+  cancelOfferParams: CancelOfferParams
+}
 /**
  * @category Instructions
  * @category CancelOffer
@@ -25,15 +28,15 @@ export type CancelOfferInstructionArgs = {
  */
 const cancelOfferStruct = new beet.BeetArgsStruct<
   CancelOfferInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['cancelOfferParams', cancelOfferParamsBeet],
   ],
-  'CancelOfferInstructionArgs',
-);
+  'CancelOfferInstructionArgs'
+)
 /**
  * Accounts required by the _cancelOffer_ instruction
  *
@@ -57,24 +60,24 @@ const cancelOfferStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type CancelOfferInstructionAccounts = {
-  wallet: web3.PublicKey;
-  offer: web3.PublicKey;
-  treasuryMint: web3.PublicKey;
-  tokenAccount: web3.PublicKey;
-  receiptAccount: web3.PublicKey;
-  escrowPaymentAccount: web3.PublicKey;
-  metadata: web3.PublicKey;
-  tokenMint: web3.PublicKey;
-  authority: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  auctionHouseFeeAccount: web3.PublicKey;
-  tradeState: web3.PublicKey;
-  ahAuctioneerPda: web3.PublicKey;
-  auctionHouseProgram: web3.PublicKey;
-};
+  wallet: web3.PublicKey
+  offer: web3.PublicKey
+  treasuryMint: web3.PublicKey
+  tokenAccount: web3.PublicKey
+  receiptAccount: web3.PublicKey
+  escrowPaymentAccount: web3.PublicKey
+  metadata: web3.PublicKey
+  tokenMint: web3.PublicKey
+  authority: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  auctionHouseFeeAccount: web3.PublicKey
+  tradeState: web3.PublicKey
+  ahAuctioneerPda: web3.PublicKey
+  auctionHouseProgram: web3.PublicKey
+}
 
-const cancelOfferInstructionDiscriminator = [92, 203, 223, 40, 92, 89, 53, 119];
+const cancelOfferInstructionDiscriminator = [92, 203, 223, 40, 92, 89, 53, 119]
 
 /**
  * Creates a _CancelOffer_ instruction.
@@ -88,7 +91,7 @@ const cancelOfferInstructionDiscriminator = [92, 203, 223, 40, 92, 89, 53, 119];
  */
 export function createCancelOfferInstruction(
   accounts: CancelOfferInstructionAccounts,
-  args: CancelOfferInstructionArgs,
+  args: CancelOfferInstructionArgs
 ) {
   const {
     wallet,
@@ -106,12 +109,12 @@ export function createCancelOfferInstruction(
     tradeState,
     ahAuctioneerPda,
     auctionHouseProgram,
-  } = accounts;
+  } = accounts
 
   const [data] = cancelOfferStruct.serialize({
     instructionDiscriminator: cancelOfferInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: wallet,
@@ -208,12 +211,14 @@ export function createCancelOfferInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

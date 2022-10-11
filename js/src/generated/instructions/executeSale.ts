@@ -5,10 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token';
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import { ExecuteSaleParams, executeSaleParamsBeet } from '../types/ExecuteSaleParams';
+import * as splToken from '@solana/spl-token'
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
+import {
+  ExecuteSaleParams,
+  executeSaleParamsBeet,
+} from '../types/ExecuteSaleParams'
 
 /**
  * @category Instructions
@@ -16,8 +19,8 @@ import { ExecuteSaleParams, executeSaleParamsBeet } from '../types/ExecuteSalePa
  * @category generated
  */
 export type ExecuteSaleInstructionArgs = {
-  executeSaleParams: ExecuteSaleParams;
-};
+  executeSaleParams: ExecuteSaleParams
+}
 /**
  * @category Instructions
  * @category ExecuteSale
@@ -25,15 +28,15 @@ export type ExecuteSaleInstructionArgs = {
  */
 const executeSaleStruct = new beet.BeetArgsStruct<
   ExecuteSaleInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['executeSaleParams', executeSaleParamsBeet],
   ],
-  'ExecuteSaleInstructionArgs',
-);
+  'ExecuteSaleInstructionArgs'
+)
 /**
  * Accounts required by the _executeSale_ instruction
  *
@@ -69,36 +72,36 @@ const executeSaleStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type ExecuteSaleInstructionAccounts = {
-  buyer: web3.PublicKey;
-  buyerRewardTokenAccount: web3.PublicKey;
-  seller: web3.PublicKey;
-  sellerRewardTokenAccount: web3.PublicKey;
-  listing: web3.PublicKey;
-  offer: web3.PublicKey;
-  payer: web3.PublicKey;
-  purchaseTicket: web3.PublicKey;
-  tokenAccount: web3.PublicKey;
-  tokenMint: web3.PublicKey;
-  metadata: web3.PublicKey;
-  treasuryMint: web3.PublicKey;
-  sellerPaymentReceiptAccount: web3.PublicKey;
-  buyerReceiptTokenAccount: web3.PublicKey;
-  authority: web3.PublicKey;
-  escrowPaymentAccount: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  auctionHouseFeeAccount: web3.PublicKey;
-  auctionHouseTreasury: web3.PublicKey;
-  buyerTradeState: web3.PublicKey;
-  sellerTradeState: web3.PublicKey;
-  freeSellerTradeState: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  rewardCenterRewardTokenAccount: web3.PublicKey;
-  ahAuctioneerPda: web3.PublicKey;
-  programAsSigner: web3.PublicKey;
-  auctionHouseProgram: web3.PublicKey;
-};
+  buyer: web3.PublicKey
+  buyerRewardTokenAccount: web3.PublicKey
+  seller: web3.PublicKey
+  sellerRewardTokenAccount: web3.PublicKey
+  listing: web3.PublicKey
+  offer: web3.PublicKey
+  payer: web3.PublicKey
+  purchaseTicket: web3.PublicKey
+  tokenAccount: web3.PublicKey
+  tokenMint: web3.PublicKey
+  metadata: web3.PublicKey
+  treasuryMint: web3.PublicKey
+  sellerPaymentReceiptAccount: web3.PublicKey
+  buyerReceiptTokenAccount: web3.PublicKey
+  authority: web3.PublicKey
+  escrowPaymentAccount: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  auctionHouseFeeAccount: web3.PublicKey
+  auctionHouseTreasury: web3.PublicKey
+  buyerTradeState: web3.PublicKey
+  sellerTradeState: web3.PublicKey
+  freeSellerTradeState: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  rewardCenterRewardTokenAccount: web3.PublicKey
+  ahAuctioneerPda: web3.PublicKey
+  programAsSigner: web3.PublicKey
+  auctionHouseProgram: web3.PublicKey
+}
 
-const executeSaleInstructionDiscriminator = [37, 74, 217, 157, 79, 49, 35, 6];
+const executeSaleInstructionDiscriminator = [37, 74, 217, 157, 79, 49, 35, 6]
 
 /**
  * Creates a _ExecuteSale_ instruction.
@@ -112,7 +115,7 @@ const executeSaleInstructionDiscriminator = [37, 74, 217, 157, 79, 49, 35, 6];
  */
 export function createExecuteSaleInstruction(
   accounts: ExecuteSaleInstructionAccounts,
-  args: ExecuteSaleInstructionArgs,
+  args: ExecuteSaleInstructionArgs
 ) {
   const {
     buyer,
@@ -142,12 +145,12 @@ export function createExecuteSaleInstruction(
     ahAuctioneerPda,
     programAsSigner,
     auctionHouseProgram,
-  } = accounts;
+  } = accounts
 
   const [data] = executeSaleStruct.serialize({
     instructionDiscriminator: executeSaleInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: buyer,
@@ -304,12 +307,14 @@ export function createExecuteSaleInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

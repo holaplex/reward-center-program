@@ -5,10 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token';
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import { UpdateOfferParams, updateOfferParamsBeet } from '../types/UpdateOfferParams';
+import * as splToken from '@solana/spl-token'
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
+import {
+  UpdateOfferParams,
+  updateOfferParamsBeet,
+} from '../types/UpdateOfferParams'
 
 /**
  * @category Instructions
@@ -16,8 +19,8 @@ import { UpdateOfferParams, updateOfferParamsBeet } from '../types/UpdateOfferPa
  * @category generated
  */
 export type UpdateOfferInstructionArgs = {
-  updateOfferParams: UpdateOfferParams;
-};
+  updateOfferParams: UpdateOfferParams
+}
 /**
  * @category Instructions
  * @category UpdateOffer
@@ -25,15 +28,15 @@ export type UpdateOfferInstructionArgs = {
  */
 const updateOfferStruct = new beet.BeetArgsStruct<
   UpdateOfferInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['updateOfferParams', updateOfferParamsBeet],
   ],
-  'UpdateOfferInstructionArgs',
-);
+  'UpdateOfferInstructionArgs'
+)
 /**
  * Accounts required by the _updateOffer_ instruction
  *
@@ -56,23 +59,23 @@ const updateOfferStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type UpdateOfferInstructionAccounts = {
-  wallet: web3.PublicKey;
-  offer: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  authority: web3.PublicKey;
-  buyerTokenAccount: web3.PublicKey;
-  transferAuthority: web3.PublicKey;
-  treasuryMint: web3.PublicKey;
-  tokenAccount: web3.PublicKey;
-  auctionHouseFeeAccount: web3.PublicKey;
-  metadata: web3.PublicKey;
-  escrowPaymentAccount: web3.PublicKey;
-  ahAuctioneerPda: web3.PublicKey;
-  auctionHouseProgram: web3.PublicKey;
-};
+  wallet: web3.PublicKey
+  offer: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  authority: web3.PublicKey
+  buyerTokenAccount: web3.PublicKey
+  transferAuthority: web3.PublicKey
+  treasuryMint: web3.PublicKey
+  tokenAccount: web3.PublicKey
+  auctionHouseFeeAccount: web3.PublicKey
+  metadata: web3.PublicKey
+  escrowPaymentAccount: web3.PublicKey
+  ahAuctioneerPda: web3.PublicKey
+  auctionHouseProgram: web3.PublicKey
+}
 
-const updateOfferInstructionDiscriminator = [191, 70, 15, 66, 224, 2, 249, 223];
+const updateOfferInstructionDiscriminator = [191, 70, 15, 66, 224, 2, 249, 223]
 
 /**
  * Creates a _UpdateOffer_ instruction.
@@ -86,7 +89,7 @@ const updateOfferInstructionDiscriminator = [191, 70, 15, 66, 224, 2, 249, 223];
  */
 export function createUpdateOfferInstruction(
   accounts: UpdateOfferInstructionAccounts,
-  args: UpdateOfferInstructionArgs,
+  args: UpdateOfferInstructionArgs
 ) {
   const {
     wallet,
@@ -103,12 +106,12 @@ export function createUpdateOfferInstruction(
     escrowPaymentAccount,
     ahAuctioneerPda,
     auctionHouseProgram,
-  } = accounts;
+  } = accounts
 
   const [data] = updateOfferStruct.serialize({
     instructionDiscriminator: updateOfferInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: wallet,
@@ -200,12 +203,14 @@ export function createUpdateOfferInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

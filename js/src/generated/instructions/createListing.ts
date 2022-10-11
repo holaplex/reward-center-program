@@ -5,10 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token';
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import { CreateListingParams, createListingParamsBeet } from '../types/CreateListingParams';
+import * as splToken from '@solana/spl-token'
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
+import {
+  CreateListingParams,
+  createListingParamsBeet,
+} from '../types/CreateListingParams'
 
 /**
  * @category Instructions
@@ -16,8 +19,8 @@ import { CreateListingParams, createListingParamsBeet } from '../types/CreateLis
  * @category generated
  */
 export type CreateListingInstructionArgs = {
-  createListingParams: CreateListingParams;
-};
+  createListingParams: CreateListingParams
+}
 /**
  * @category Instructions
  * @category CreateListing
@@ -25,15 +28,15 @@ export type CreateListingInstructionArgs = {
  */
 const createListingStruct = new beet.BeetArgsStruct<
   CreateListingInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['createListingParams', createListingParamsBeet],
   ],
-  'CreateListingInstructionArgs',
-);
+  'CreateListingInstructionArgs'
+)
 /**
  * Accounts required by the _createListing_ instruction
  *
@@ -55,22 +58,24 @@ const createListingStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type CreateListingInstructionAccounts = {
-  auctionHouseProgram: web3.PublicKey;
-  listing: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  wallet: web3.PublicKey;
-  tokenAccount: web3.PublicKey;
-  metadata: web3.PublicKey;
-  authority: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  auctionHouseFeeAccount: web3.PublicKey;
-  sellerTradeState: web3.PublicKey;
-  freeSellerTradeState: web3.PublicKey;
-  ahAuctioneerPda: web3.PublicKey;
-  programAsSigner: web3.PublicKey;
-};
+  auctionHouseProgram: web3.PublicKey
+  listing: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  wallet: web3.PublicKey
+  tokenAccount: web3.PublicKey
+  metadata: web3.PublicKey
+  authority: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  auctionHouseFeeAccount: web3.PublicKey
+  sellerTradeState: web3.PublicKey
+  freeSellerTradeState: web3.PublicKey
+  ahAuctioneerPda: web3.PublicKey
+  programAsSigner: web3.PublicKey
+}
 
-const createListingInstructionDiscriminator = [18, 168, 45, 24, 191, 31, 117, 54];
+const createListingInstructionDiscriminator = [
+  18, 168, 45, 24, 191, 31, 117, 54,
+]
 
 /**
  * Creates a _CreateListing_ instruction.
@@ -84,7 +89,7 @@ const createListingInstructionDiscriminator = [18, 168, 45, 24, 191, 31, 117, 54
  */
 export function createCreateListingInstruction(
   accounts: CreateListingInstructionAccounts,
-  args: CreateListingInstructionArgs,
+  args: CreateListingInstructionArgs
 ) {
   const {
     auctionHouseProgram,
@@ -100,12 +105,12 @@ export function createCreateListingInstruction(
     freeSellerTradeState,
     ahAuctioneerPda,
     programAsSigner,
-  } = accounts;
+  } = accounts
 
   const [data] = createListingStruct.serialize({
     instructionDiscriminator: createListingInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: auctionHouseProgram,
@@ -187,12 +192,14 @@ export function createCreateListingInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

@@ -6,16 +6,19 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-export type UpdateListingParams = {
-  newPrice: beet.bignum
+/**
+ * @category enums
+ * @category generated
+ */
+export enum PayoutOperation {
+  Multiple,
+  Divide,
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const updateListingParamsBeet =
-  new beet.BeetArgsStruct<UpdateListingParams>(
-    [['newPrice', beet.u64]],
-    'UpdateListingParams'
-  )
+export const payoutOperationBeet = beet.fixedScalarEnum(
+  PayoutOperation
+) as beet.FixedSizeBeet<PayoutOperation, PayoutOperation>

@@ -5,20 +5,21 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
+import * as beet from '@metaplex-foundation/beet'
 export type CancelListingParams = {
-  price: beet.bignum;
-  tokenSize: beet.bignum;
-};
+  price: beet.bignum
+  tokenSize: beet.bignum
+}
 
 /**
  * @category userTypes
  * @category generated
  */
-export const cancelListingParamsBeet = new beet.BeetArgsStruct<CancelListingParams>(
-  [
-    ['price', beet.u64],
-    ['tokenSize', beet.u64],
-  ],
-  'CancelListingParams',
-);
+export const cancelListingParamsBeet =
+  new beet.BeetArgsStruct<CancelListingParams>(
+    [
+      ['price', beet.u64],
+      ['tokenSize', beet.u64],
+    ],
+    'CancelListingParams'
+  )

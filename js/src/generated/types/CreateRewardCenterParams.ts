@@ -5,17 +5,18 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
-import { RewardRules, rewardRulesBeet } from './RewardRules';
+import * as beet from '@metaplex-foundation/beet'
+import { RewardRules, rewardRulesBeet } from './RewardRules'
 export type CreateRewardCenterParams = {
-  rewardRules: RewardRules;
-};
+  rewardRules: RewardRules
+}
 
 /**
  * @category userTypes
  * @category generated
  */
-export const createRewardCenterParamsBeet = new beet.BeetArgsStruct<CreateRewardCenterParams>(
-  [['rewardRules', rewardRulesBeet]],
-  'CreateRewardCenterParams',
-);
+export const createRewardCenterParamsBeet =
+  new beet.BeetArgsStruct<CreateRewardCenterParams>(
+    [['rewardRules', rewardRulesBeet]],
+    'CreateRewardCenterParams'
+  )
