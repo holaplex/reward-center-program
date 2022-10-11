@@ -5,9 +5,12 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
-import { UpdateListingParams, updateListingParamsBeet } from '../types/UpdateListingParams';
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
+import {
+  UpdateListingParams,
+  updateListingParamsBeet,
+} from '../types/UpdateListingParams'
 
 /**
  * @category Instructions
@@ -15,8 +18,8 @@ import { UpdateListingParams, updateListingParamsBeet } from '../types/UpdateLis
  * @category generated
  */
 export type UpdateListingInstructionArgs = {
-  updateListingParams: UpdateListingParams;
-};
+  updateListingParams: UpdateListingParams
+}
 /**
  * @category Instructions
  * @category UpdateListing
@@ -24,15 +27,15 @@ export type UpdateListingInstructionArgs = {
  */
 const updateListingStruct = new beet.BeetArgsStruct<
   UpdateListingInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['updateListingParams', updateListingParamsBeet],
   ],
-  'UpdateListingInstructionArgs',
-);
+  'UpdateListingInstructionArgs'
+)
 /**
  * Accounts required by the _updateListing_ instruction
  *
@@ -48,16 +51,18 @@ const updateListingStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type UpdateListingInstructionAccounts = {
-  wallet: web3.PublicKey;
-  listing: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  metadata: web3.PublicKey;
-  tokenAccount: web3.PublicKey;
-  auctionHouseProgram: web3.PublicKey;
-};
+  wallet: web3.PublicKey
+  listing: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  metadata: web3.PublicKey
+  tokenAccount: web3.PublicKey
+  auctionHouseProgram: web3.PublicKey
+}
 
-const updateListingInstructionDiscriminator = [192, 174, 210, 68, 116, 40, 242, 253];
+const updateListingInstructionDiscriminator = [
+  192, 174, 210, 68, 116, 40, 242, 253,
+]
 
 /**
  * Creates a _UpdateListing_ instruction.
@@ -71,7 +76,7 @@ const updateListingInstructionDiscriminator = [192, 174, 210, 68, 116, 40, 242, 
  */
 export function createUpdateListingInstruction(
   accounts: UpdateListingInstructionAccounts,
-  args: UpdateListingInstructionArgs,
+  args: UpdateListingInstructionArgs
 ) {
   const {
     wallet,
@@ -81,12 +86,12 @@ export function createUpdateListingInstruction(
     metadata,
     tokenAccount,
     auctionHouseProgram,
-  } = accounts;
+  } = accounts
 
   const [data] = updateListingStruct.serialize({
     instructionDiscriminator: updateListingInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: wallet,
@@ -123,12 +128,14 @@ export function createUpdateListingInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

@@ -5,13 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token';
-import * as beet from '@metaplex-foundation/beet';
-import * as web3 from '@solana/web3.js';
+import * as splToken from '@solana/spl-token'
+import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
 import {
   CreateRewardCenterParams,
   createRewardCenterParamsBeet,
-} from '../types/CreateRewardCenterParams';
+} from '../types/CreateRewardCenterParams'
 
 /**
  * @category Instructions
@@ -19,8 +19,8 @@ import {
  * @category generated
  */
 export type CreateRewardCenterInstructionArgs = {
-  createRewardCenterParams: CreateRewardCenterParams;
-};
+  createRewardCenterParams: CreateRewardCenterParams
+}
 /**
  * @category Instructions
  * @category CreateRewardCenter
@@ -28,15 +28,15 @@ export type CreateRewardCenterInstructionArgs = {
  */
 const createRewardCenterStruct = new beet.BeetArgsStruct<
   CreateRewardCenterInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
+    instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['createRewardCenterParams', createRewardCenterParamsBeet],
   ],
-  'CreateRewardCenterInstructionArgs',
-);
+  'CreateRewardCenterInstructionArgs'
+)
 /**
  * Accounts required by the _createRewardCenter_ instruction
  *
@@ -51,15 +51,17 @@ const createRewardCenterStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type CreateRewardCenterInstructionAccounts = {
-  wallet: web3.PublicKey;
-  mint: web3.PublicKey;
-  associatedTokenAccount: web3.PublicKey;
-  auctionHouse: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  associatedTokenProgram: web3.PublicKey;
-};
+  wallet: web3.PublicKey
+  mint: web3.PublicKey
+  associatedTokenAccount: web3.PublicKey
+  auctionHouse: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  associatedTokenProgram: web3.PublicKey
+}
 
-const createRewardCenterInstructionDiscriminator = [51, 138, 29, 157, 96, 169, 51, 139];
+const createRewardCenterInstructionDiscriminator = [
+  51, 138, 29, 157, 96, 169, 51, 139,
+]
 
 /**
  * Creates a _CreateRewardCenter_ instruction.
@@ -73,7 +75,7 @@ const createRewardCenterInstructionDiscriminator = [51, 138, 29, 157, 96, 169, 5
  */
 export function createCreateRewardCenterInstruction(
   accounts: CreateRewardCenterInstructionAccounts,
-  args: CreateRewardCenterInstructionArgs,
+  args: CreateRewardCenterInstructionArgs
 ) {
   const {
     wallet,
@@ -82,12 +84,12 @@ export function createCreateRewardCenterInstruction(
     auctionHouse,
     rewardCenter,
     associatedTokenProgram,
-  } = accounts;
+  } = accounts
 
   const [data] = createRewardCenterStruct.serialize({
     instructionDiscriminator: createRewardCenterInstructionDiscriminator,
     ...args,
-  });
+  })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: wallet,
@@ -134,12 +136,14 @@ export function createCreateRewardCenterInstruction(
       isWritable: false,
       isSigner: false,
     },
-  ];
+  ]
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey('rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'),
+    programId: new web3.PublicKey(
+      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
+    ),
     keys,
     data,
-  });
-  return ix;
+  })
+  return ix
 }

@@ -5,11 +5,11 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
+import * as beet from '@metaplex-foundation/beet'
 export type UpdateOfferParams = {
-  newBuyerPrice: beet.bignum;
-  escrowPaymentBump: number;
-};
+  newBuyerPrice: beet.bignum
+  escrowPaymentBump: number
+}
 
 /**
  * @category userTypes
@@ -20,5 +20,5 @@ export const updateOfferParamsBeet = new beet.BeetArgsStruct<UpdateOfferParams>(
     ['newBuyerPrice', beet.u64],
     ['escrowPaymentBump', beet.u8],
   ],
-  'UpdateOfferParams',
-);
+  'UpdateOfferParams'
+)

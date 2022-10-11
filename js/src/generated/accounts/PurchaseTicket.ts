@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js';
-import * as beet from '@metaplex-foundation/beet';
-import * as beetSolana from '@metaplex-foundation/beet-solana';
+import * as web3 from '@solana/web3.js'
+import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 /**
  * Arguments used to create {@link PurchaseTicket}
@@ -15,16 +15,16 @@ import * as beetSolana from '@metaplex-foundation/beet-solana';
  * @category generated
  */
 export type PurchaseTicketArgs = {
-  buyer: web3.PublicKey;
-  seller: web3.PublicKey;
-  metadata: web3.PublicKey;
-  rewardCenter: web3.PublicKey;
-  tokenSize: beet.bignum;
-  price: beet.bignum;
-  createdAt: beet.bignum;
-};
+  buyer: web3.PublicKey
+  seller: web3.PublicKey
+  metadata: web3.PublicKey
+  rewardCenter: web3.PublicKey
+  tokenSize: beet.bignum
+  price: beet.bignum
+  createdAt: beet.bignum
+}
 
-const purchaseTicketDiscriminator = [253, 34, 93, 204, 5, 153, 33, 126];
+const purchaseTicketDiscriminator = [253, 34, 93, 204, 5, 153, 33, 126]
 /**
  * Holds the data for the {@link PurchaseTicket} Account and provides de/serialization
  * functionality for that data
@@ -40,7 +40,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
     readonly rewardCenter: web3.PublicKey,
     readonly tokenSize: beet.bignum,
     readonly price: beet.bignum,
-    readonly createdAt: beet.bignum,
+    readonly createdAt: beet.bignum
   ) {}
 
   /**
@@ -54,8 +54,8 @@ export class PurchaseTicket implements PurchaseTicketArgs {
       args.rewardCenter,
       args.tokenSize,
       args.price,
-      args.createdAt,
-    );
+      args.createdAt
+    )
   }
 
   /**
@@ -64,9 +64,9 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0,
+    offset = 0
   ): [PurchaseTicket, number] {
-    return PurchaseTicket.deserialize(accountInfo.data, offset);
+    return PurchaseTicket.deserialize(accountInfo.data, offset)
   }
 
   /**
@@ -77,13 +77,13 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    */
   static async fromAccountAddress(
     connection: web3.Connection,
-    address: web3.PublicKey,
+    address: web3.PublicKey
   ): Promise<PurchaseTicket> {
-    const accountInfo = await connection.getAccountInfo(address);
+    const accountInfo = await connection.getAccountInfo(address)
     if (accountInfo == null) {
-      throw new Error(`Unable to find PurchaseTicket account at ${address}`);
+      throw new Error(`Unable to find PurchaseTicket account at ${address}`)
     }
-    return PurchaseTicket.fromAccountInfo(accountInfo, 0)[0];
+    return PurchaseTicket.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -91,7 +91,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [PurchaseTicket, number] {
-    return purchaseTicketBeet.deserialize(buf, offset);
+    return purchaseTicketBeet.deserialize(buf, offset)
   }
 
   /**
@@ -102,7 +102,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
     return purchaseTicketBeet.serialize({
       accountDiscriminator: purchaseTicketDiscriminator,
       ...this,
-    });
+    })
   }
 
   /**
@@ -110,7 +110,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    * {@link PurchaseTicket}
    */
   static get byteSize() {
-    return purchaseTicketBeet.byteSize;
+    return purchaseTicketBeet.byteSize
   }
 
   /**
@@ -121,9 +121,12 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    */
   static async getMinimumBalanceForRentExemption(
     connection: web3.Connection,
-    commitment?: web3.Commitment,
+    commitment?: web3.Commitment
   ): Promise<number> {
-    return connection.getMinimumBalanceForRentExemption(PurchaseTicket.byteSize, commitment);
+    return connection.getMinimumBalanceForRentExemption(
+      PurchaseTicket.byteSize,
+      commitment
+    )
   }
 
   /**
@@ -131,7 +134,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
    * hold {@link PurchaseTicket} data.
    */
   static hasCorrectByteSize(buf: Buffer, offset = 0) {
-    return buf.byteLength - offset === PurchaseTicket.byteSize;
+    return buf.byteLength - offset === PurchaseTicket.byteSize
   }
 
   /**
@@ -145,39 +148,39 @@ export class PurchaseTicket implements PurchaseTicketArgs {
       metadata: this.metadata.toBase58(),
       rewardCenter: this.rewardCenter.toBase58(),
       tokenSize: (() => {
-        const x = <{ toNumber: () => number }>this.tokenSize;
+        const x = <{ toNumber: () => number }>this.tokenSize
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       price: (() => {
-        const x = <{ toNumber: () => number }>this.price;
+        const x = <{ toNumber: () => number }>this.price
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       createdAt: (() => {
-        const x = <{ toNumber: () => number }>this.createdAt;
+        const x = <{ toNumber: () => number }>this.createdAt
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
-    };
+    }
   }
 }
 
@@ -188,7 +191,7 @@ export class PurchaseTicket implements PurchaseTicketArgs {
 export const purchaseTicketBeet = new beet.BeetStruct<
   PurchaseTicket,
   PurchaseTicketArgs & {
-    accountDiscriminator: number[] /* size: 8 */;
+    accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
@@ -202,5 +205,5 @@ export const purchaseTicketBeet = new beet.BeetStruct<
     ['createdAt', beet.i64],
   ],
   PurchaseTicket.fromArgs,
-  'PurchaseTicket',
-);
+  'PurchaseTicket'
+)

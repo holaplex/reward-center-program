@@ -5,15 +5,15 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet';
+import * as beet from '@metaplex-foundation/beet'
 export type ExecuteSaleParams = {
-  escrowPaymentBump: number;
-  freeTradeStateBump: number;
-  sellerTradeStateBump: number;
-  programAsSignerBump: number;
-  price: beet.bignum;
-  tokenSize: beet.bignum;
-};
+  escrowPaymentBump: number
+  freeTradeStateBump: number
+  sellerTradeStateBump: number
+  programAsSignerBump: number
+  price: beet.bignum
+  tokenSize: beet.bignum
+}
 
 /**
  * @category userTypes
@@ -28,5 +28,5 @@ export const executeSaleParamsBeet = new beet.BeetArgsStruct<ExecuteSaleParams>(
     ['price', beet.u64],
     ['tokenSize', beet.u64],
   ],
-  'ExecuteSaleParams',
-);
+  'ExecuteSaleParams'
+)

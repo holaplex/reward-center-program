@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js';
-import * as beet from '@metaplex-foundation/beet';
-import * as beetSolana from '@metaplex-foundation/beet-solana';
+import * as web3 from '@solana/web3.js'
+import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 /**
  * Arguments used to create {@link Listing}
@@ -15,19 +15,19 @@ import * as beetSolana from '@metaplex-foundation/beet-solana';
  * @category generated
  */
 export type ListingArgs = {
-  isInitialized: boolean;
-  rewardCenter: web3.PublicKey;
-  seller: web3.PublicKey;
-  metadata: web3.PublicKey;
-  price: beet.bignum;
-  tokenSize: beet.bignum;
-  bump: number;
-  createdAt: beet.bignum;
-  canceledAt: beet.COption<beet.bignum>;
-  purchaseTicket: beet.COption<web3.PublicKey>;
-};
+  isInitialized: boolean
+  rewardCenter: web3.PublicKey
+  seller: web3.PublicKey
+  metadata: web3.PublicKey
+  price: beet.bignum
+  tokenSize: beet.bignum
+  bump: number
+  createdAt: beet.bignum
+  canceledAt: beet.COption<beet.bignum>
+  purchaseTicket: beet.COption<web3.PublicKey>
+}
 
-const listingDiscriminator = [218, 32, 50, 73, 43, 134, 26, 58];
+const listingDiscriminator = [218, 32, 50, 73, 43, 134, 26, 58]
 /**
  * Holds the data for the {@link Listing} Account and provides de/serialization
  * functionality for that data
@@ -46,7 +46,7 @@ export class Listing implements ListingArgs {
     readonly bump: number,
     readonly createdAt: beet.bignum,
     readonly canceledAt: beet.COption<beet.bignum>,
-    readonly purchaseTicket: beet.COption<web3.PublicKey>,
+    readonly purchaseTicket: beet.COption<web3.PublicKey>
   ) {}
 
   /**
@@ -63,16 +63,19 @@ export class Listing implements ListingArgs {
       args.bump,
       args.createdAt,
       args.canceledAt,
-      args.purchaseTicket,
-    );
+      args.purchaseTicket
+    )
   }
 
   /**
    * Deserializes the {@link Listing} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static fromAccountInfo(accountInfo: web3.AccountInfo<Buffer>, offset = 0): [Listing, number] {
-    return Listing.deserialize(accountInfo.data, offset);
+  static fromAccountInfo(
+    accountInfo: web3.AccountInfo<Buffer>,
+    offset = 0
+  ): [Listing, number] {
+    return Listing.deserialize(accountInfo.data, offset)
   }
 
   /**
@@ -83,13 +86,13 @@ export class Listing implements ListingArgs {
    */
   static async fromAccountAddress(
     connection: web3.Connection,
-    address: web3.PublicKey,
+    address: web3.PublicKey
   ): Promise<Listing> {
-    const accountInfo = await connection.getAccountInfo(address);
+    const accountInfo = await connection.getAccountInfo(address)
     if (accountInfo == null) {
-      throw new Error(`Unable to find Listing account at ${address}`);
+      throw new Error(`Unable to find Listing account at ${address}`)
     }
-    return Listing.fromAccountInfo(accountInfo, 0)[0];
+    return Listing.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -97,7 +100,7 @@ export class Listing implements ListingArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Listing, number] {
-    return listingBeet.deserialize(buf, offset);
+    return listingBeet.deserialize(buf, offset)
   }
 
   /**
@@ -108,7 +111,7 @@ export class Listing implements ListingArgs {
     return listingBeet.serialize({
       accountDiscriminator: listingDiscriminator,
       ...this,
-    });
+    })
   }
 
   /**
@@ -119,11 +122,11 @@ export class Listing implements ListingArgs {
    * depends on them
    */
   static byteSize(args: ListingArgs) {
-    const instance = Listing.fromArgs(args);
+    const instance = Listing.fromArgs(args)
     return listingBeet.toFixedFromValue({
       accountDiscriminator: listingDiscriminator,
       ...instance,
-    }).byteSize;
+    }).byteSize
   }
 
   /**
@@ -137,9 +140,12 @@ export class Listing implements ListingArgs {
   static async getMinimumBalanceForRentExemption(
     args: ListingArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment,
+    commitment?: web3.Commitment
   ): Promise<number> {
-    return connection.getMinimumBalanceForRentExemption(Listing.byteSize(args), commitment);
+    return connection.getMinimumBalanceForRentExemption(
+      Listing.byteSize(args),
+      commitment
+    )
   }
 
   /**
@@ -153,42 +159,42 @@ export class Listing implements ListingArgs {
       seller: this.seller.toBase58(),
       metadata: this.metadata.toBase58(),
       price: (() => {
-        const x = <{ toNumber: () => number }>this.price;
+        const x = <{ toNumber: () => number }>this.price
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       tokenSize: (() => {
-        const x = <{ toNumber: () => number }>this.tokenSize;
+        const x = <{ toNumber: () => number }>this.tokenSize
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       bump: this.bump,
       createdAt: (() => {
-        const x = <{ toNumber: () => number }>this.createdAt;
+        const x = <{ toNumber: () => number }>this.createdAt
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       canceledAt: this.canceledAt,
       purchaseTicket: this.purchaseTicket,
-    };
+    }
   }
 }
 
@@ -199,7 +205,7 @@ export class Listing implements ListingArgs {
 export const listingBeet = new beet.FixableBeetStruct<
   Listing,
   ListingArgs & {
-    accountDiscriminator: number[] /* size: 8 */;
+    accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
@@ -216,5 +222,5 @@ export const listingBeet = new beet.FixableBeetStruct<
     ['purchaseTicket', beet.coption(beetSolana.publicKey)],
   ],
   Listing.fromArgs,
-  'Listing',
-);
+  'Listing'
+)

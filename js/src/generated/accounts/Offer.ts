@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js';
-import * as beet from '@metaplex-foundation/beet';
-import * as beetSolana from '@metaplex-foundation/beet-solana';
+import * as web3 from '@solana/web3.js'
+import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 /**
  * Arguments used to create {@link Offer}
@@ -15,19 +15,19 @@ import * as beetSolana from '@metaplex-foundation/beet-solana';
  * @category generated
  */
 export type OfferArgs = {
-  isInitialized: boolean;
-  rewardCenter: web3.PublicKey;
-  buyer: web3.PublicKey;
-  metadata: web3.PublicKey;
-  price: beet.bignum;
-  tokenSize: beet.bignum;
-  bump: number;
-  createdAt: beet.bignum;
-  canceledAt: beet.COption<beet.bignum>;
-  purchaseTicket: beet.COption<web3.PublicKey>;
-};
+  isInitialized: boolean
+  rewardCenter: web3.PublicKey
+  buyer: web3.PublicKey
+  metadata: web3.PublicKey
+  price: beet.bignum
+  tokenSize: beet.bignum
+  bump: number
+  createdAt: beet.bignum
+  canceledAt: beet.COption<beet.bignum>
+  purchaseTicket: beet.COption<web3.PublicKey>
+}
 
-const offerDiscriminator = [215, 88, 60, 71, 170, 162, 73, 229];
+const offerDiscriminator = [215, 88, 60, 71, 170, 162, 73, 229]
 /**
  * Holds the data for the {@link Offer} Account and provides de/serialization
  * functionality for that data
@@ -46,7 +46,7 @@ export class Offer implements OfferArgs {
     readonly bump: number,
     readonly createdAt: beet.bignum,
     readonly canceledAt: beet.COption<beet.bignum>,
-    readonly purchaseTicket: beet.COption<web3.PublicKey>,
+    readonly purchaseTicket: beet.COption<web3.PublicKey>
   ) {}
 
   /**
@@ -63,16 +63,19 @@ export class Offer implements OfferArgs {
       args.bump,
       args.createdAt,
       args.canceledAt,
-      args.purchaseTicket,
-    );
+      args.purchaseTicket
+    )
   }
 
   /**
    * Deserializes the {@link Offer} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static fromAccountInfo(accountInfo: web3.AccountInfo<Buffer>, offset = 0): [Offer, number] {
-    return Offer.deserialize(accountInfo.data, offset);
+  static fromAccountInfo(
+    accountInfo: web3.AccountInfo<Buffer>,
+    offset = 0
+  ): [Offer, number] {
+    return Offer.deserialize(accountInfo.data, offset)
   }
 
   /**
@@ -83,13 +86,13 @@ export class Offer implements OfferArgs {
    */
   static async fromAccountAddress(
     connection: web3.Connection,
-    address: web3.PublicKey,
+    address: web3.PublicKey
   ): Promise<Offer> {
-    const accountInfo = await connection.getAccountInfo(address);
+    const accountInfo = await connection.getAccountInfo(address)
     if (accountInfo == null) {
-      throw new Error(`Unable to find Offer account at ${address}`);
+      throw new Error(`Unable to find Offer account at ${address}`)
     }
-    return Offer.fromAccountInfo(accountInfo, 0)[0];
+    return Offer.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -97,7 +100,7 @@ export class Offer implements OfferArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Offer, number] {
-    return offerBeet.deserialize(buf, offset);
+    return offerBeet.deserialize(buf, offset)
   }
 
   /**
@@ -108,7 +111,7 @@ export class Offer implements OfferArgs {
     return offerBeet.serialize({
       accountDiscriminator: offerDiscriminator,
       ...this,
-    });
+    })
   }
 
   /**
@@ -119,11 +122,11 @@ export class Offer implements OfferArgs {
    * depends on them
    */
   static byteSize(args: OfferArgs) {
-    const instance = Offer.fromArgs(args);
+    const instance = Offer.fromArgs(args)
     return offerBeet.toFixedFromValue({
       accountDiscriminator: offerDiscriminator,
       ...instance,
-    }).byteSize;
+    }).byteSize
   }
 
   /**
@@ -137,9 +140,12 @@ export class Offer implements OfferArgs {
   static async getMinimumBalanceForRentExemption(
     args: OfferArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment,
+    commitment?: web3.Commitment
   ): Promise<number> {
-    return connection.getMinimumBalanceForRentExemption(Offer.byteSize(args), commitment);
+    return connection.getMinimumBalanceForRentExemption(
+      Offer.byteSize(args),
+      commitment
+    )
   }
 
   /**
@@ -153,42 +159,42 @@ export class Offer implements OfferArgs {
       buyer: this.buyer.toBase58(),
       metadata: this.metadata.toBase58(),
       price: (() => {
-        const x = <{ toNumber: () => number }>this.price;
+        const x = <{ toNumber: () => number }>this.price
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       tokenSize: (() => {
-        const x = <{ toNumber: () => number }>this.tokenSize;
+        const x = <{ toNumber: () => number }>this.tokenSize
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       bump: this.bump,
       createdAt: (() => {
-        const x = <{ toNumber: () => number }>this.createdAt;
+        const x = <{ toNumber: () => number }>this.createdAt
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber();
+            return x.toNumber()
           } catch (_) {
-            return x;
+            return x
           }
         }
-        return x;
+        return x
       })(),
       canceledAt: this.canceledAt,
       purchaseTicket: this.purchaseTicket,
-    };
+    }
   }
 }
 
@@ -199,7 +205,7 @@ export class Offer implements OfferArgs {
 export const offerBeet = new beet.FixableBeetStruct<
   Offer,
   OfferArgs & {
-    accountDiscriminator: number[] /* size: 8 */;
+    accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
@@ -216,5 +222,5 @@ export const offerBeet = new beet.FixableBeetStruct<
     ['purchaseTicket', beet.coption(beetSolana.publicKey)],
   ],
   Offer.fromArgs,
-  'Offer',
-);
+  'Offer'
+)
