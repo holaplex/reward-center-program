@@ -234,18 +234,18 @@ pub fn handler(
         reward_center_signer_seeds,
     );
 
+    mpl_auction_house::cpi::auctioneer_deposit(
+        deposit_accounts_ctx,
+        escrow_payment_bump,
+        buyer_price,
+    )?;
+
     mpl_auction_house::cpi::auctioneer_public_buy(
         public_buy_accounts_ctx,
         trade_state_bump,
         escrow_payment_bump,
         buyer_price,
         token_size,
-    )?;
-
-    mpl_auction_house::cpi::auctioneer_deposit(
-        deposit_accounts_ctx,
-        escrow_payment_bump,
-        buyer_price,
     )?;
 
     Ok(())
