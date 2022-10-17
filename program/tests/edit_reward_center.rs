@@ -3,7 +3,7 @@
 pub mod reward_center_test;
 use anchor_client::solana_sdk::{signature::Signer, transaction::Transaction};
 use mpl_auction_house::pda::find_auction_house_address;
-use mpl_reward_center::{pda::find_reward_center_address, reward_centers, state::*};
+use hpl_reward_center::{pda::find_reward_center_address, reward_centers, state::*};
 
 use mpl_testing_utils::solana::airdrop;
 use solana_program_test::*;
@@ -113,7 +113,7 @@ async fn edit_reward_center_success() {
         create_auction_house_data,
     );
 
-    let create_reward_center_ix = mpl_reward_center_sdk::create_reward_center(
+    let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
         wallet,
         reward_mint_keypair.pubkey(),
         auction_house,
@@ -121,7 +121,7 @@ async fn edit_reward_center_success() {
     );
 
     let edit_reward_center_ix =
-        mpl_reward_center_sdk::edit_reward_center(wallet, auction_house, edit_reward_center_params);
+        hpl_reward_center_sdk::edit_reward_center(wallet, auction_house, edit_reward_center_params);
 
     let tx = Transaction::new_signed_with_payer(
         &[

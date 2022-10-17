@@ -8,7 +8,7 @@ use mpl_auction_house::{
     },
     AuthorityScope,
 };
-use mpl_reward_center::{
+use hpl_reward_center::{
     pda::{find_listing_address, find_reward_center_address},
     reward_centers,
     state::*,
@@ -18,7 +18,7 @@ use reward_center_test::fixtures::metadata;
 use solana_program_test::*;
 use std::str::FromStr;
 
-use mpl_reward_center_sdk::{accounts::*, args::*, *};
+use hpl_reward_center_sdk::{accounts::*, args::*, *};
 use mpl_token_metadata::state::Collection;
 
 use spl_associated_token_account::get_associated_token_address;
@@ -131,7 +131,7 @@ async fn redeem_rewards_success() {
         create_auction_house_data,
     );
 
-    let create_reward_center_ix = mpl_reward_center_sdk::create_reward_center(
+    let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
         wallet,
         mint.pubkey(),
         auction_house,

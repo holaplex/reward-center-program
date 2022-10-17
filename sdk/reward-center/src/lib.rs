@@ -9,7 +9,7 @@ use mpl_auction_house::pda::{
     find_auction_house_treasury_address, find_auctioneer_trade_state_address,
     find_public_bid_trade_state_address, find_trade_state_address,
 };
-use mpl_reward_center::{
+use hpl_reward_center::{
     accounts as rewards_accounts,
     execute_sale::ExecuteSaleParams,
     id, instruction,

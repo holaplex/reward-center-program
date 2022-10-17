@@ -1,1 +1,1 @@
-cargo test-bpf
+cargo test-bpf --bpf-out-dir ../mpl-deps

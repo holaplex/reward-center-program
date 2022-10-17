@@ -8,14 +8,14 @@ use mpl_auction_house::{
     },
     AuthorityScope,
 };
-use mpl_reward_center::{
+use hpl_reward_center::{
     pda::{find_listing_address, find_reward_center_address},
     reward_centers,
     state::*,
 };
 use reward_center_test::fixtures::metadata;
 
-use mpl_reward_center_sdk::{
+use hpl_reward_center_sdk::{
     accounts::{CreateListingAccounts, CreateOfferAccounts},
     args::{CreateListingData, CreateOfferData},
     *,
@@ -151,7 +151,7 @@ async fn create_offer_success() {
         create_auction_house_data,
     );
 
-    let create_reward_center_ix = mpl_reward_center_sdk::create_reward_center(
+    let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
         wallet,
         reward_mint_keypair.pubkey(),
         auction_house,
