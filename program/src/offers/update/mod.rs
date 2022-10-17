@@ -16,12 +16,9 @@ use solana_program::program::invoke_signed;
 
 use crate::{
     constants::{OFFER, REWARD_CENTER},
-    metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
     errors::ListingRewardsError,
-    state::{
-        Offer, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
+    state::{metaplex_anchor::TokenMetadata, Offer, RewardCenter},
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -49,7 +46,7 @@ pub struct UpdateOffer<'info> {
             wallet.key().as_ref(),
             metadata.key().as_ref(),
             reward_center.key().as_ref()
-        ],  
+        ],
         bump
     )]
     pub offer: Account<'info, Offer>,
@@ -57,9 +54,9 @@ pub struct UpdateOffer<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,

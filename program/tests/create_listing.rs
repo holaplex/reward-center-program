@@ -2,16 +2,16 @@
 
 pub mod reward_center_test;
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
+use hpl_reward_center::{
+    pda::{find_listing_address, find_reward_center_address},
+    reward_centers,
+    state::*,
+};
 use mpl_auction_house::{
     pda::{
         find_auction_house_address, find_auctioneer_trade_state_address, find_trade_state_address,
     },
     AuthorityScope,
-};
-use hpl_reward_center::{
-    pda::{find_listing_address, find_reward_center_address},
-    reward_centers,
-    state::*,
 };
 use reward_center_test::fixtures::metadata;
 

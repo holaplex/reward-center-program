@@ -7,10 +7,7 @@ use mpl_auction_house::{
 use crate::{
     constants::{LISTING, REWARD_CENTER},
     errors::ListingRewardsError,
-    state::{
-        Listing, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    state::{metaplex_anchor::TokenMetadata, Listing, RewardCenter},
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -46,9 +43,9 @@ pub struct UpdateListing<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump,
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,

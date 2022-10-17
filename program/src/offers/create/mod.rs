@@ -2,10 +2,7 @@ use crate::{
     assertions::assert_offer_init_eligibility,
     constants::{OFFER, REWARD_CENTER},
     errors::ListingRewardsError,
-    state::{
-        Offer, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    state::{metaplex_anchor::TokenMetadata, Offer, RewardCenter},
 };
 use anchor_lang::prelude::{Result, *};
 use anchor_spl::token::{Mint, Token, TokenAccount};
@@ -40,10 +37,10 @@ pub struct CreateOffer<'info> {
             wallet.key().as_ref(),
             metadata.key().as_ref(),
             reward_center.key().as_ref()
-        ],  
+        ],
         bump
     )]
-    pub offer: Account<'info, Offer>,
+    pub offer: Box<Account<'info, Offer>>,
 
     /// CHECK: Validated in public_bid_logic.
     #[account(mut)]
@@ -80,9 +77,9 @@ pub struct CreateOffer<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,

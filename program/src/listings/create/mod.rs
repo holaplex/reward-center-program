@@ -5,12 +5,9 @@ use solana_program::program::invoke_signed;
 use crate::{
     assertions::assert_listing_init_eligibility,
     constants::{LISTING, REWARD_CENTER},
-    metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
     errors::ListingRewardsError,
-    state::{
-        Listing, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
+    state::{metaplex_anchor::TokenMetadata, Listing, RewardCenter},
 };
 use mpl_auction_house::{
     constants::{AUCTIONEER, FEE_PAYER, PREFIX, SIGNER},
@@ -56,9 +53,9 @@ pub struct CreateListing<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,
@@ -113,7 +110,7 @@ pub struct CreateListing<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Seller trade state PDA account encoding the sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
             PREFIX.as_bytes(),
             wallet.key().as_ref(),
@@ -132,7 +129,7 @@ pub struct CreateListing<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Free seller trade state PDA account encoding a free sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
             PREFIX.as_bytes(),
             wallet.key().as_ref(),

@@ -1,10 +1,7 @@
 use crate::{
     constants::{LISTING, REWARD_CENTER},
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
-    state::{
-        Listing, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    state::{metaplex_anchor::TokenMetadata, Listing, RewardCenter},
 };
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::token::{Mint, Token, TokenAccount};
@@ -60,9 +57,9 @@ pub struct CancelListing<'info> {
     /// The auctioneer program PDA running this auction.
     #[account(
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,
