@@ -4,9 +4,9 @@ pub mod errors;
 pub mod execute_sale;
 pub mod listings;
 pub mod metaplex_cpi;
-pub mod reward_centers;
 pub mod offers;
 pub mod pda;
+pub mod reward_centers;
 pub mod state;
 
 use anchor_lang::prelude::*;
@@ -14,8 +14,8 @@ use anchor_lang::prelude::*;
 use crate::{
     execute_sale::*,
     listings::{cancel::*, create::*, update::*},
-    reward_centers::{create::*, edit::*},
     offers::{cancel::*, create::*, update::*},
+    reward_centers::{create::*, edit::*},
 };
 
 declare_id!("rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u");
