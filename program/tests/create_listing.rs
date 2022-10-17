@@ -2,20 +2,20 @@
 
 pub mod reward_center_test;
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
+use hpl_reward_center::{
+    pda::{find_listing_address, find_reward_center_address},
+    reward_centers,
+    state::*,
+};
 use mpl_auction_house::{
     pda::{
         find_auction_house_address, find_auctioneer_trade_state_address, find_trade_state_address,
     },
     AuthorityScope,
 };
-use mpl_reward_center::{
-    pda::{find_listing_address, find_reward_center_address},
-    reward_centers,
-    state::*,
-};
 use reward_center_test::fixtures::metadata;
 
-use mpl_reward_center_sdk::{accounts::CreateListingAccounts, args::CreateListingData, *};
+use hpl_reward_center_sdk::{accounts::CreateListingAccounts, args::CreateListingData, *};
 
 use mpl_testing_utils::solana::airdrop;
 use solana_program_test::*;
@@ -147,7 +147,7 @@ async fn create_listing_success() {
         create_auction_house_data,
     );
 
-    let create_reward_center_ix = mpl_reward_center_sdk::create_reward_center(
+    let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
         wallet,
         reward_mint_keypair.pubkey(),
         auction_house,
