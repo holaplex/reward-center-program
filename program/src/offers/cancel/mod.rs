@@ -16,10 +16,7 @@ use mpl_auction_house::{
 use crate::{
     constants::{OFFER, REWARD_CENTER},
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
-    state::{
-        Offer, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    state::{metaplex_anchor::TokenMetadata, Offer, RewardCenter},
 };
 use solana_program::program::invoke_signed;
 
@@ -46,7 +43,7 @@ pub struct CancelOffer<'info> {
             wallet.key().as_ref(),
             metadata.key().as_ref(),
             reward_center.key().as_ref()
-        ],  
+        ],
         bump = offer.bump
     )]
     pub offer: Box<Account<'info, Offer>>,
@@ -90,9 +87,9 @@ pub struct CancelOffer<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,

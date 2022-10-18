@@ -1,10 +1,7 @@
 use crate::constants::{LISTING, OFFER, PURCHASE_TICKET, REWARD_CENTER};
-use crate::metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs};
 use crate::errors::ListingRewardsError;
-use crate::state::{
-    Listing, Offer, PurchaseTicket, RewardCenter,
-    metaplex_anchor::TokenMetadata,
-};
+use crate::metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs};
+use crate::state::{metaplex_anchor::TokenMetadata, Listing, Offer, PurchaseTicket, RewardCenter};
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::token::{transfer, Transfer};
 use anchor_spl::{
@@ -81,7 +78,7 @@ pub struct ExecuteSale<'info> {
             buyer.key().as_ref(),
             metadata.key().as_ref(),
             reward_center.key().as_ref()
-        ],  
+        ],
         bump = offer.bump
     )]
     pub offer: Box<Account<'info, Offer>>,
@@ -142,7 +139,7 @@ pub struct ExecuteSale<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             buyer.key().as_ref()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.escrow_payment_bump
     )]
@@ -154,7 +151,7 @@ pub struct ExecuteSale<'info> {
             PREFIX.as_bytes(),
             auction_house.creator.as_ref(),
             auction_house.treasury_mint.as_ref()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = auction_house.bump,
         has_one = treasury_mint,
@@ -168,11 +165,11 @@ pub struct ExecuteSale<'info> {
     #[account(
         mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            auction_house.key().as_ref(), 
+            PREFIX.as_bytes(),
+            auction_house.key().as_ref(),
             FEE_PAYER.as_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+        ],
+        seeds::program = auction_house_program,
         bump = auction_house.fee_payer_bump
     )]
     pub auction_house_fee_account: UncheckedAccount<'info>,
@@ -180,13 +177,13 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Auction House instance treasury account.
     #[account(
-        mut, 
+        mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            auction_house.key().as_ref(), 
+            PREFIX.as_bytes(),
+            auction_house.key().as_ref(),
             TREASURY.as_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+        ],
+        seeds::program = auction_house_program,
         bump = auction_house.treasury_bump
     )]
     pub auction_house_treasury: UncheckedAccount<'info>,
@@ -199,18 +196,18 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Seller trade state PDA account encoding the sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            seller.key().as_ref(), 
-            auction_house.key().as_ref(), 
-            token_account.key().as_ref(), 
-            auction_house.treasury_mint.as_ref(), 
-            token_mint.key().as_ref(), 
-            &u64::MAX.to_le_bytes(), 
+            PREFIX.as_bytes(),
+            seller.key().as_ref(),
+            auction_house.key().as_ref(),
+            token_account.key().as_ref(),
+            auction_house.treasury_mint.as_ref(),
+            token_mint.key().as_ref(),
+            &u64::MAX.to_le_bytes(),
             &execute_sale_params.token_size.to_le_bytes()
         ],
-        seeds::program = auction_house_program, 
+        seeds::program = auction_house_program,
         bump = execute_sale_params.seller_trade_state_bump,
     )]
     pub seller_trade_state: UncheckedAccount<'info>,
@@ -218,18 +215,18 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Free seller trade state PDA account encoding a free sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
             PREFIX.as_bytes(),
             seller.key().as_ref(),
-            auction_house.key().as_ref(), 
+            auction_house.key().as_ref(),
             token_account.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
             token_account.mint.as_ref(),
-            &0u64.to_le_bytes(), 
+            &0u64.to_le_bytes(),
             &execute_sale_params.token_size.to_le_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+        ],
+        seeds::program = auction_house_program,
         bump = execute_sale_params.free_trade_state_bump
     )]
     pub free_seller_trade_state: UncheckedAccount<'info>,
@@ -239,9 +236,9 @@ pub struct ExecuteSale<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,
@@ -271,9 +268,9 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     #[account(
         seeds = [
-            PREFIX.as_bytes(), 
+            PREFIX.as_bytes(),
             SIGNER.as_bytes()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.program_as_signer_bump
     )]

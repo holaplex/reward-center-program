@@ -9,7 +9,7 @@ use mpl_auction_house::{constants::PREFIX, AuctionHouse};
 use crate::{
     constants::REWARD_CENTER,
     errors::ListingRewardsError,
-    state::{RewardRules, RewardCenter},
+    state::{RewardCenter, RewardRules},
 };
 
 /// Options to set on the reward center
@@ -45,21 +45,21 @@ pub struct CreateRewardCenter<'info> {
     /// Auction House instance PDA account.
     #[account(
         seeds = [
-            PREFIX.as_bytes(), 
-            auction_house.creator.as_ref(), 
+            PREFIX.as_bytes(),
+            auction_house.creator.as_ref(),
             auction_house.treasury_mint.as_ref()
-        ], 
-        seeds::program = mpl_auction_house::id(), 
+        ],
+        seeds::program = mpl_auction_house::id(),
         bump = auction_house.bump
     )]
     pub auction_house: Box<Account<'info, AuctionHouse>>,
 
     /// The auctioneer program PDA running this auction.
     #[account(
-        init, 
-        payer = wallet, 
-        space = RewardCenter::size(), 
-        seeds = [REWARD_CENTER.as_bytes(), auction_house.key().as_ref()], 
+        init,
+        payer = wallet,
+        space = RewardCenter::size(),
+        seeds = [REWARD_CENTER.as_bytes(), auction_house.key().as_ref()],
         bump
     )]
     pub reward_center: Account<'info, RewardCenter>,
