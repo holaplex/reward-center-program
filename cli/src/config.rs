@@ -44,8 +44,8 @@ pub fn parse_solana_config() -> Option<SolanaConfig> {
 }
 
 pub fn parse_keypair(
-    keypair_opt: Option<String>,
-    sol_config_option: Option<SolanaConfig>,
+    keypair_opt: &Option<String>,
+    sol_config_option: &Option<SolanaConfig>,
 ) -> Keypair {
     let keypair = match keypair_opt {
         Some(keypair_path) => read_keypair(&keypair_path).expect("Failed to read keypair file."),

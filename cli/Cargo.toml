@@ -1,9 +1,9 @@
 [package]
 name = "reward-center"
-description="Command line Interface for Holaplex's Reward Center Program"
+description="A Metaplex auctioneer program that distributes spl token to the buyer and seller of NFTs"
 version = "0.1.0"
 edition = "2021"
-repository="https://github.com/holaplex/reward-center-cli"
+repository="https://github.com/holaplex/reward-center-program"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -25,4 +25,9 @@ retry = "2.0.0"
 shellexpand = "2.1.2"
 serde_json = "1.0.86"
 bs58 = "0.4.0"
+env_logger = "0.9.1"
+mpl-auction-house-sdk = { path = "./../sdk/auction-house" }
+hpl-reward-center-sdk = {path="./../sdk/reward-center"}
+spl-token = "3.2.0"
+spl-associated-token-account = "1.0.3"
 # tokio = { version = "1.14.1", features = ["full"] }
