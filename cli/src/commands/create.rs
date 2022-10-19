@@ -15,6 +15,7 @@ use solana_sdk::{
     signature::Keypair, signer::Signer, system_instruction::create_account,
     transaction::Transaction,
 };
+use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
 use spl_token::{instruction::initialize_mint, native_mint::id as NATIVE_MINT_ID, state::Mint};
 
 use crate::{
@@ -102,8 +103,19 @@ pub fn process_create_reward_center(
             9,
         )?;
 
+        // Create token account for mint authority
+        let mint_auth_rewards_mint_token_account =
+            get_associated_token_address(&rewards_mint_authority_pubkey, &rewards_mint_pubkey);
+
+        let create_associated_token_mint_auth_ix = create_associated_token_account(
+            &mint_auth_rewards_mint_token_account,
+            &rewards_mint_authority_pubkey,
+            &rewards_mint_pubkey,
+        );
+
         instructions.push(allocate_rewards_mint_space_ix);
         instructions.push(init_rewards_reward_mint_ix);
+        instructions.push(create_associated_token_mint_auth_ix);
     }
 
     let CreateRewardCenterParams {
@@ -174,12 +186,15 @@ pub fn process_create_reward_center(
     )?;
 
     println!(
-        "Reward center address: {}",
+        "Reward center address: {}\n",
         reward_center_pubkey.to_string()
     );
 
     if mint_rewards.is_none() {
-        println!("Rewards mint address: {}", rewards_mint_pubkey.to_string());
+        println!(
+            "Rewards mint address: {}\n",
+            rewards_mint_pubkey.to_string()
+        );
     }
 
     println!("Created in tx: {:?}", &tx_hash);

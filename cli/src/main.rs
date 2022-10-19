@@ -3,7 +3,9 @@ use std::{str::FromStr, time::Duration};
 use anyhow::Result;
 use log::*;
 use reward_center::{
-    commands::{process_create_reward_center, process_edit_reward_center},
+    commands::{
+        process_create_reward_center, process_edit_reward_center, process_fund_reward_center,
+    },
     config::*,
     constants::*,
     opt::*,
@@ -78,6 +80,12 @@ fn main() -> Result<()> {
         } => {
             process_edit_reward_center(client, keypair, reward_center, auction_house, config_file)?
         }
+
+        Command::Fund {
+            reward_center,
+            keypair,
+            amount,
+        } => process_fund_reward_center(client, keypair, reward_center, amount)?,
     }
 
     println!("Done :)");

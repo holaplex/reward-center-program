@@ -30,4 +30,5 @@ mpl-auction-house-sdk = { path = "./../sdk/auction-house" }
 hpl-reward-center-sdk = {path="./../sdk/reward-center"}
 spl-token = "3.2.0"
 spl-associated-token-account = "1.0.3"
+anchor-lang = "0.24.2"
 # tokio = { version = "1.14.1", features = ["full"] }

@@ -64,4 +64,20 @@ pub enum Command {
         #[structopt(short, long)]
         keypair: Option<String>,
     },
+
+    /// Fund reward center
+    #[structopt(name = "fund")]
+    Fund {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the creator's keypair file (mint auth keypair if required to create)
+        #[structopt(short, long)]
+        keypair: Option<String>,
+
+        /// Funding amount
+        #[structopt(short, long)]
+        amount: u64,
+    },
 }
