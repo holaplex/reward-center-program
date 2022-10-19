@@ -6,13 +6,13 @@ use hpl_reward_center::{
     state::{PayoutOperation, RewardRules},
 };
 use hpl_reward_center_sdk::edit_reward_center;
+use log::error;
 use retry::{delay::Exponential, retry};
 use solana_client::rpc_client::RpcClient;
 use solana_program::pubkey::Pubkey;
 use solana_sdk::{signer::Signer, transaction::Transaction};
 
 use crate::config::{parse_keypair, parse_solana_config};
-use log::error;
 
 pub fn process_edit_reward_center(
     client: RpcClient,
@@ -38,7 +38,7 @@ pub fn process_edit_reward_center(
         false => {
             error!("Update reward center config doesn't exist");
             return Err(anyhow!("Update config missing"));
-        }
+        },
         true => {
             let create_reward_center_config_file = File::open(config_file)?;
             let edit_reward_center_config: crate::schema::EditRewardCenterParams =
@@ -55,7 +55,7 @@ pub fn process_edit_reward_center(
                     payout_numeral: edit_reward_center_config.payout_numeral,
                 },
             }
-        }
+        },
     };
 
     let edit_reward_center_ix = edit_reward_center(

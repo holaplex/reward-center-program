@@ -1,5 +1,6 @@
-use lazy_static::lazy_static;
 use std::{collections::HashMap, sync::RwLock};
+
+use lazy_static::lazy_static;
 
 pub const PUBLIC_RPC_URLS: &[&str] = &[
     "https://api.devnet.solana.com",

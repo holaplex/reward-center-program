@@ -70,7 +70,7 @@ fn main() -> Result<()> {
             mint_rewards,
         } => {
             process_create_reward_center(client, keypair, config_file, auction_house, mint_rewards)?
-        }
+        },
 
         Command::Edit {
             keypair,
@@ -79,7 +79,7 @@ fn main() -> Result<()> {
             auction_house,
         } => {
             process_edit_reward_center(client, keypair, reward_center, auction_house, config_file)?
-        }
+        },
 
         Command::Fund {
             reward_center,

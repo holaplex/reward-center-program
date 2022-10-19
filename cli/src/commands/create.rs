@@ -47,7 +47,9 @@ pub fn process_create_reward_center(
     };
 
     if auction_house.is_none() {
-        info!("Auction house account not passed. Creating a new auction house with default parameters");
+        info!(
+            "Auction house account not passed. Creating a new auction house with default parameters"
+        );
 
         let create_auction_house_accounts = CreateAuctionHouseAccounts {
             treasury_mint: wsol_mint,
@@ -130,11 +132,11 @@ pub fn process_create_reward_center(
                 payout_numeral: 5,
                 seller_reward_payout_basis_points: 1000,
             }
-        }
+        },
         true => {
             let create_reward_center_config_file = File::open(config_file)?;
             serde_json::from_reader(create_reward_center_config_file)?
-        }
+        },
     };
 
     let (reward_center_pubkey, _) = find_reward_center_address(&auction_house_pubkey);
@@ -150,10 +152,10 @@ pub fn process_create_reward_center(
                     mathematical_operand: match mathematical_operand {
                         PayoutOperation::Divide => {
                             hpl_reward_center::state::PayoutOperation::Divide
-                        }
+                        },
                         PayoutOperation::Multiple => {
                             hpl_reward_center::state::PayoutOperation::Multiple
-                        }
+                        },
                     },
                     payout_numeral,
                 }

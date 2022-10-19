@@ -5,7 +5,6 @@ use std::{
 };
 
 use anyhow::{anyhow, Context, Result};
-
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use solana_sdk::signature::Keypair;
@@ -52,7 +51,7 @@ pub fn parse_keypair(
         None => match sol_config_option {
             Some(ref sol_config) => {
                 read_keypair(&sol_config.keypair_path).expect("Failed to read keypair file.")
-            }
+            },
             None => read_keypair(&(*shellexpand::tilde("~/.config/solana/id.json")).to_string())
                 .expect("Failed to read keypair file."),
         },
