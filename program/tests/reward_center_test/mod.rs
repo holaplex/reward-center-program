@@ -1,6 +1,7 @@
 pub mod fixtures;
 
 use solana_program_test::*;
+use solana_sdk::{pubkey::Pubkey, account::Account};
 
 pub const TEN_SOL: u64 = 10_000_000_000;
 pub const ONE_SOL: u64 = 1_000_000_000;
@@ -12,4 +13,8 @@ pub fn setup_program<'a>() -> ProgramTest {
     program.add_program("mpl_token_metadata", mpl_token_metadata::id(), None);
 
     program
+}
+
+pub async fn get_account(bank_client: &mut BanksClient, address: Pubkey) -> Option<Account> {
+    bank_client.get_account(address).await.unwrap()
 }

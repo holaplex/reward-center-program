@@ -69,4 +69,12 @@ pub enum ListingRewardsError {
     // 6016
     #[msg("Cannot re-initialize an existing offer")]
     OfferAlreadyExists,
+
+    // 6017
+    #[msg("Buyer token account owner does not match the buyer")]
+    BuyerTokenAccountMismatch,
+
+    // 6018
+    #[msg("Seller token account owner does not match the seller")]
+    SellerTokenAccountMismatch,
 }

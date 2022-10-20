@@ -466,9 +466,9 @@ pub fn execute_sale(
         buyer_receipt_token_account,
     }: ExecuteSaleAccounts,
     ExecuteSaleData {
-        price,
         token_size,
         reward_mint,
+        price,
     }: ExecuteSaleData,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
@@ -557,7 +557,6 @@ pub fn execute_sale(
 
     let data = instruction::ExecuteSale {
         execute_sale_params: ExecuteSaleParams {
-            price,
             escrow_payment_bump,
             free_trade_state_bump,
             program_as_signer_bump,

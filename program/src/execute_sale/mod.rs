@@ -23,7 +23,6 @@ pub struct ExecuteSaleParams {
     pub free_trade_state_bump: u8,
     pub seller_trade_state_bump: u8,
     pub program_as_signer_bump: u8,
-    pub price: u64,
     pub token_size: u64,
 }
 
@@ -39,7 +38,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the buyer rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch,
+        constraint = buyer_reward_token_account.owner == buyer.key() @ ListingRewardsError::BuyerTokenAccountMismatch,
     )]
     pub buyer_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -51,7 +51,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the seller rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch,
+        constraint = seller_reward_token_account.owner == seller.key() @ ListingRewardsError::SellerTokenAccountMismatch,
     )]
     pub seller_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -66,7 +67,8 @@ pub struct ExecuteSale<'info> {
             reward_center.key().as_ref(),
         ],
         bump,
-        constraint = listing.price == offer.price @ ListingRewardsError::PriceMismatch
+        constraint = listing.price == offer.price @ ListingRewardsError::PriceMismatch,
+        close = seller,
     )]
     pub listing: Box<Account<'info, Listing>>,
 
@@ -79,7 +81,8 @@ pub struct ExecuteSale<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref()
         ],
-        bump = offer.bump
+        bump = offer.bump,
+        close = buyer,
     )]
     pub offer: Box<Account<'info, Offer>>,
 
@@ -294,7 +297,6 @@ pub fn handler(
         escrow_payment_bump,
         free_trade_state_bump,
         program_as_signer_bump,
-        price,
         token_size,
         ..
     }: ExecuteSaleParams,
@@ -308,6 +310,7 @@ pub fn handler(
     let auction_house = &ctx.accounts.auction_house;
     let reward_center = &ctx.accounts.reward_center;
     let metadata = &ctx.accounts.metadata;
+    let price = buyer_offer.price;
 
     let auction_house_key = auction_house.key();
 
