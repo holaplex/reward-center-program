@@ -55,16 +55,50 @@ pub fn process_fund_reward_center(
     let amount_to_transfer_with_decimals =
         amount.saturating_mul(10u64.saturating_pow(decimals.into()));
 
-    let instructions: Vec<Instruction> = match client
-        .get_account_data(&caller_reward_mint_token_account)
-    {
-        Ok(data) => {
-            let Account {
-                amount: token_balance,
-                ..
-            } = Account::unpack(&data[..])?;
+    let instructions: Vec<Instruction> =
+        match client.get_account_data(&caller_reward_mint_token_account) {
+            Ok(data) => {
+                let Account {
+                    amount: token_balance,
+                    ..
+                } = Account::unpack(&data[..])?;
 
-            if token_balance < amount {
+                if token_balance < amount {
+                    if let COption::Some(mint_authority) = mint_authority {
+                        if mint_authority.eq(&keypair.pubkey()) {
+                            vec![mint_to_checked(
+                                &token_program,
+                                &token_mint,
+                                &reward_center_reward_mint_token_account,
+                                &keypair.pubkey(),
+                                &[],
+                                amount_to_transfer_with_decimals,
+                                decimals,
+                            )?]
+                        } else {
+                            error!(
+                            "Caller reward token account does not have enough tokens to transfer"
+                        );
+                            return Err(anyhow!(
+                            "Caller reward token account does not have enough tokens to transfer"
+                        ));
+                        }
+                    } else {
+                        error!("Mint authority parse failed");
+                        return Err(anyhow!("Error in mint authority account parse"));
+                    }
+                } else {
+                    vec![transfer(
+                        &token_program,
+                        &caller_reward_mint_token_account,
+                        &reward_center_reward_mint_token_account,
+                        &keypair.pubkey(),
+                        &[&keypair.pubkey()],
+                        amount_to_transfer_with_decimals,
+                    )?]
+                }
+            },
+            Err(_) => {
                 if let COption::Some(mint_authority) = mint_authority {
                     if mint_authority.eq(&keypair.pubkey()) {
                         vec![mint_to_checked(
@@ -77,50 +111,15 @@ pub fn process_fund_reward_center(
                             decimals,
                         )?]
                     } else {
-                        error!(
-                            "Caller reward token account does not have enough tokens to transfer"
-                        );
-                        return Err(anyhow!(
-                            "Caller reward token account does not have enough tokens to transfer"
-                        ));
+                        error!("Caller reward token account does not exist");
+                        return Err(anyhow!("Caller reward token account does not exist"));
                     }
                 } else {
                     error!("Mint authority parse failed");
                     return Err(anyhow!("Error in mint authority account parse"));
                 }
-            } else {
-                vec![transfer(
-                    &token_program,
-                    &caller_reward_mint_token_account,
-                    &reward_center_reward_mint_token_account,
-                    &keypair.pubkey(),
-                    &[&keypair.pubkey()],
-                    amount_to_transfer_with_decimals,
-                )?]
-            }
-        },
-        Err(_) => {
-            if let COption::Some(mint_authority) = mint_authority {
-                if mint_authority.eq(&keypair.pubkey()) {
-                    vec![mint_to_checked(
-                        &token_program,
-                        &token_mint,
-                        &reward_center_reward_mint_token_account,
-                        &keypair.pubkey(),
-                        &[],
-                        amount_to_transfer_with_decimals,
-                        decimals,
-                    )?]
-                } else {
-                    error!("Caller reward token account does not exist");
-                    return Err(anyhow!("Caller reward token account does not exist"));
-                }
-            } else {
-                error!("Mint authority parse failed");
-                return Err(anyhow!("Error in mint authority account parse"));
-            }
-        },
-    };
+            },
+        };
 
     let latest_blockhash = client.get_latest_blockhash()?;
     let transaction = Transaction::new_signed_with_payer(
@@ -130,14 +129,14 @@ pub fn process_fund_reward_center(
         latest_blockhash,
     );
 
-    println!("Funding {} tokens to reward center", amount);
+    info!("Funding {} tokens to reward center", amount);
 
     let tx_hash = retry(
         Exponential::from_millis_with_factor(250, 2.0).take(3),
         || client.send_and_confirm_transaction(&transaction),
     )?;
 
-    println!("Funding complete. Tx hash {}", tx_hash);
+    info!("Funding complete. Tx hash {}", tx_hash);
 
     Ok(())
 }

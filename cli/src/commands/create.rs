@@ -187,19 +187,19 @@ pub fn process_create_reward_center(
         || client.send_and_confirm_transaction(&transaction),
     )?;
 
-    println!(
+    info!(
         "Reward center address: {}\n",
         reward_center_pubkey.to_string()
     );
 
     if mint_rewards.is_none() {
-        println!(
+        info!(
             "Rewards mint address: {}\n",
             rewards_mint_pubkey.to_string()
         );
     }
 
-    println!("Created in tx: {:?}", &tx_hash);
+    info!("Created in tx: {:?}", &tx_hash);
 
     Ok(())
 }

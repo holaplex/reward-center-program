@@ -4,7 +4,9 @@ use anyhow::Result;
 use log::*;
 use reward_center::{
     commands::{
-        process_create_reward_center, process_edit_reward_center, process_fund_reward_center,
+        process_create_reward_center, process_edit_reward_center,
+        process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,
+        process_fund_reward_center,
     },
     config::*,
     constants::*,
@@ -86,8 +88,15 @@ fn main() -> Result<()> {
             keypair,
             amount,
         } => process_fund_reward_center(client, keypair, reward_center, amount)?,
+
+        Command::FetchRewardCenterState { reward_center, .. } => {
+            process_fetch_reward_center_state(client, reward_center)?
+        },
+        Command::FetchTreasuryBalance { reward_center, .. } => {
+            process_fetch_reward_center_treasury_balance(client, reward_center)?
+        },
     }
 
-    println!("Done :)");
+    info!("Done :)");
     Ok(())
 }

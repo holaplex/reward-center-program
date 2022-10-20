@@ -60,7 +60,7 @@ pub enum Command {
         #[structopt(short, long, default_value = "src/json/reward_center.json")]
         config_file: String,
 
-        /// Path to the creator's keypair file (mint auth keypair if required to create)
+        /// Path to the reward center authority's keypair file
         #[structopt(short, long)]
         keypair: Option<String>,
     },
@@ -72,12 +72,36 @@ pub enum Command {
         #[structopt(short = "R", long)]
         reward_center: String,
 
-        /// Path to the creator's keypair file (mint auth keypair if required to create)
+        /// Path to the reward center authority keypair file
         #[structopt(short, long)]
         keypair: Option<String>,
 
         /// Funding amount
         #[structopt(short, long)]
         amount: u64,
+    },
+
+    /// Fetch Treasury Balance
+    #[structopt(name = "fetch-balance")]
+    FetchTreasuryBalance {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
+    },
+
+    /// Fetch Reward Center State details
+    #[structopt(name = "fetch-state")]
+    FetchRewardCenterState {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
     },
 }

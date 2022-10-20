@@ -6,7 +6,7 @@ use hpl_reward_center::{
     state::{PayoutOperation, RewardRules},
 };
 use hpl_reward_center_sdk::edit_reward_center;
-use log::error;
+use log::{error, info};
 use retry::{delay::Exponential, retry};
 use solana_client::rpc_client::RpcClient;
 use solana_program::pubkey::Pubkey;
@@ -64,7 +64,7 @@ pub fn process_edit_reward_center(
         edit_reward_center_params,
     );
 
-    println!(
+    info!(
         "Updating reward center {}",
         reward_center_pubkey.to_string()
     );
@@ -83,7 +83,7 @@ pub fn process_edit_reward_center(
         || client.send_and_confirm_transaction(&transaction),
     )?;
 
-    println!("Updated reward center in tx: {:?}", &tx_hash);
+    info!("Updated reward center in tx: {:?}", &tx_hash);
 
     Ok(())
 }
