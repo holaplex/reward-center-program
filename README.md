@@ -68,7 +68,6 @@ In order to run program specs peform the following operations:
 
 ```shell
 $ cd program
+$ ./build.sh
 $ ./test.sh
 ```
-
-The test script builds the program and sets the output directory for test-bpf to mpl-deps so solana-program-test has access to the Auction House and Token Metadata programs.
