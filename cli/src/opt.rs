@@ -5,7 +5,7 @@ use structopt::StructOpt;
     name = "Reward Center",
     about = "A Metaplex auctioneer program that distributes spl token to the buyer and seller of NFTs"
 )]
-pub struct RewardCenterOption {
+pub struct Opt {
     /// RPC endpoint url to override using the Solana config or the hard-coded default
     #[structopt(short, long, global = true)]
     pub rpc: Option<String>,
@@ -20,11 +20,11 @@ pub struct RewardCenterOption {
 
     /// All available commands
     #[structopt(subcommand)]
-    pub cmd: RewardCenterCommands,
+    pub cmd: Command,
 }
 
 #[derive(Debug, StructOpt)]
-pub enum RewardCenterCommands {
+pub enum Command {
     /// Create Reward Center
     #[structopt(name = "create")]
     Create {
@@ -33,11 +33,75 @@ pub enum RewardCenterCommands {
         config_file: String,
 
         /// Optional Auction House address
-        #[structopt(short, long)]
+        #[structopt(short = "a", long)]
         auction_house: Option<String>,
 
         /// Optional Rewards mint address
+        #[structopt(short = "M", long)]
+        mint_rewards: Option<String>,
+
+        /// Path to the creator's keypair file (mint auth keypair if required to create)
         #[structopt(short, long)]
-        rewards_mint: Option<String>,
+        keypair: Option<String>,
+    },
+
+    /// Edit reward center's reward rules
+    #[structopt(name = "edit")]
+    Edit {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Auction house address
+        #[structopt(short, long)]
+        auction_house: String,
+
+        /// Reward center config file path
+        #[structopt(short, long, default_value = "src/json/reward_center.json")]
+        config_file: String,
+
+        /// Path to the reward center authority's keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
+    },
+
+    /// Fund reward center
+    #[structopt(name = "fund")]
+    Fund {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
+
+        /// Funding amount
+        #[structopt(short, long)]
+        amount: u64,
+    },
+
+    /// Fetch Treasury Balance
+    #[structopt(name = "fetch-balance")]
+    FetchTreasuryBalance {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
+    },
+
+    /// Fetch Reward Center State details
+    #[structopt(name = "fetch-state")]
+    FetchRewardCenterState {
+        /// Reward center address
+        #[structopt(short = "R", long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[structopt(short, long)]
+        keypair: Option<String>,
     },
 }

@@ -2,21 +2,29 @@ use std::{str::FromStr, time::Duration};
 
 use anyhow::Result;
 use log::*;
-use reward_center::{commands::process_create_reward_center, config::*, constants::*, opt::*};
+use reward_center::{
+    commands::{
+        process_create_reward_center, process_edit_reward_center,
+        process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,
+        process_fund_reward_center,
+    },
+    config::*,
+    constants::*,
+    opt::*,
+};
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::commitment_config::CommitmentConfig;
 use structopt::StructOpt;
 
 fn main() -> Result<()> {
-    let RewardCenterOption {
+    let Opt {
         log_level,
         rpc,
         timeout,
         cmd,
-    } = RewardCenterOption::from_args_safe()?;
+    } = Opt::from_args();
 
-    let log_level = format!("solana={}", log_level);
-    solana_logger::setup_with_default(&log_level);
+    solana_logger::setup_with(&log_level);
 
     let sol_config = parse_solana_config();
 
@@ -57,13 +65,38 @@ fn main() -> Result<()> {
     );
 
     match cmd {
-        RewardCenterCommands::Create {
+        Command::Create {
+            keypair,
             config_file,
             auction_house,
-            rewards_mint,
-        } => process_create_reward_center(client, config_file, auction_house, rewards_mint)?,
+            mint_rewards,
+        } => {
+            process_create_reward_center(client, keypair, config_file, auction_house, mint_rewards)?
+        },
+
+        Command::Edit {
+            keypair,
+            config_file,
+            reward_center,
+            auction_house,
+        } => {
+            process_edit_reward_center(client, keypair, reward_center, auction_house, config_file)?
+        },
+
+        Command::Fund {
+            reward_center,
+            keypair,
+            amount,
+        } => process_fund_reward_center(client, keypair, reward_center, amount)?,
+
+        Command::FetchRewardCenterState { reward_center, .. } => {
+            process_fetch_reward_center_state(client, reward_center)?
+        },
+        Command::FetchTreasuryBalance { reward_center, .. } => {
+            process_fetch_reward_center_treasury_balance(client, reward_center)?
+        },
     }
 
-    println!("Done :)");
+    info!("Done :)");
     Ok(())
 }

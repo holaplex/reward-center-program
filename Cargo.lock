@@ -2525,12 +2525,16 @@ dependencies = [
 name = "reward-center"
 version = "0.1.0"
 dependencies = [
+ "anchor-lang",
  "anyhow",
  "bs58 0.4.0",
+ "env_logger",
  "hpl-reward-center",
+ "hpl-reward-center-sdk",
  "lazy_static",
  "log",
  "mpl-auction-house",
+ "mpl-auction-house-sdk",
  "mpl-token-metadata",
  "retry",
  "serde",
@@ -2541,6 +2545,8 @@ dependencies = [
  "solana-logger",
  "solana-program",
  "solana-sdk",
+ "spl-associated-token-account",
+ "spl-token",
  "structopt",
 ]
 
