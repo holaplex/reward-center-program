@@ -5,27 +5,26 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
+import * as beet from '@metaplex-foundation/beet';
 export type CreateListingParams = {
-  price: beet.bignum
-  tokenSize: beet.bignum
-  tradeStateBump: number
-  freeTradeStateBump: number
-  programAsSignerBump: number
-}
+  price: beet.bignum;
+  tokenSize: beet.bignum;
+  tradeStateBump: number;
+  freeTradeStateBump: number;
+  programAsSignerBump: number;
+};
 
 /**
  * @category userTypes
  * @category generated
  */
-export const createListingParamsBeet =
-  new beet.BeetArgsStruct<CreateListingParams>(
-    [
-      ['price', beet.u64],
-      ['tokenSize', beet.u64],
-      ['tradeStateBump', beet.u8],
-      ['freeTradeStateBump', beet.u8],
-      ['programAsSignerBump', beet.u8],
-    ],
-    'CreateListingParams'
-  )
+export const createListingParamsBeet = new beet.BeetArgsStruct<CreateListingParams>(
+  [
+    ['price', beet.u64],
+    ['tokenSize', beet.u64],
+    ['tradeStateBump', beet.u8],
+    ['freeTradeStateBump', beet.u8],
+    ['programAsSignerBump', beet.u8],
+  ],
+  'CreateListingParams',
+);

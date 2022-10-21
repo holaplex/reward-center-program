@@ -8,95 +8,96 @@
 import * as splToken from '@solana/spl-token';
 import * as beet from '@metaplex-foundation/beet';
 import * as web3 from '@solana/web3.js';
-import { CreateOfferParams, createOfferParamsBeet } from '../types/CreateOfferParams';
+import { CloseOfferParams, closeOfferParamsBeet } from '../types/CloseOfferParams';
 
 /**
  * @category Instructions
- * @category CreateOffer
+ * @category CloseOffer
  * @category generated
  */
-export type CreateOfferInstructionArgs = {
-  createOfferParams: CreateOfferParams;
+export type CloseOfferInstructionArgs = {
+  closeOfferParams: CloseOfferParams;
 };
 /**
  * @category Instructions
- * @category CreateOffer
+ * @category CloseOffer
  * @category generated
  */
-export const createOfferStruct = new beet.BeetArgsStruct<
-  CreateOfferInstructionArgs & {
+export const closeOfferStruct = new beet.BeetArgsStruct<
+  CloseOfferInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['createOfferParams', createOfferParamsBeet],
+    ['closeOfferParams', closeOfferParamsBeet],
   ],
-  'CreateOfferInstructionArgs',
+  'CloseOfferInstructionArgs',
 );
 /**
- * Accounts required by the _createOffer_ instruction
+ * Accounts required by the _closeOffer_ instruction
  *
  * @property [_writable_, **signer**] wallet
  * @property [_writable_] offer
- * @property [_writable_] paymentAccount
- * @property [] transferAuthority
  * @property [] treasuryMint
- * @property [] tokenAccount
- * @property [] metadata
+ * @property [_writable_] tokenAccount
+ * @property [_writable_] receiptAccount
  * @property [_writable_] escrowPaymentAccount
+ * @property [] metadata
+ * @property [] tokenMint
  * @property [] authority
  * @property [] rewardCenter
  * @property [] auctionHouse
  * @property [_writable_] auctionHouseFeeAccount
- * @property [_writable_] buyerTradeState
+ * @property [_writable_] tradeState
  * @property [] ahAuctioneerPda
  * @property [] auctionHouseProgram
  * @category Instructions
- * @category CreateOffer
+ * @category CloseOffer
  * @category generated
  */
-export type CreateOfferInstructionAccounts = {
+export type CloseOfferInstructionAccounts = {
   wallet: web3.PublicKey;
   offer: web3.PublicKey;
-  paymentAccount: web3.PublicKey;
-  transferAuthority: web3.PublicKey;
   treasuryMint: web3.PublicKey;
   tokenAccount: web3.PublicKey;
-  metadata: web3.PublicKey;
+  receiptAccount: web3.PublicKey;
   escrowPaymentAccount: web3.PublicKey;
+  metadata: web3.PublicKey;
+  tokenMint: web3.PublicKey;
   authority: web3.PublicKey;
   rewardCenter: web3.PublicKey;
   auctionHouse: web3.PublicKey;
   auctionHouseFeeAccount: web3.PublicKey;
-  buyerTradeState: web3.PublicKey;
+  tradeState: web3.PublicKey;
   ahAuctioneerPda: web3.PublicKey;
   auctionHouseProgram: web3.PublicKey;
-  tokenProgram?: web3.PublicKey;
+  ataProgram?: web3.PublicKey;
   systemProgram?: web3.PublicKey;
+  tokenProgram?: web3.PublicKey;
   rent?: web3.PublicKey;
   anchorRemainingAccounts?: web3.AccountMeta[];
 };
 
-export const createOfferInstructionDiscriminator = [237, 233, 192, 168, 248, 7, 249, 241];
+export const closeOfferInstructionDiscriminator = [191, 72, 67, 35, 239, 209, 97, 132];
 
 /**
- * Creates a _CreateOffer_ instruction.
+ * Creates a _CloseOffer_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category CreateOffer
+ * @category CloseOffer
  * @category generated
  */
-export function createCreateOfferInstruction(
-  accounts: CreateOfferInstructionAccounts,
-  args: CreateOfferInstructionArgs,
+export function createCloseOfferInstruction(
+  accounts: CloseOfferInstructionAccounts,
+  args: CloseOfferInstructionArgs,
   programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const [data] = createOfferStruct.serialize({
-    instructionDiscriminator: createOfferInstructionDiscriminator,
+  const [data] = closeOfferStruct.serialize({
+    instructionDiscriminator: closeOfferInstructionDiscriminator,
     ...args,
   });
   const keys: web3.AccountMeta[] = [
@@ -111,23 +112,23 @@ export function createCreateOfferInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.paymentAccount,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.transferAuthority,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.treasuryMint,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey: accounts.tokenAccount,
-      isWritable: false,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.receiptAccount,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.escrowPaymentAccount,
+      isWritable: true,
       isSigner: false,
     },
     {
@@ -136,8 +137,8 @@ export function createCreateOfferInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.escrowPaymentAccount,
-      isWritable: true,
+      pubkey: accounts.tokenMint,
+      isWritable: false,
       isSigner: false,
     },
     {
@@ -161,7 +162,7 @@ export function createCreateOfferInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.buyerTradeState,
+      pubkey: accounts.tradeState,
       isWritable: true,
       isSigner: false,
     },
@@ -176,12 +177,17 @@ export function createCreateOfferInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
+      pubkey: accounts.ataProgram ?? splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
       isWritable: false,
       isSigner: false,
     },

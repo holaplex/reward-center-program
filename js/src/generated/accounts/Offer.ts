@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js'
-import * as beet from '@metaplex-foundation/beet'
-import * as beetSolana from '@metaplex-foundation/beet-solana'
+import * as web3 from '@solana/web3.js';
+import * as beet from '@metaplex-foundation/beet';
+import * as beetSolana from '@metaplex-foundation/beet-solana';
 
 /**
  * Arguments used to create {@link Offer}
@@ -15,19 +15,16 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category generated
  */
 export type OfferArgs = {
-  isInitialized: boolean
-  rewardCenter: web3.PublicKey
-  buyer: web3.PublicKey
-  metadata: web3.PublicKey
-  price: beet.bignum
-  tokenSize: beet.bignum
-  bump: number
-  createdAt: beet.bignum
-  canceledAt: beet.COption<beet.bignum>
-  purchaseTicket: beet.COption<web3.PublicKey>
-}
+  rewardCenter: web3.PublicKey;
+  buyer: web3.PublicKey;
+  metadata: web3.PublicKey;
+  price: beet.bignum;
+  tokenSize: beet.bignum;
+  bump: number;
+  createdAt: beet.bignum;
+};
 
-const offerDiscriminator = [215, 88, 60, 71, 170, 162, 73, 229]
+export const offerDiscriminator = [215, 88, 60, 71, 170, 162, 73, 229];
 /**
  * Holds the data for the {@link Offer} Account and provides de/serialization
  * functionality for that data
@@ -37,7 +34,6 @@ const offerDiscriminator = [215, 88, 60, 71, 170, 162, 73, 229]
  */
 export class Offer implements OfferArgs {
   private constructor(
-    readonly isInitialized: boolean,
     readonly rewardCenter: web3.PublicKey,
     readonly buyer: web3.PublicKey,
     readonly metadata: web3.PublicKey,
@@ -45,8 +41,6 @@ export class Offer implements OfferArgs {
     readonly tokenSize: beet.bignum,
     readonly bump: number,
     readonly createdAt: beet.bignum,
-    readonly canceledAt: beet.COption<beet.bignum>,
-    readonly purchaseTicket: beet.COption<web3.PublicKey>
   ) {}
 
   /**
@@ -54,7 +48,6 @@ export class Offer implements OfferArgs {
    */
   static fromArgs(args: OfferArgs) {
     return new Offer(
-      args.isInitialized,
       args.rewardCenter,
       args.buyer,
       args.metadata,
@@ -62,20 +55,15 @@ export class Offer implements OfferArgs {
       args.tokenSize,
       args.bump,
       args.createdAt,
-      args.canceledAt,
-      args.purchaseTicket
-    )
+    );
   }
 
   /**
    * Deserializes the {@link Offer} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static fromAccountInfo(
-    accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
-  ): [Offer, number] {
-    return Offer.deserialize(accountInfo.data, offset)
+  static fromAccountInfo(accountInfo: web3.AccountInfo<Buffer>, offset = 0): [Offer, number] {
+    return Offer.deserialize(accountInfo.data, offset);
   }
 
   /**
@@ -86,13 +74,26 @@ export class Offer implements OfferArgs {
    */
   static async fromAccountAddress(
     connection: web3.Connection,
-    address: web3.PublicKey
+    address: web3.PublicKey,
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
   ): Promise<Offer> {
-    const accountInfo = await connection.getAccountInfo(address)
+    const accountInfo = await connection.getAccountInfo(address, commitmentOrConfig);
     if (accountInfo == null) {
-      throw new Error(`Unable to find Offer account at ${address}`)
+      throw new Error(`Unable to find Offer account at ${address}`);
     }
-    return Offer.fromAccountInfo(accountInfo, 0)[0]
+    return Offer.fromAccountInfo(accountInfo, 0)[0];
+  }
+
+  /**
+   * Provides a {@link web3.Connection.getProgramAccounts} config builder,
+   * to fetch accounts matching filters that can be specified via that builder.
+   *
+   * @param programId - the program that owns the accounts we are filtering
+   */
+  static gpaBuilder(
+    programId: web3.PublicKey = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
+  ) {
+    return beetSolana.GpaBuilder.fromStruct(programId, offerBeet);
   }
 
   /**
@@ -100,7 +101,7 @@ export class Offer implements OfferArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Offer, number] {
-    return offerBeet.deserialize(buf, offset)
+    return offerBeet.deserialize(buf, offset);
   }
 
   /**
@@ -111,41 +112,36 @@ export class Offer implements OfferArgs {
     return offerBeet.serialize({
       accountDiscriminator: offerDiscriminator,
       ...this,
-    })
+    });
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link Offer} for the provided args.
-   *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
+   * {@link Offer}
    */
-  static byteSize(args: OfferArgs) {
-    const instance = Offer.fromArgs(args)
-    return offerBeet.toFixedFromValue({
-      accountDiscriminator: offerDiscriminator,
-      ...instance,
-    }).byteSize
+  static get byteSize() {
+    return offerBeet.byteSize;
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
    * {@link Offer} data from rent
    *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: OfferArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
-    return connection.getMinimumBalanceForRentExemption(
-      Offer.byteSize(args),
-      commitment
-    )
+    return connection.getMinimumBalanceForRentExemption(Offer.byteSize, commitment);
+  }
+
+  /**
+   * Determines if the provided {@link Buffer} has the correct byte size to
+   * hold {@link Offer} data.
+   */
+  static hasCorrectByteSize(buf: Buffer, offset = 0) {
+    return buf.byteLength - offset === Offer.byteSize;
   }
 
   /**
@@ -154,47 +150,44 @@ export class Offer implements OfferArgs {
    */
   pretty() {
     return {
-      isInitialized: this.isInitialized,
       rewardCenter: this.rewardCenter.toBase58(),
       buyer: this.buyer.toBase58(),
       metadata: this.metadata.toBase58(),
       price: (() => {
-        const x = <{ toNumber: () => number }>this.price
+        const x = <{ toNumber: () => number }>this.price;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
       tokenSize: (() => {
-        const x = <{ toNumber: () => number }>this.tokenSize
+        const x = <{ toNumber: () => number }>this.tokenSize;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
       bump: this.bump,
       createdAt: (() => {
-        const x = <{ toNumber: () => number }>this.createdAt
+        const x = <{ toNumber: () => number }>this.createdAt;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
-      canceledAt: this.canceledAt,
-      purchaseTicket: this.purchaseTicket,
-    }
+    };
   }
 }
 
@@ -202,15 +195,14 @@ export class Offer implements OfferArgs {
  * @category Accounts
  * @category generated
  */
-export const offerBeet = new beet.FixableBeetStruct<
+export const offerBeet = new beet.BeetStruct<
   Offer,
   OfferArgs & {
-    accountDiscriminator: number[] /* size: 8 */
+    accountDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['isInitialized', beet.bool],
     ['rewardCenter', beetSolana.publicKey],
     ['buyer', beetSolana.publicKey],
     ['metadata', beetSolana.publicKey],
@@ -218,9 +210,7 @@ export const offerBeet = new beet.FixableBeetStruct<
     ['tokenSize', beet.u64],
     ['bump', beet.u8],
     ['createdAt', beet.i64],
-    ['canceledAt', beet.coption(beet.i64)],
-    ['purchaseTicket', beet.coption(beetSolana.publicKey)],
   ],
   Offer.fromArgs,
-  'Offer'
-)
+  'Offer',
+);

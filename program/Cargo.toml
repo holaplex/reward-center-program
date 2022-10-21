@@ -1,8 +1,8 @@
 [package]
 name = "hpl-reward-center"
-version = "0.1.0"
+version = "0.2.1"
 edition = "2021"
-description = "Default Auctioneer implementation"
+description = "Reward buyers and sellers of NFTs with spl tokens"
 authors = ["Holaplex Developers <hola@holaplex.com>"]
 repository = "https://github.com/holaplex/reward-center-program"
 license = "AGPL-3.0"
