@@ -408,8 +408,8 @@ pub fn execute_sale(
     }: ExecuteSaleAccounts,
     ExecuteSaleData {
         token_size,
-        reward_mint,
         price,
+        reward_mint,
     }: ExecuteSaleData,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
@@ -500,7 +500,6 @@ pub fn execute_sale(
             free_trade_state_bump,
             program_as_signer_bump,
             seller_trade_state_bump,
-            token_size,
         },
     }
     .data();

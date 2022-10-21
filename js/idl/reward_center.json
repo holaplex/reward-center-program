@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.2",
   "name": "reward_center",
   "instructions": [
     {
@@ -808,10 +808,6 @@
           {
             "name": "programAsSignerBump",
             "type": "u8"
-          },
-          {
-            "name": "tokenSize",
-            "type": "u64"
           }
         ]
       }

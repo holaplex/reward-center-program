@@ -24,7 +24,6 @@ pub struct ExecuteSaleParams {
     pub free_trade_state_bump: u8,
     pub seller_trade_state_bump: u8,
     pub program_as_signer_bump: u8,
-    pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
@@ -196,7 +195,7 @@ pub struct ExecuteSale<'info> {
             auction_house.treasury_mint.as_ref(),
             token_mint.key().as_ref(),
             &u64::MAX.to_le_bytes(),
-            &execute_sale_params.token_size.to_le_bytes()
+            &listing.token_size.to_le_bytes()
         ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.seller_trade_state_bump,
@@ -215,7 +214,7 @@ pub struct ExecuteSale<'info> {
             auction_house.treasury_mint.as_ref(),
             token_account.mint.as_ref(),
             &0u64.to_le_bytes(),
-            &execute_sale_params.token_size.to_le_bytes()
+            &listing.token_size.to_le_bytes()
         ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.free_trade_state_bump
@@ -285,7 +284,6 @@ pub fn handler(
         escrow_payment_bump,
         free_trade_state_bump,
         program_as_signer_bump,
-        token_size,
         ..
     }: ExecuteSaleParams,
 ) -> Result<()> {
@@ -296,6 +294,7 @@ pub fn handler(
     let metadata = &ctx.accounts.metadata;
     let token_account = &ctx.accounts.token_account;
     let price = seller_listing.price;
+    let token_size = seller_listing.token_size;
 
     let auction_house_key = auction_house.key();
 
