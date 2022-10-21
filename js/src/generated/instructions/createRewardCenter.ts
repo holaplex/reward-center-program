@@ -5,13 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token'
-import * as beet from '@metaplex-foundation/beet'
-import * as web3 from '@solana/web3.js'
+import * as splToken from '@solana/spl-token';
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
 import {
   CreateRewardCenterParams,
   createRewardCenterParamsBeet,
-} from '../types/CreateRewardCenterParams'
+} from '../types/CreateRewardCenterParams';
 
 /**
  * @category Instructions
@@ -19,29 +19,30 @@ import {
  * @category generated
  */
 export type CreateRewardCenterInstructionArgs = {
-  createRewardCenterParams: CreateRewardCenterParams
-}
+  createRewardCenterParams: CreateRewardCenterParams;
+};
 /**
  * @category Instructions
  * @category CreateRewardCenter
  * @category generated
  */
-const createRewardCenterStruct = new beet.BeetArgsStruct<
+export const createRewardCenterStruct = new beet.BeetArgsStruct<
   CreateRewardCenterInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
+    instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['createRewardCenterParams', createRewardCenterParamsBeet],
   ],
-  'CreateRewardCenterInstructionArgs'
-)
+  'CreateRewardCenterInstructionArgs',
+);
 /**
  * Accounts required by the _createRewardCenter_ instruction
  *
  * @property [_writable_, **signer**] wallet
  * @property [] mint
+ * @property [] auctionHouseTreasuryMint
  * @property [_writable_] associatedTokenAccount
  * @property [] auctionHouse
  * @property [_writable_] rewardCenter
@@ -51,17 +52,20 @@ const createRewardCenterStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type CreateRewardCenterInstructionAccounts = {
-  wallet: web3.PublicKey
-  mint: web3.PublicKey
-  associatedTokenAccount: web3.PublicKey
-  auctionHouse: web3.PublicKey
-  rewardCenter: web3.PublicKey
-  associatedTokenProgram: web3.PublicKey
-}
+  wallet: web3.PublicKey;
+  mint: web3.PublicKey;
+  auctionHouseTreasuryMint: web3.PublicKey;
+  associatedTokenAccount: web3.PublicKey;
+  auctionHouse: web3.PublicKey;
+  rewardCenter: web3.PublicKey;
+  systemProgram?: web3.PublicKey;
+  tokenProgram?: web3.PublicKey;
+  associatedTokenProgram: web3.PublicKey;
+  rent?: web3.PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+};
 
-const createRewardCenterInstructionDiscriminator = [
-  51, 138, 29, 157, 96, 169, 51, 139,
-]
+export const createRewardCenterInstructionDiscriminator = [51, 138, 29, 157, 96, 169, 51, 139];
 
 /**
  * Creates a _CreateRewardCenter_ instruction.
@@ -75,75 +79,76 @@ const createRewardCenterInstructionDiscriminator = [
  */
 export function createCreateRewardCenterInstruction(
   accounts: CreateRewardCenterInstructionAccounts,
-  args: CreateRewardCenterInstructionArgs
+  args: CreateRewardCenterInstructionArgs,
+  programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const {
-    wallet,
-    mint,
-    associatedTokenAccount,
-    auctionHouse,
-    rewardCenter,
-    associatedTokenProgram,
-  } = accounts
-
   const [data] = createRewardCenterStruct.serialize({
     instructionDiscriminator: createRewardCenterInstructionDiscriminator,
     ...args,
-  })
+  });
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: wallet,
+      pubkey: accounts.wallet,
       isWritable: true,
       isSigner: true,
     },
     {
-      pubkey: mint,
+      pubkey: accounts.mint,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: associatedTokenAccount,
+      pubkey: accounts.auctionHouseTreasuryMint,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.associatedTokenAccount,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: auctionHouse,
+      pubkey: accounts.auctionHouse,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: rewardCenter,
+      pubkey: accounts.rewardCenter,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: web3.SystemProgram.programId,
+      pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: splToken.TOKEN_PROGRAM_ID,
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: associatedTokenProgram,
+      pubkey: accounts.associatedTokenProgram,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: web3.SYSVAR_RENT_PUBKEY,
+      pubkey: accounts.rent ?? web3.SYSVAR_RENT_PUBKEY,
       isWritable: false,
       isSigner: false,
     },
-  ]
+  ];
+
+  if (accounts.anchorRemainingAccounts != null) {
+    for (const acc of accounts.anchorRemainingAccounts) {
+      keys.push(acc);
+    }
+  }
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey(
-      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
-    ),
+    programId,
     keys,
     data,
-  })
-  return ix
+  });
+  return ix;
 }

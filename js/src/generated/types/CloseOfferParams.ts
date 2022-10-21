@@ -5,24 +5,22 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
-export type CancelOfferParams = {
-  tradeStateBump: number
-  escrowPaymentBump: number
-  buyerPrice: beet.bignum
-  tokenSize: beet.bignum
-}
+import * as beet from '@metaplex-foundation/beet';
+export type CloseOfferParams = {
+  escrowPaymentBump: number;
+  buyerPrice: beet.bignum;
+  tokenSize: beet.bignum;
+};
 
 /**
  * @category userTypes
  * @category generated
  */
-export const cancelOfferParamsBeet = new beet.BeetArgsStruct<CancelOfferParams>(
+export const closeOfferParamsBeet = new beet.BeetArgsStruct<CloseOfferParams>(
   [
-    ['tradeStateBump', beet.u8],
     ['escrowPaymentBump', beet.u8],
     ['buyerPrice', beet.u64],
     ['tokenSize', beet.u64],
   ],
-  'CancelOfferParams'
-)
+  'CloseOfferParams',
+);

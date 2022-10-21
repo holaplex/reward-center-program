@@ -1,7 +1,7 @@
 {
   "name": "@holaplex/hpl-reward-center",
-  "version": "0.1.0",
-  "description": "HPL Auction House JavaScript API.",
+  "version": "0.2.0",
+  "description": "HPL Reward Center JavaScript API.",
   "main": "dist/src/generated/index.js",
   "types": "dist/src/generated/index.d.ts",
   "scripts": {
@@ -32,21 +32,22 @@
     "nft",
     "metaplex",
     "solana",
-    "blockchain"
+    "blockchain",
+    "holaplex"
   ],
   "homepage": "https://holaplex.com",
-  "repository": "https://github.com/metaplex-foundation/metaplex-program-library.git",
+  "repository": "https://github.com/holaplex/reward-center-program.git",
   "author": "Holaplex Maintainers <hola@holaplex.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@metaplex-foundation/beet": "^0.1.0",
-    "@metaplex-foundation/beet-solana": "^0.1.1",
+    "@metaplex-foundation/beet": "^0.7.1",
+    "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-core": "^0.0.5",
     "@solana/web3.js": "^1.35.1",
     "bn.js": "^5.2.0"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.18.0",
+    "@metaplex-foundation/solita": "^0.19.0",
     "@types/tape": "^4.13.2",
     "eslint": "^8.3.0",
     "prettier": "^2.5.1",

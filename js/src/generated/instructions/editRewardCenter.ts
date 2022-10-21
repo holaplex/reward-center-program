@@ -5,12 +5,12 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
-import * as web3 from '@solana/web3.js'
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
 import {
   EditRewardCenterParams,
   editRewardCenterParamsBeet,
-} from '../types/EditRewardCenterParams'
+} from '../types/EditRewardCenterParams';
 
 /**
  * @category Instructions
@@ -18,24 +18,24 @@ import {
  * @category generated
  */
 export type EditRewardCenterInstructionArgs = {
-  editRewardCenterParams: EditRewardCenterParams
-}
+  editRewardCenterParams: EditRewardCenterParams;
+};
 /**
  * @category Instructions
  * @category EditRewardCenter
  * @category generated
  */
-const editRewardCenterStruct = new beet.BeetArgsStruct<
+export const editRewardCenterStruct = new beet.BeetArgsStruct<
   EditRewardCenterInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
+    instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['editRewardCenterParams', editRewardCenterParamsBeet],
   ],
-  'EditRewardCenterInstructionArgs'
-)
+  'EditRewardCenterInstructionArgs',
+);
 /**
  * Accounts required by the _editRewardCenter_ instruction
  *
@@ -47,14 +47,13 @@ const editRewardCenterStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type EditRewardCenterInstructionAccounts = {
-  wallet: web3.PublicKey
-  auctionHouse: web3.PublicKey
-  rewardCenter: web3.PublicKey
-}
+  wallet: web3.PublicKey;
+  auctionHouse: web3.PublicKey;
+  rewardCenter: web3.PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+};
 
-const editRewardCenterInstructionDiscriminator = [
-  185, 238, 29, 159, 195, 37, 196, 120,
-]
+export const editRewardCenterInstructionDiscriminator = [185, 238, 29, 159, 195, 37, 196, 120];
 
 /**
  * Creates a _EditRewardCenter_ instruction.
@@ -68,38 +67,41 @@ const editRewardCenterInstructionDiscriminator = [
  */
 export function createEditRewardCenterInstruction(
   accounts: EditRewardCenterInstructionAccounts,
-  args: EditRewardCenterInstructionArgs
+  args: EditRewardCenterInstructionArgs,
+  programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const { wallet, auctionHouse, rewardCenter } = accounts
-
   const [data] = editRewardCenterStruct.serialize({
     instructionDiscriminator: editRewardCenterInstructionDiscriminator,
     ...args,
-  })
+  });
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: wallet,
+      pubkey: accounts.wallet,
       isWritable: true,
       isSigner: true,
     },
     {
-      pubkey: auctionHouse,
+      pubkey: accounts.auctionHouse,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: rewardCenter,
+      pubkey: accounts.rewardCenter,
       isWritable: true,
       isSigner: false,
     },
-  ]
+  ];
+
+  if (accounts.anchorRemainingAccounts != null) {
+    for (const acc of accounts.anchorRemainingAccounts) {
+      keys.push(acc);
+    }
+  }
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey(
-      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
-    ),
+    programId,
     keys,
     data,
-  })
-  return ix
+  });
+  return ix;
 }

@@ -5,12 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
-import * as web3 from '@solana/web3.js'
-import {
-  UpdateListingParams,
-  updateListingParamsBeet,
-} from '../types/UpdateListingParams'
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
+import { UpdateListingParams, updateListingParamsBeet } from '../types/UpdateListingParams';
 
 /**
  * @category Instructions
@@ -18,24 +15,24 @@ import {
  * @category generated
  */
 export type UpdateListingInstructionArgs = {
-  updateListingParams: UpdateListingParams
-}
+  updateListingParams: UpdateListingParams;
+};
 /**
  * @category Instructions
  * @category UpdateListing
  * @category generated
  */
-const updateListingStruct = new beet.BeetArgsStruct<
+export const updateListingStruct = new beet.BeetArgsStruct<
   UpdateListingInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
+    instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['updateListingParams', updateListingParamsBeet],
   ],
-  'UpdateListingInstructionArgs'
-)
+  'UpdateListingInstructionArgs',
+);
 /**
  * Accounts required by the _updateListing_ instruction
  *
@@ -51,18 +48,17 @@ const updateListingStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type UpdateListingInstructionAccounts = {
-  wallet: web3.PublicKey
-  listing: web3.PublicKey
-  rewardCenter: web3.PublicKey
-  auctionHouse: web3.PublicKey
-  metadata: web3.PublicKey
-  tokenAccount: web3.PublicKey
-  auctionHouseProgram: web3.PublicKey
-}
+  wallet: web3.PublicKey;
+  listing: web3.PublicKey;
+  rewardCenter: web3.PublicKey;
+  auctionHouse: web3.PublicKey;
+  metadata: web3.PublicKey;
+  tokenAccount: web3.PublicKey;
+  auctionHouseProgram: web3.PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+};
 
-const updateListingInstructionDiscriminator = [
-  192, 174, 210, 68, 116, 40, 242, 253,
-]
+export const updateListingInstructionDiscriminator = [192, 174, 210, 68, 116, 40, 242, 253];
 
 /**
  * Creates a _UpdateListing_ instruction.
@@ -76,66 +72,61 @@ const updateListingInstructionDiscriminator = [
  */
 export function createUpdateListingInstruction(
   accounts: UpdateListingInstructionAccounts,
-  args: UpdateListingInstructionArgs
+  args: UpdateListingInstructionArgs,
+  programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const {
-    wallet,
-    listing,
-    rewardCenter,
-    auctionHouse,
-    metadata,
-    tokenAccount,
-    auctionHouseProgram,
-  } = accounts
-
   const [data] = updateListingStruct.serialize({
     instructionDiscriminator: updateListingInstructionDiscriminator,
     ...args,
-  })
+  });
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: wallet,
+      pubkey: accounts.wallet,
       isWritable: true,
       isSigner: true,
     },
     {
-      pubkey: listing,
+      pubkey: accounts.listing,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: rewardCenter,
+      pubkey: accounts.rewardCenter,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: auctionHouse,
+      pubkey: accounts.auctionHouse,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: metadata,
+      pubkey: accounts.metadata,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: tokenAccount,
+      pubkey: accounts.tokenAccount,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: auctionHouseProgram,
+      pubkey: accounts.auctionHouseProgram,
       isWritable: false,
       isSigner: false,
     },
-  ]
+  ];
+
+  if (accounts.anchorRemainingAccounts != null) {
+    for (const acc of accounts.anchorRemainingAccounts) {
+      keys.push(acc);
+    }
+  }
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey(
-      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
-    ),
+    programId,
     keys,
     data,
-  })
-  return ix
+  });
+  return ix;
 }
