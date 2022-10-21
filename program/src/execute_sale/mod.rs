@@ -1,7 +1,7 @@
-use crate::constants::{LISTING, OFFER, PURCHASE_TICKET, REWARD_CENTER};
+use crate::constants::{LISTING, OFFER, REWARD_CENTER};
 use crate::errors::ListingRewardsError;
 use crate::metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs};
-use crate::state::{metaplex_anchor::TokenMetadata, Listing, Offer, PurchaseTicket, RewardCenter};
+use crate::state::{Listing, Offer, RewardCenter};
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::token::{transfer, Transfer};
 use anchor_spl::{
@@ -13,6 +13,7 @@ use mpl_auction_house::{
     cpi::accounts::AuctioneerExecuteSale,
     instruction::AuctioneerExecuteSale as AuctioneerExecuteSaleParams,
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 use solana_program::program::invoke_signed;
@@ -66,7 +67,7 @@ pub struct ExecuteSale<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref(),
         ],
-        bump,
+        bump = listing.bump,
         constraint = listing.price == offer.price @ ListingRewardsError::PriceMismatch,
         close = seller,
     )]
@@ -90,20 +91,6 @@ pub struct ExecuteSale<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
-    /// The purchase ticket that would be initialized to record an executed sale
-    #[account(
-        init_if_needed,
-        space = PurchaseTicket::size(),
-        payer = payer,
-        seeds = [
-            PURCHASE_TICKET.as_bytes(),
-            listing.key().as_ref(),
-            offer.key().as_ref(),
-        ],
-        bump,
-    )]
-    pub purchase_ticket: Box<Account<'info, PurchaseTicket>>,
-
     ///Token account where the SPL token is stored.
     #[account(
         mut,
@@ -114,8 +101,9 @@ pub struct ExecuteSale<'info> {
     /// Token mint account for the SPL token.
     pub token_mint: Box<Account<'info, Mint>>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// Auction House treasury mint account.
     pub treasury_mint: Box<Account<'info, Mint>>,
@@ -301,20 +289,15 @@ pub fn handler(
         ..
     }: ExecuteSaleParams,
 ) -> Result<()> {
-    let buyer = &ctx.accounts.buyer;
-    let seller = &ctx.accounts.seller;
     let seller_listing = &mut ctx.accounts.listing;
-    let buyer_offer = &mut ctx.accounts.offer;
-    let purchase_ticket = &mut ctx.accounts.purchase_ticket;
 
     let auction_house = &ctx.accounts.auction_house;
     let reward_center = &ctx.accounts.reward_center;
     let metadata = &ctx.accounts.metadata;
-    let price = buyer_offer.price;
+    let token_account = &ctx.accounts.token_account;
+    let price = seller_listing.price;
 
     let auction_house_key = auction_house.key();
-
-    let clock = Clock::get()?;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
@@ -322,9 +305,7 @@ pub fn handler(
         &[reward_center.bump],
     ]];
 
-    // Setting purchase_ticket for listing and offer
-    seller_listing.purchase_ticket = Some(purchase_ticket.key());
-    buyer_offer.purchase_ticket = Some(purchase_ticket.key());
+    assert_metadata_valid(metadata, token_account)?;
 
     // Auction house CPI
     let execute_sale_ctx_accounts = AuctioneerExecuteSale {
@@ -419,15 +400,6 @@ pub fn handler(
             seller_payout,
         )?
     };
-
-    // Initialize Purchase receipt
-    purchase_ticket.buyer = buyer.key();
-    purchase_ticket.seller = seller.key();
-    purchase_ticket.metadata = metadata.key();
-    purchase_ticket.reward_center = reward_center.key();
-    purchase_ticket.token_size = token_size;
-    purchase_ticket.price = price;
-    purchase_ticket.created_at = clock.unix_timestamp;
 
     Ok(())
 }

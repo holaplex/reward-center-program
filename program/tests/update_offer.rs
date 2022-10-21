@@ -17,8 +17,8 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{CreateListingAccounts, CreateOfferAccounts, UpdateOfferAccounts},
-    args::{CreateListingData, CreateOfferData, UpdateOfferData},
+    accounts::{CloseOfferAccounts, CreateListingAccounts, CreateOfferAccounts},
+    args::{CloseOfferData, CreateListingData, CreateOfferData},
     *,
 };
 
@@ -286,13 +286,42 @@ async fn create_offer_success() {
 
     let create_offer_ix = create_offer(create_offer_accounts, create_offer_params);
 
-    // UPDATE OFFER TEST
+    let tx = Transaction::new_signed_with_payer(
+        &[create_offer_ix],
+        Some(buyer_pubkey),
+        &[&buyer],
+        context.last_blockhash,
+    );
 
-    let update_offer_inc_accounts = UpdateOfferAccounts {
+    let tx_response = context.banks_client.process_transaction(tx).await;
+
+    assert!(tx_response.is_ok());
+
+    let cancel_offer_accounts = CloseOfferAccounts {
+        wallet: *buyer_pubkey,
+        treasury_mint: mint,
+        token_mint: metadata_mint_address,
+        token_account,
+        receipt_account: *buyer_pubkey,
+        metadata: metadata_address,
+        authority: wallet,
+        auction_house,
+        reward_center,
+    };
+
+    let cancel_offer_params = CloseOfferData {
+        token_size: 1,
+        buyer_price: reward_center_test::ONE_SOL,
+    };
+
+    let cancel_offer_ix = close_offer(cancel_offer_accounts, cancel_offer_params);
+
+    let update_offer_accounts = CreateOfferAccounts {
         wallet: *buyer_pubkey,
         transfer_authority: *buyer_pubkey,
-        buyer_token_account: *buyer_pubkey,
+        payment_account: *buyer_pubkey,
         treasury_mint: mint,
+        token_mint: metadata_mint_address,
         auction_house,
         reward_center,
         token_account,
@@ -300,32 +329,26 @@ async fn create_offer_success() {
         authority: wallet,
     };
 
-    let update_offer_inc_params = UpdateOfferData {
-        new_buyer_price: reward_center_test::ONE_SOL * 2,
+    let update_offer_params = CreateOfferData {
+        token_size: 1,
+        buyer_price: reward_center_test::ONE_SOL * 2,
     };
 
-    let update_offer_dec_accounts = UpdateOfferAccounts {
-        wallet: *buyer_pubkey,
-        transfer_authority: *buyer_pubkey,
-        buyer_token_account: *buyer_pubkey,
-        treasury_mint: mint,
-        auction_house,
-        reward_center,
-        token_account,
-        metadata: metadata_address,
-        authority: wallet,
-    };
-
-    let update_offer_dec_params = UpdateOfferData {
-        new_buyer_price: reward_center_test::ONE_SOL,
-    };
-
-    let update_offer_inc_ix = update_offer(update_offer_inc_accounts, update_offer_inc_params);
-
-    let update_offer_dec_ix = update_offer(update_offer_dec_accounts, update_offer_dec_params);
+    let update_offer_ix = create_offer(update_offer_accounts, update_offer_params);
 
     let tx = Transaction::new_signed_with_payer(
-        &[create_offer_ix, update_offer_inc_ix, update_offer_dec_ix],
+        &[cancel_offer_ix],
+        Some(buyer_pubkey),
+        &[&buyer],
+        context.last_blockhash,
+    );
+
+    let tx_response = context.banks_client.process_transaction(tx).await;
+
+    assert!(tx_response.is_ok());
+
+    let tx = Transaction::new_signed_with_payer(
+        &[update_offer_ix],
         Some(buyer_pubkey),
         &[&buyer],
         context.last_blockhash,

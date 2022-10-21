@@ -3,22 +3,13 @@
 pub mod reward_center_test;
 
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
-use hpl_reward_center::{
-    pda::{find_listing_address, find_reward_center_address},
-    reward_centers,
-    state::*,
-};
-use mpl_auction_house::{
-    pda::{
-        find_auction_house_address, find_auctioneer_trade_state_address, find_trade_state_address,
-    },
-    AuthorityScope,
-};
+use hpl_reward_center::{pda::find_reward_center_address, reward_centers, state::*};
+use mpl_auction_house::{pda::find_auction_house_address, AuthorityScope};
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{CancelOfferAccounts, *},
-    args::{CancelOfferData, *},
+    accounts::{CloseOfferAccounts, *},
+    args::{CloseOfferData, *},
     *,
 };
 
@@ -37,7 +28,7 @@ use spl_token::{
 };
 
 #[tokio::test]
-async fn cancel_offer_success() {
+async fn close_offer_success() {
     let program = reward_center_test::setup_program();
     let mut context = program.start_with_context().await;
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -71,8 +62,6 @@ async fn cancel_offer_success() {
 
     let (auction_house, _) = find_auction_house_address(&wallet, &mint);
     let (reward_center, _) = find_reward_center_address(&auction_house);
-    let (listing, _) =
-        find_listing_address(&metadata_owner_address, &metadata_address, &reward_center);
 
     // Creating Rewards mint and token account
     let token_program = &spl_token::id();
@@ -185,46 +174,6 @@ async fn cancel_offer_success() {
     let token_account =
         get_associated_token_address(&metadata_owner_address, &metadata_mint_address);
 
-    let (seller_trade_state, trade_state_bump) = find_auctioneer_trade_state_address(
-        &metadata_owner_address,
-        &auction_house,
-        &token_account,
-        &mint,
-        &metadata_mint_address,
-        1,
-    );
-
-    let (free_seller_trade_state, free_trade_state_bump) = find_trade_state_address(
-        &metadata_owner_address,
-        &auction_house,
-        &token_account,
-        &mint,
-        &metadata_mint_address,
-        0,
-        1,
-    );
-
-    let create_listing_accounts = CreateListingAccounts {
-        wallet: metadata_owner.pubkey(),
-        listing,
-        reward_center,
-        token_account,
-        metadata: metadata.pubkey,
-        authority: wallet,
-        auction_house,
-        seller_trade_state,
-        free_seller_trade_state,
-    };
-
-    let create_listing_params = CreateListingData {
-        price: reward_center_test::ONE_SOL,
-        token_size: 1,
-        trade_state_bump,
-        free_trade_state_bump,
-    };
-
-    let create_listing_ix = create_listing(create_listing_accounts, create_listing_params);
-
     let tx = Transaction::new_signed_with_payer(
         &[
             create_auction_house_ix,
@@ -240,17 +189,6 @@ async fn cancel_offer_success() {
             &reward_mint_authority_keypair,
             &reward_mint_keypair,
         ],
-        context.last_blockhash,
-    );
-
-    let tx_response = context.banks_client.process_transaction(tx).await;
-
-    assert!(tx_response.is_ok());
-
-    let tx = Transaction::new_signed_with_payer(
-        &[create_listing_ix],
-        Some(&metadata_owner_address),
-        &[&metadata_owner],
         context.last_blockhash,
     );
 
@@ -299,7 +237,7 @@ async fn cancel_offer_success() {
 
     // CANCEL OFFER TEST
 
-    let cancel_offer_accounts = CancelOfferAccounts {
+    let cancel_offer_accounts = CloseOfferAccounts {
         wallet: *buyer_pubkey,
         treasury_mint: mint,
         token_mint: metadata_mint_address,
@@ -311,12 +249,12 @@ async fn cancel_offer_success() {
         reward_center,
     };
 
-    let cancel_offer_params = CancelOfferData {
+    let cancel_offer_params = CloseOfferData {
         token_size: 1,
         buyer_price: reward_center_test::ONE_SOL,
     };
 
-    let cancel_offer_ix = cancel_offer(cancel_offer_accounts, cancel_offer_params);
+    let cancel_offer_ix = close_offer(cancel_offer_accounts, cancel_offer_params);
 
     let tx = Transaction::new_signed_with_payer(
         &[cancel_offer_ix],

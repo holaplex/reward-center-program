@@ -3,17 +3,17 @@ use anchor_spl::token::{Token, TokenAccount};
 use solana_program::program::invoke_signed;
 
 use crate::{
-    assertions::assert_listing_init_eligibility,
     constants::{LISTING, REWARD_CENTER},
     errors::ListingRewardsError,
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
-    state::{metaplex_anchor::TokenMetadata, Listing, RewardCenter},
+    state::{Listing, RewardCenter},
 };
 use mpl_auction_house::{
     constants::{AUCTIONEER, FEE_PAYER, PREFIX, SIGNER},
     cpi::accounts::AuctioneerSell,
     instruction::AuctioneerSell as AuctioneerSellParams,
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 
@@ -36,7 +36,7 @@ pub struct CreateListing<'info> {
     // Accounts used for Auctioneer
     /// The Listing Config used for listing settings
     #[account(
-        init_if_needed,
+        init,
         payer = wallet,
         space = Listing::size(),
         seeds = [
@@ -73,8 +73,9 @@ pub struct CreateListing<'info> {
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// CHECK: Verified through CPI
     /// Auction House authority account.
@@ -187,15 +188,15 @@ pub fn handler(
     let metadata = &ctx.accounts.metadata;
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
+    let token_account = &ctx.accounts.token_account;
+
+    assert_metadata_valid(metadata, token_account)?;
 
     let wallet = &ctx.accounts.wallet;
     let clock = Clock::get()?;
     let listing = &mut ctx.accounts.listing;
     let auction_house_key = auction_house.key();
 
-    assert_listing_init_eligibility(listing)?;
-
-    listing.is_initialized = true;
     listing.reward_center = reward_center.key();
     listing.seller = wallet.key();
     listing.metadata = metadata.key();
@@ -206,8 +207,6 @@ pub fn handler(
         .get(LISTING)
         .ok_or(ListingRewardsError::BumpSeedNotInHashMap)?;
     listing.created_at = clock.unix_timestamp;
-    listing.canceled_at = None;
-    listing.purchase_ticket = None;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),

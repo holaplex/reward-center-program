@@ -10,18 +10,6 @@ pub enum ListingRewardsError {
     #[msg("Unauthorized signer")]
     SignerNotAuthorized,
 
-    // 6002
-    #[msg("Invalid collection maintainer")]
-    InvalidCollectionMaintainer,
-
-    // 6003
-    #[msg("The NFT does not belong to a collection")]
-    NFTMissingCollection,
-
-    // 6004
-    #[msg("The NFT does not match the rewardable collection")]
-    NFTMismatchRewardableCollection,
-
     // 6005
     #[msg("The seller doesnt match the provided wallet")]
     SellerWalletMismatch,
@@ -46,35 +34,11 @@ pub enum ListingRewardsError {
     #[msg("Listing and offer prices do not match")]
     PriceMismatch,
 
-    // 6011
-    #[msg("Cannot update price on an already cancelled listing")]
-    ListingAlreadyCancelled,
-
-    // 6012
-    #[msg("Cannot update price on an already purchased listing")]
-    ListingAlreadyPurchased,
-
-    // 6013
-    #[msg("Cannot update price on an already cancelled offer")]
-    OfferAlreadyCancelled,
-
-    // 6014
-    #[msg("Cannot update price on an already purchased offer")]
-    OfferAlreadyPurchased,
-
-    // 6015
-    #[msg("Cannot re-initialize an existing listing")]
-    ListingAlreadyExists,
-
-    // 6016
-    #[msg("Cannot re-initialize an existing offer")]
-    OfferAlreadyExists,
-
-    // 6017
+    // 6009
     #[msg("Buyer token account owner does not match the buyer")]
     BuyerTokenAccountMismatch,
 
-    // 6018
+    // 6010
     #[msg("Seller token account owner does not match the seller")]
     SellerTokenAccountMismatch,
 }

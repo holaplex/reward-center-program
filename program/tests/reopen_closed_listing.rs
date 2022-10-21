@@ -1,7 +1,6 @@
 #![cfg(feature = "test-bpf")]
 
 pub mod reward_center_test;
-
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
 use hpl_reward_center::{
     pda::{find_listing_address, find_reward_center_address},
@@ -17,15 +16,15 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{CancelListingAccounts, *},
-    args::{CancelListingData, *},
+    accounts::{CloseListingAccounts, *},
+    args::{CloseListingData, *},
     *,
 };
 
 use mpl_testing_utils::solana::airdrop;
 use solana_program_test::*;
 use solana_sdk::{program_pack::Pack, signature::Keypair, system_instruction::create_account};
-use std::{println, str::FromStr};
+use std::str::FromStr;
 
 use mpl_token_metadata::state::Collection;
 
@@ -37,7 +36,7 @@ use spl_token::{
 };
 
 #[tokio::test]
-async fn cancel_listing_success() {
+async fn reopen_closed_listing_success() {
     let program = reward_center_test::setup_program();
     let mut context = program.start_with_context().await;
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -245,7 +244,7 @@ async fn cancel_listing_success() {
     );
 
     let tx_response = context.banks_client.process_transaction(tx).await;
-    println!("{:?}", tx_response);
+
     assert!(tx_response.is_ok());
 
     let tx = Transaction::new_signed_with_payer(
@@ -261,7 +260,7 @@ async fn cancel_listing_success() {
 
     // CANCEL LISTING TEST
 
-    let cancel_listing_accounts = CancelListingAccounts {
+    let cancel_listing_accounts = CloseListingAccounts {
         wallet: metadata_owner_address,
         listing,
         reward_center,
@@ -273,15 +272,46 @@ async fn cancel_listing_success() {
         token_mint: metadata_mint_address,
     };
 
-    let cancel_listing_params = CancelListingData {
-        price: u64::MAX,
-        token_size: 1,
+    let cancel_listing_params = CloseListingData { token_size: 1 };
+
+    let cancel_listing_ix = close_listing(cancel_listing_accounts, cancel_listing_params);
+
+    // REOPEN LISTING TEST
+
+    let reopen_listing_accounts = CreateListingAccounts {
+        wallet: metadata_owner.pubkey(),
+        listing,
+        reward_center,
+        token_account,
+        metadata: metadata.pubkey,
+        authority: wallet,
+        auction_house,
+        seller_trade_state,
+        free_seller_trade_state,
     };
 
-    let cancel_listing_ix = cancel_listing(cancel_listing_accounts, cancel_listing_params);
+    let reopen_listing_params = CreateListingData {
+        price: reward_center_test::ONE_SOL,
+        token_size: 1,
+        trade_state_bump,
+        free_trade_state_bump,
+    };
+
+    let reopen_listing_ix = create_listing(reopen_listing_accounts, reopen_listing_params);
 
     let tx = Transaction::new_signed_with_payer(
         &[cancel_listing_ix],
+        Some(&metadata_owner_address),
+        &[&metadata_owner],
+        context.last_blockhash,
+    );
+
+    let tx_response = context.banks_client.process_transaction(tx).await;
+
+    assert!(tx_response.is_ok());
+
+    let tx = Transaction::new_signed_with_payer(
+        &[reopen_listing_ix],
         Some(&metadata_owner_address),
         &[&metadata_owner],
         context.last_blockhash,

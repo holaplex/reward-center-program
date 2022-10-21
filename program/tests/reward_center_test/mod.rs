@@ -1,7 +1,7 @@
 pub mod fixtures;
 
 use solana_program_test::*;
-use solana_sdk::{pubkey::Pubkey, account::Account};
+use solana_sdk::{account::Account, pubkey::Pubkey};
 
 pub const TEN_SOL: u64 = 10_000_000_000;
 pub const ONE_SOL: u64 = 1_000_000_000;

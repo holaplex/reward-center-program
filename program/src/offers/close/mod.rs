@@ -10,27 +10,27 @@ use mpl_auction_house::{
         AuctioneerCancel as AuctioneerCancelParams, AuctioneerWithdraw as AuctioneerWithdrawParams,
     },
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 
 use crate::{
     constants::{OFFER, REWARD_CENTER},
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
-    state::{metaplex_anchor::TokenMetadata, Offer, RewardCenter},
+    state::{Offer, RewardCenter},
 };
 use solana_program::program::invoke_signed;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CancelOfferParams {
-    pub trade_state_bump: u8,
+pub struct CloseOfferParams {
     pub escrow_payment_bump: u8,
     pub buyer_price: u64,
     pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
-#[instruction(cancel_offer_params: CancelOfferParams)]
-pub struct CancelOffer<'info> {
+#[instruction(close_offer_params: CloseOfferParams)]
+pub struct CloseOffer<'info> {
     /// User wallet account.
     #[account(mut)]
     pub wallet: Signer<'info>,
@@ -44,7 +44,8 @@ pub struct CancelOffer<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref()
         ],
-        bump = offer.bump
+        bump = offer.bump,
+        close = wallet
     )]
     pub offer: Box<Account<'info, Offer>>,
 
@@ -68,12 +69,13 @@ pub struct CancelOffer<'info> {
             wallet.key().as_ref()
         ],
         seeds::program = auction_house_program,
-        bump = cancel_offer_params.escrow_payment_bump
+        bump = close_offer_params.escrow_payment_bump
     )]
     pub escrow_payment_account: UncheckedAccount<'info>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// Token mint account of SPL token.
     pub token_mint: Box<Account<'info, Mint>>,
@@ -147,23 +149,21 @@ pub struct CancelOffer<'info> {
 }
 
 pub fn handler(
-    ctx: Context<CancelOffer>,
-    CancelOfferParams {
+    ctx: Context<CloseOffer>,
+    CloseOfferParams {
         buyer_price,
         token_size,
         escrow_payment_bump,
-        ..
-    }: CancelOfferParams,
+    }: CloseOfferParams,
 ) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
+    let metadata = &ctx.accounts.metadata;
+    let token_account = &ctx.accounts.token_account;
     let wallet = &ctx.accounts.wallet;
     let auction_house_key = auction_house.key();
 
-    let clock = Clock::get()?;
-    let offer = &mut ctx.accounts.offer;
-
-    offer.canceled_at = Some(clock.unix_timestamp);
+    assert_metadata_valid(metadata, token_account)?;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
@@ -220,7 +220,7 @@ pub fn handler(
         token_program: ctx.accounts.token_program.to_account_info(),
     };
 
-    let cancel_offer_params = AuctioneerCancelParams {
+    let close_offer_params = AuctioneerCancelParams {
         buyer_price,
         token_size,
     };
@@ -228,7 +228,7 @@ pub fn handler(
     let (cancel_offer_ix, cancel_offer_account_infos) =
         make_auctioneer_instruction(AuctioneerInstructionArgs {
             accounts: cancel_offer_ctx_accounts,
-            instruction_data: cancel_offer_params.data(),
+            instruction_data: close_offer_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
         });
 
