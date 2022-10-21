@@ -8,7 +8,7 @@ use mpl_auction_house::{constants::PREFIX, AuctionHouse};
 
 use crate::{
     constants::REWARD_CENTER,
-    errors::ListingRewardsError,
+    errors::RewardCenterError,
     state::{RewardCenter, RewardRules},
 };
 
@@ -26,13 +26,18 @@ pub struct CreateRewardCenter<'info> {
     #[
       account(
         mut,
-        constraint = wallet.key() == auction_house.authority @ ListingRewardsError::SignerNotAuthorized
+        constraint = wallet.key() == auction_house.authority @ RewardCenterError::SignerNotAuthorized
       )
     ]
     pub wallet: Signer<'info>,
 
     /// the mint of the token to use as rewards.
+    #[account(constraint = mint.decimals == auction_house_treasury_mint.decimals @ RewardCenterError::RewardMintDecimalMismatch)]
     pub mint: Account<'info, Mint>,
+
+    // the mint of the accepted token currency for the associated auction house
+    #[account(constraint = auction_house.treasury_mint.key() == auction_house_treasury_mint.key() @ RewardCenterError::AuctionHouseTreasuryMismatch)]
+    pub auction_house_treasury_mint: Account<'info, Mint>,
 
     #[account(
         init,
@@ -87,7 +92,7 @@ pub fn handler(
     reward_center.bump = *ctx
         .bumps
         .get(REWARD_CENTER)
-        .ok_or(ListingRewardsError::BumpSeedNotInHashMap)?;
+        .ok_or(RewardCenterError::BumpSeedNotInHashMap)?;
 
     Ok(())
 }

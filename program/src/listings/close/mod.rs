@@ -1,7 +1,7 @@
 use crate::{
     constants::{LISTING, REWARD_CENTER},
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
-    state::{metaplex_anchor::TokenMetadata, Listing, RewardCenter},
+    state::{Listing, RewardCenter},
 };
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::token::{Mint, Token, TokenAccount};
@@ -10,19 +10,19 @@ use mpl_auction_house::{
     cpi::accounts::AuctioneerCancel,
     instruction::AuctioneerCancel as AuctioneerCancelParams,
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 use solana_program::program::invoke_signed;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CancelListingParams {
-    pub price: u64,
+pub struct CloseListingParams {
     pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
-#[instruction(cancel_listing_params: CancelListingParams)]
-pub struct CancelListing<'info> {
+#[instruction(close_listing_params: CloseListingParams)]
+pub struct CloseListing<'info> {
     /// User wallet account.
     #[account(mut)]
     pub wallet: Signer<'info>,
@@ -37,11 +37,13 @@ pub struct CancelListing<'info> {
             reward_center.key().as_ref(),
         ],
         bump = listing.bump,
+        close = wallet
     )]
     pub listing: Account<'info, Listing>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// SPL token account containing the token of the sale to be canceled.
     #[account(mut)]
@@ -115,23 +117,23 @@ pub struct CancelListing<'info> {
 }
 
 pub fn handler(
-    ctx: Context<CancelListing>,
-    CancelListingParams { price, token_size }: CancelListingParams,
+    ctx: Context<CloseListing>,
+    CloseListingParams { token_size }: CloseListingParams,
 ) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
-    let clock = Clock::get()?;
-    let listing = &mut ctx.accounts.listing;
+    let metadata = &ctx.accounts.metadata;
+    let token_account = &ctx.accounts.token_account;
 
     let auction_house_key = auction_house.key();
-
-    listing.canceled_at = Some(clock.unix_timestamp);
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
         auction_house_key.as_ref(),
         &[reward_center.bump],
     ]];
+
+    assert_metadata_valid(metadata, token_account)?;
 
     let cancel_listing_ctx_accounts = AuctioneerCancel {
         wallet: ctx.accounts.wallet.to_account_info(),
@@ -146,15 +148,15 @@ pub fn handler(
         token_program: ctx.accounts.token_program.to_account_info(),
     };
 
-    let cancel_listing_params = AuctioneerCancelParams {
-        buyer_price: price,
+    let close_listing_params = AuctioneerCancelParams {
+        buyer_price: u64::MAX,
         token_size,
     };
 
     let (cancel_listing_ix, cancel_listing_account_infos) =
         make_auctioneer_instruction(AuctioneerInstructionArgs {
             accounts: cancel_listing_ctx_accounts,
-            instruction_data: cancel_listing_params.data(),
+            instruction_data: close_listing_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
         });
 

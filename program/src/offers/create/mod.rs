@@ -1,8 +1,7 @@
 use crate::{
-    assertions::assert_offer_init_eligibility,
     constants::{OFFER, REWARD_CENTER},
-    errors::ListingRewardsError,
-    state::{metaplex_anchor::TokenMetadata, Offer, RewardCenter},
+    errors::RewardCenterError,
+    state::{Offer, RewardCenter},
 };
 use anchor_lang::prelude::{Result, *};
 use anchor_spl::token::{Mint, Token, TokenAccount};
@@ -10,6 +9,7 @@ use mpl_auction_house::{
     constants::{AUCTIONEER, FEE_PAYER, PREFIX},
     cpi::accounts::{AuctioneerDeposit, AuctioneerPublicBuy},
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 
@@ -29,7 +29,7 @@ pub struct CreateOffer<'info> {
 
     /// The Offer config account used for bids
     #[account(
-        init_if_needed,
+        init,
         payer = wallet,
         space = Offer::size(),
         seeds = [
@@ -53,8 +53,9 @@ pub struct CreateOffer<'info> {
 
     pub token_account: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     #[account(
@@ -160,15 +161,13 @@ pub fn handler(
     let metadata = &ctx.accounts.metadata;
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
+    let token_account = &ctx.accounts.token_account;
     let wallet = &ctx.accounts.wallet;
     let clock = Clock::get()?;
     let offer = &mut ctx.accounts.offer;
 
-    assert_offer_init_eligibility(offer)?;
-
     let auction_house_key = auction_house.key();
 
-    offer.is_initialized = true;
     offer.reward_center = reward_center.key();
     offer.buyer = wallet.key();
     offer.metadata = metadata.key();
@@ -177,16 +176,16 @@ pub fn handler(
     offer.bump = *ctx
         .bumps
         .get(OFFER)
-        .ok_or(ListingRewardsError::BumpSeedNotInHashMap)?;
+        .ok_or(RewardCenterError::BumpSeedNotInHashMap)?;
     offer.created_at = clock.unix_timestamp;
-    offer.canceled_at = None;
-    offer.purchase_ticket = None;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
         auction_house_key.as_ref(),
         &[reward_center.bump],
     ]];
+
+    assert_metadata_valid(metadata, token_account)?;
 
     let deposit_accounts_ctx = CpiContext::new_with_signer(
         ctx.accounts.auction_house_program.to_account_info(),

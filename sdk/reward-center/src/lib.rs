@@ -10,13 +10,10 @@ use hpl_reward_center::{
     execute_sale::ExecuteSaleParams,
     id, instruction,
     listings::{
-        cancel::CancelListingParams, create::CreateListingParams, update::UpdateListingParams,
+        close::CloseListingParams, create::CreateListingParams, update::UpdateListingParams,
     },
-    offers::{cancel::CancelOfferParams, create::CreateOfferParams, update::UpdateOfferParams},
-    pda::{
-        self, find_listing_address, find_offer_address, find_purchase_ticket_address,
-        find_reward_center_address,
-    },
+    offers::{close::CloseOfferParams, create::CreateOfferParams},
+    pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
 };
 use mpl_auction_house::pda::{
@@ -26,9 +23,12 @@ use mpl_auction_house::pda::{
 use spl_associated_token_account::get_associated_token_address;
 
 pub fn create_reward_center(
-    wallet: Pubkey,
-    mint: Pubkey,
-    auction_house: Pubkey,
+    CreateRewardCenterAccounts {
+        wallet,
+        mint,
+        auction_house,
+        auction_house_treasury_mint,
+    }: CreateRewardCenterAccounts,
     create_reward_center_params: CreateRewardCenterParams,
 ) -> Instruction {
     let (reward_center, _) = pda::find_reward_center_address(&auction_house);
@@ -40,6 +40,7 @@ pub fn create_reward_center(
         auction_house,
         reward_center,
         associated_token_account,
+        auction_house_treasury_mint,
         token_program: spl_token::id(),
         associated_token_program: spl_associated_token_account::id(),
         rent: sysvar::rent::id(),
@@ -149,8 +150,8 @@ pub fn create_listing(
     }
 }
 
-pub fn cancel_listing(
-    CancelListingAccounts {
+pub fn close_listing(
+    CloseListingAccounts {
         auction_house,
         listing,
         reward_center,
@@ -160,8 +161,8 @@ pub fn cancel_listing(
         token_mint,
         treasury_mint,
         wallet,
-    }: CancelListingAccounts,
-    CancelListingData { token_size, price }: CancelListingData,
+    }: CloseListingAccounts,
+    CloseListingData { token_size }: CloseListingData,
 ) -> Instruction {
     let (auction_house_fee_account, _) =
         mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
@@ -177,7 +178,7 @@ pub fn cancel_listing(
         1,
     );
 
-    let accounts = rewards_accounts::CancelListing {
+    let accounts = rewards_accounts::CloseListing {
         ah_auctioneer_pda,
         auction_house,
         auction_house_fee_account,
@@ -194,8 +195,8 @@ pub fn cancel_listing(
     }
     .to_account_metas(None);
 
-    let data = instruction::CancelListing {
-        cancel_listing_params: CancelListingParams { price, token_size },
+    let data = instruction::CloseListing {
+        close_listing_params: CloseListingParams { token_size },
     }
     .data();
 
@@ -317,67 +318,8 @@ pub fn create_offer(
     }
 }
 
-pub fn update_offer(
-    UpdateOfferAccounts {
-        auction_house,
-        authority,
-        metadata,
-        buyer_token_account,
-        reward_center,
-        token_account,
-        transfer_authority,
-        treasury_mint,
-        wallet,
-    }: UpdateOfferAccounts,
-    UpdateOfferData { new_buyer_price }: UpdateOfferData,
-) -> Instruction {
-    let (auction_house_fee_account, _) =
-        mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
-    let (ah_auctioneer_pda, _) =
-        mpl_auction_house::pda::find_auctioneer_pda(&auction_house, &reward_center);
-    let (escrow_payment_account, escrow_payment_bump) =
-        mpl_auction_house::pda::find_escrow_payment_address(&auction_house, &wallet);
-    let (offer, _) = pda::find_offer_address(&wallet, &metadata, &reward_center);
-
-    let accounts = rewards_accounts::UpdateOffer {
-        ah_auctioneer_pda,
-        auction_house,
-        auction_house_fee_account,
-        authority,
-        metadata,
-        buyer_token_account,
-        reward_center,
-        token_account,
-        transfer_authority,
-        treasury_mint,
-        escrow_payment_account,
-        wallet,
-        offer,
-        auction_house_program: mpl_auction_house::id(),
-        ata_program: spl_associated_token_account::id(),
-        token_program: spl_token::id(),
-        system_program: system_program::id(),
-        rent: sysvar::rent::id(),
-    }
-    .to_account_metas(None);
-
-    let data = instruction::UpdateOffer {
-        update_offer_params: UpdateOfferParams {
-            new_buyer_price,
-            escrow_payment_bump,
-        },
-    }
-    .data();
-
-    Instruction {
-        program_id: id(),
-        accounts,
-        data,
-    }
-}
-
-pub fn cancel_offer(
-    CancelOfferAccounts {
+pub fn close_offer(
+    CloseOfferAccounts {
         auction_house,
         authority,
         metadata,
@@ -387,11 +329,11 @@ pub fn cancel_offer(
         token_mint,
         treasury_mint,
         wallet,
-    }: CancelOfferAccounts,
-    CancelOfferData {
+    }: CloseOfferAccounts,
+    CloseOfferData {
         buyer_price,
         token_size,
-    }: CancelOfferData,
+    }: CloseOfferData,
 ) -> Instruction {
     let (auction_house_fee_account, _) =
         mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
@@ -400,7 +342,7 @@ pub fn cancel_offer(
     let (escrow_payment_account, escrow_payment_bump) =
         mpl_auction_house::pda::find_escrow_payment_address(&auction_house, &wallet);
 
-    let (buyer_trade_state, trade_state_bump) = find_public_bid_trade_state_address(
+    let (buyer_trade_state, _trade_state_bump) = find_public_bid_trade_state_address(
         &wallet,
         &auction_house,
         &treasury_mint,
@@ -411,7 +353,7 @@ pub fn cancel_offer(
 
     let (offer, _) = pda::find_offer_address(&wallet, &metadata, &reward_center);
 
-    let accounts = rewards_accounts::CancelOffer {
+    let accounts = rewards_accounts::CloseOffer {
         wallet,
         ah_auctioneer_pda,
         auction_house,
@@ -434,12 +376,11 @@ pub fn cancel_offer(
     }
     .to_account_metas(None);
 
-    let data = instruction::CancelOffer {
-        cancel_offer_params: CancelOfferParams {
+    let data = instruction::CloseOffer {
+        close_offer_params: CloseOfferParams {
             buyer_price,
             escrow_payment_bump,
             token_size,
-            trade_state_bump,
         },
     }
     .data();
@@ -466,15 +407,14 @@ pub fn execute_sale(
         buyer_receipt_token_account,
     }: ExecuteSaleAccounts,
     ExecuteSaleData {
-        price,
         token_size,
         reward_mint,
+        price,
     }: ExecuteSaleData,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
     let (offer, _) = find_offer_address(&buyer, &metadata, &reward_center);
     let (listing, _) = find_listing_address(&seller, &metadata, &reward_center);
-    let (purchase_ticket, _) = find_purchase_ticket_address(&listing, &offer);
 
     let (auction_house_fee_account, _) =
         mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
@@ -528,7 +468,6 @@ pub fn execute_sale(
         listing,
         offer,
         payer,
-        purchase_ticket,
         authority,
         treasury_mint,
         token_mint,
@@ -557,7 +496,6 @@ pub fn execute_sale(
 
     let data = instruction::ExecuteSale {
         execute_sale_params: ExecuteSaleParams {
-            price,
             escrow_payment_bump,
             free_trade_state_bump,
             program_as_signer_bump,

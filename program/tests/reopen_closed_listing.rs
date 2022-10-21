@@ -16,8 +16,8 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{CancelListingAccounts, *},
-    args::{CancelListingData, *},
+    accounts::{CloseListingAccounts, *},
+    args::{CloseListingData, *},
     *,
 };
 
@@ -36,7 +36,7 @@ use spl_token::{
 };
 
 #[tokio::test]
-async fn reopen_cancelled_listing_success() {
+async fn reopen_closed_listing_success() {
     let program = reward_center_test::setup_program();
     let mut context = program.start_with_context().await;
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -153,9 +153,12 @@ async fn reopen_cancelled_listing_success() {
     );
 
     let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
-        wallet,
-        reward_mint_keypair.pubkey(),
-        auction_house,
+        hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts {
+            wallet,
+            mint: reward_mint_keypair.pubkey(),
+            auction_house_treasury_mint: mint,
+            auction_house,
+        },
         reward_center_params,
     );
 
@@ -260,7 +263,7 @@ async fn reopen_cancelled_listing_success() {
 
     // CANCEL LISTING TEST
 
-    let cancel_listing_accounts = CancelListingAccounts {
+    let cancel_listing_accounts = CloseListingAccounts {
         wallet: metadata_owner_address,
         listing,
         reward_center,
@@ -272,12 +275,9 @@ async fn reopen_cancelled_listing_success() {
         token_mint: metadata_mint_address,
     };
 
-    let cancel_listing_params = CancelListingData {
-        price: u64::MAX,
-        token_size: 1,
-    };
+    let cancel_listing_params = CloseListingData { token_size: 1 };
 
-    let cancel_listing_ix = cancel_listing(cancel_listing_accounts, cancel_listing_params);
+    let cancel_listing_ix = close_listing(cancel_listing_accounts, cancel_listing_params);
 
     // REOPEN LISTING TEST
 
@@ -303,7 +303,18 @@ async fn reopen_cancelled_listing_success() {
     let reopen_listing_ix = create_listing(reopen_listing_accounts, reopen_listing_params);
 
     let tx = Transaction::new_signed_with_payer(
-        &[cancel_listing_ix, reopen_listing_ix],
+        &[cancel_listing_ix],
+        Some(&metadata_owner_address),
+        &[&metadata_owner],
+        context.last_blockhash,
+    );
+
+    let tx_response = context.banks_client.process_transaction(tx).await;
+
+    assert!(tx_response.is_ok());
+
+    let tx = Transaction::new_signed_with_payer(
+        &[reopen_listing_ix],
         Some(&metadata_owner_address),
         &[&metadata_owner],
         context.last_blockhash,

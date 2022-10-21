@@ -153,9 +153,12 @@ async fn reopen_purchased_listing_success() {
     );
 
     let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
-        wallet,
-        reward_mint_keypair.pubkey(),
-        auction_house,
+        hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts {
+            wallet,
+            mint: reward_mint_keypair.pubkey(),
+            auction_house_treasury_mint: mint,
+            auction_house,
+        },
         reward_center_params,
     );
 

@@ -1,4 +1,10 @@
 use anchor_lang::prelude::Pubkey;
+pub struct CreateRewardCenterAccounts {
+    pub wallet: Pubkey,
+    pub mint: Pubkey,
+    pub auction_house: Pubkey,
+    pub auction_house_treasury_mint: Pubkey,
+}
 
 pub struct CreateListingAccounts {
     pub wallet: Pubkey,
@@ -12,7 +18,7 @@ pub struct CreateListingAccounts {
     pub free_seller_trade_state: Pubkey,
 }
 
-pub struct CancelListingAccounts {
+pub struct CloseListingAccounts {
     pub wallet: Pubkey,
     pub listing: Pubkey,
     pub reward_center: Pubkey,
@@ -44,19 +50,7 @@ pub struct CreateOfferAccounts {
     pub auction_house: Pubkey,
 }
 
-pub struct UpdateOfferAccounts {
-    pub wallet: Pubkey,
-    pub buyer_token_account: Pubkey,
-    pub transfer_authority: Pubkey,
-    pub treasury_mint: Pubkey,
-    pub token_account: Pubkey,
-    pub metadata: Pubkey,
-    pub authority: Pubkey,
-    pub reward_center: Pubkey,
-    pub auction_house: Pubkey,
-}
-
-pub struct CancelOfferAccounts {
+pub struct CloseOfferAccounts {
     pub wallet: Pubkey,
     pub receipt_account: Pubkey,
     pub treasury_mint: Pubkey,

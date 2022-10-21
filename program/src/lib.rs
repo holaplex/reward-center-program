@@ -1,4 +1,3 @@
-pub mod assertions;
 pub mod constants;
 pub mod errors;
 pub mod execute_sale;
@@ -13,12 +12,12 @@ use anchor_lang::prelude::*;
 
 use crate::{
     execute_sale::*,
-    listings::{cancel::*, create::*, update::*},
-    offers::{cancel::*, create::*, update::*},
+    listings::{close::*, create::*, update::*},
+    offers::{close::*, create::*},
     reward_centers::{create::*, edit::*},
 };
 
-declare_id!("rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u");
+declare_id!("RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki");
 
 #[program]
 pub mod reward_center {
@@ -52,11 +51,11 @@ pub mod reward_center {
         listings::update::handler(ctx, update_listing_params)
     }
 
-    pub fn cancel_listing(
-        ctx: Context<CancelListing>,
-        cancel_listing_params: CancelListingParams,
+    pub fn close_listing(
+        ctx: Context<CloseListing>,
+        close_listing_params: CloseListingParams,
     ) -> Result<()> {
-        listings::cancel::handler(ctx, cancel_listing_params)
+        listings::close::handler(ctx, close_listing_params)
     }
 
     pub fn create_offer(
@@ -66,18 +65,11 @@ pub mod reward_center {
         offers::create::handler(ctx, create_offer_params)
     }
 
-    pub fn update_offer(
-        ctx: Context<UpdateOffer>,
-        update_offer_params: UpdateOfferParams,
+    pub fn close_offer(
+        ctx: Context<CloseOffer>,
+        close_offer_params: CloseOfferParams,
     ) -> Result<()> {
-        offers::update::handler(ctx, update_offer_params)
-    }
-
-    pub fn cancel_offer(
-        ctx: Context<CancelOffer>,
-        cancel_offer_params: CancelOfferParams,
-    ) -> Result<()> {
-        offers::cancel::handler(ctx, cancel_offer_params)
+        offers::close::handler(ctx, close_offer_params)
     }
 
     pub fn execute_sale(

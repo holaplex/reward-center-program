@@ -1,8 +1,6 @@
-pub mod metaplex_anchor;
-
 use anchor_lang::prelude::*;
 
-use crate::errors::ListingRewardsError;
+use crate::errors::RewardCenterError;
 
 #[derive(AnchorDeserialize, AnchorSerialize, Clone, Debug)]
 pub enum PayoutOperation {
@@ -49,41 +47,38 @@ impl RewardCenter {
         &self,
         listing_price: u64,
         payout_operation: &PayoutOperation,
-    ) -> u64 {
+    ) -> Result<u64> {
         match payout_operation {
             PayoutOperation::Multiple => {
                 msg!("Payout operation mode: Multiple");
-                return listing_price
+                listing_price
                     .checked_mul(self.reward_rules.payout_numeral.into())
-                    .ok_or(ListingRewardsError::NumericalOverflowError)
-                    .unwrap();
+                    .ok_or(RewardCenterError::NumericalOverflowError.into())
             }
 
             PayoutOperation::Divide => {
                 msg!("Payout operation mode: Divide");
-                return listing_price
+                listing_price
                     .checked_div(self.reward_rules.payout_numeral.into())
-                    .ok_or(ListingRewardsError::NumericalOverflowError)
-                    .unwrap();
+                    .ok_or(RewardCenterError::NumericalOverflowError.into())
             }
         }
     }
 
-    // TODO: review the effects of decimals on the payouts. The math is clean when the currency token is the same as the reward token.
     pub fn payouts(&self, listing_price: u64) -> Result<(u64, u64)> {
         let total_token_payout = self
-            .calculate_total_token_payout(listing_price, &self.reward_rules.mathematical_operand);
+            .calculate_total_token_payout(listing_price, &self.reward_rules.mathematical_operand)?;
 
         let seller_share = self.reward_rules.seller_reward_payout_basis_points;
 
         let seller_payout = (seller_share as u128)
             .checked_mul(total_token_payout as u128)
             .and_then(|product| product.checked_div(10000))
-            .ok_or(ListingRewardsError::NumericalOverflowError)? as u64;
+            .ok_or(RewardCenterError::NumericalOverflowError)? as u64;
 
         let buyer_payout = total_token_payout
             .checked_sub(seller_payout)
-            .ok_or(ListingRewardsError::NumericalOverflowError)?;
+            .ok_or(RewardCenterError::NumericalOverflowError)?;
 
         Ok((seller_payout, buyer_payout))
     }
@@ -91,7 +86,6 @@ impl RewardCenter {
 
 #[account]
 pub struct Listing {
-    pub is_initialized: bool,
     pub reward_center: Pubkey,
     pub seller: Pubkey,
     pub metadata: Pubkey,
@@ -99,29 +93,23 @@ pub struct Listing {
     pub token_size: u64,
     pub bump: u8,
     pub created_at: i64,
-    pub canceled_at: Option<i64>,
-    pub purchase_ticket: Option<Pubkey>,
 }
 
 impl Listing {
     pub fn size() -> usize {
         8 + // delimiter
-        1 + // is_initialized
         32 + // reward_center
         32 + // seller
         32 + // metadata
         8 + // price
         8 + // token_size
         1 + // bump
-        8 + // created_at
-        1 + 8 + // canceled_at
-        1 + 32 // purchase_ticket
+        8 // created_at
     }
 }
 
 #[account]
 pub struct Offer {
-    pub is_initialized: bool,
     pub reward_center: Pubkey,
     pub buyer: Pubkey,
     pub metadata: Pubkey,
@@ -129,46 +117,17 @@ pub struct Offer {
     pub token_size: u64,
     pub bump: u8,
     pub created_at: i64,
-    pub canceled_at: Option<i64>,
-    pub purchase_ticket: Option<Pubkey>,
 }
 
 impl Offer {
     pub fn size() -> usize {
         8 + // delimiter
-        1 + // is_initialized
         32 + // reward_center
         32 + // buyer
         32 + // metadata
         8 + // price
         8 + // token_size
         1 + // bump
-        8 + // created_at
-        1 + 8 + // canceled_at
-        1 + 32 // purchase_ticket
-    }
-}
-
-#[account]
-pub struct PurchaseTicket {
-    pub buyer: Pubkey,
-    pub seller: Pubkey,
-    pub metadata: Pubkey,
-    pub reward_center: Pubkey,
-    pub token_size: u64,
-    pub price: u64,
-    pub created_at: i64,
-}
-
-impl PurchaseTicket {
-    pub fn size() -> usize {
-        8 + // delimiter
-        32 + // buyer
-        32 + // seller
-        32 + // metadata
-        32 + // reward_center
-        32 + // token_size
-        8 + // price
         8 // created_at
     }
 }
