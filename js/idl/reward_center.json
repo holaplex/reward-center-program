@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.2",
   "name": "reward_center",
   "instructions": [
     {
@@ -12,6 +12,11 @@
         },
         {
           "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "auctionHouseTreasuryMint",
           "isMut": false,
           "isSigner": false
         },
@@ -230,7 +235,7 @@
       ]
     },
     {
-      "name": "cancelListing",
+      "name": "closeListing",
       "accounts": [
         {
           "name": "wallet",
@@ -300,9 +305,9 @@
       ],
       "args": [
         {
-          "name": "cancelListingParams",
+          "name": "closeListingParams",
           "type": {
-            "defined": "CancelListingParams"
+            "defined": "CloseListingParams"
           }
         }
       ]
@@ -411,110 +416,7 @@
       ]
     },
     {
-      "name": "updateOffer",
-      "accounts": [
-        {
-          "name": "wallet",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "offer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "rewardCenter",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "auctionHouse",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "buyerTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "transferAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "treasuryMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "auctionHouseFeeAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "metadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "escrowPaymentAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "ahAuctioneerPda",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "auctionHouseProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "ataProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "updateOfferParams",
-          "type": {
-            "defined": "UpdateOfferParams"
-          }
-        }
-      ]
-    },
-    {
-      "name": "cancelOffer",
+      "name": "closeOffer",
       "accounts": [
         {
           "name": "wallet",
@@ -614,9 +516,9 @@
       ],
       "args": [
         {
-          "name": "cancelOfferParams",
+          "name": "closeOfferParams",
           "type": {
-            "defined": "CancelOfferParams"
+            "defined": "CloseOfferParams"
           }
         }
       ]
@@ -658,11 +560,6 @@
           "name": "payer",
           "isMut": true,
           "isSigner": true
-        },
-        {
-          "name": "purchaseTicket",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "tokenAccount",
@@ -823,10 +720,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "isInitialized",
-            "type": "bool"
-          },
-          {
             "name": "rewardCenter",
             "type": "publicKey"
           },
@@ -853,18 +746,6 @@
           {
             "name": "createdAt",
             "type": "i64"
-          },
-          {
-            "name": "canceledAt",
-            "type": {
-              "option": "i64"
-            }
-          },
-          {
-            "name": "purchaseTicket",
-            "type": {
-              "option": "publicKey"
-            }
           }
         ]
       }
@@ -875,10 +756,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "isInitialized",
-            "type": "bool"
-          },
-          {
             "name": "rewardCenter",
             "type": "publicKey"
           },
@@ -901,54 +778,6 @@
           {
             "name": "bump",
             "type": "u8"
-          },
-          {
-            "name": "createdAt",
-            "type": "i64"
-          },
-          {
-            "name": "canceledAt",
-            "type": {
-              "option": "i64"
-            }
-          },
-          {
-            "name": "purchaseTicket",
-            "type": {
-              "option": "publicKey"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "PurchaseTicket",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "buyer",
-            "type": "publicKey"
-          },
-          {
-            "name": "seller",
-            "type": "publicKey"
-          },
-          {
-            "name": "metadata",
-            "type": "publicKey"
-          },
-          {
-            "name": "rewardCenter",
-            "type": "publicKey"
-          },
-          {
-            "name": "tokenSize",
-            "type": "u64"
-          },
-          {
-            "name": "price",
-            "type": "u64"
           },
           {
             "name": "createdAt",
@@ -979,27 +808,15 @@
           {
             "name": "programAsSignerBump",
             "type": "u8"
-          },
-          {
-            "name": "price",
-            "type": "u64"
-          },
-          {
-            "name": "tokenSize",
-            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "CancelListingParams",
+      "name": "CloseListingParams",
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "price",
-            "type": "u64"
-          },
           {
             "name": "tokenSize",
             "type": "u64"
@@ -1048,14 +865,10 @@
       }
     },
     {
-      "name": "CancelOfferParams",
+      "name": "CloseOfferParams",
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "tradeStateBump",
-            "type": "u8"
-          },
           {
             "name": "escrowPaymentBump",
             "type": "u8"
@@ -1091,22 +904,6 @@
           {
             "name": "tokenSize",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UpdateOfferParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "newBuyerPrice",
-            "type": "u64"
-          },
-          {
-            "name": "escrowPaymentBump",
-            "type": "u8"
           }
         ]
       }
@@ -1189,82 +986,42 @@
     },
     {
       "code": 6002,
-      "name": "InvalidCollectionMaintainer",
-      "msg": "Invalid collection maintainer"
-    },
-    {
-      "code": 6003,
-      "name": "NFTMissingCollection",
-      "msg": "The NFT does not belong to a collection"
-    },
-    {
-      "code": 6004,
-      "name": "NFTMismatchRewardableCollection",
-      "msg": "The NFT does not match the rewardable collection"
-    },
-    {
-      "code": 6005,
-      "name": "SellerWalletMismatch",
-      "msg": "The seller doesnt match the provided wallet"
-    },
-    {
-      "code": 6006,
-      "name": "RewardsAlreadyClaimed",
-      "msg": "The rewards were already claimed for this listing"
-    },
-    {
-      "code": 6007,
-      "name": "IneligibaleForRewards",
-      "msg": "The listings is not eligible for rewards yet"
-    },
-    {
-      "code": 6008,
       "name": "NumericalOverflowError",
       "msg": "Math numerical overflow"
     },
     {
-      "code": 6009,
+      "code": 6003,
       "name": "MintMismatch",
       "msg": "The mints do not match"
     },
     {
-      "code": 6010,
+      "code": 6004,
       "name": "PriceMismatch",
       "msg": "Listing and offer prices do not match"
     },
     {
-      "code": 6011,
-      "name": "ListingAlreadyCancelled",
-      "msg": "Cannot update price on an already cancelled listing"
+      "code": 6005,
+      "name": "BuyerTokenAccountMismatch",
+      "msg": "Buyer token account owner does not match the buyer"
     },
     {
-      "code": 6012,
-      "name": "ListingAlreadyPurchased",
-      "msg": "Cannot update price on an already purchased listing"
+      "code": 6006,
+      "name": "SellerTokenAccountMismatch",
+      "msg": "Seller token account owner does not match the seller"
     },
     {
-      "code": 6013,
-      "name": "OfferAlreadyCancelled",
-      "msg": "Cannot update price on an already cancelled offer"
+      "code": 6007,
+      "name": "RewardMintDecimalMismatch",
+      "msg": "The number of decimals for auction house treasury mint do not match reward mint decimals"
     },
     {
-      "code": 6014,
-      "name": "OfferAlreadyPurchased",
-      "msg": "Cannot update price on an already purchased offer"
-    },
-    {
-      "code": 6015,
-      "name": "ListingAlreadyExists",
-      "msg": "Cannot re-initialize an existing listing"
-    },
-    {
-      "code": 6016,
-      "name": "OfferAlreadyExists",
-      "msg": "Cannot re-initialize an existing offer"
+      "code": 6008,
+      "name": "AuctionHouseTreasuryMismatch",
+      "msg": "The treasury does not match the one present on the auction house"
     }
   ],
   "metadata": {
-    "address": "rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u",
+    "address": "RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki",
     "origin": "anchor",
     "binaryVersion": "0.24.2",
     "libVersion": "~0.24.2"

@@ -5,11 +5,11 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-type ErrorWithCode = Error & { code: number }
-type MaybeErrorWithCode = ErrorWithCode | null | undefined
+type ErrorWithCode = Error & { code: number };
+type MaybeErrorWithCode = ErrorWithCode | null | undefined;
 
-const createErrorFromCodeLookup: Map<number, () => ErrorWithCode> = new Map()
-const createErrorFromNameLookup: Map<string, () => ErrorWithCode> = new Map()
+const createErrorFromCodeLookup: Map<number, () => ErrorWithCode> = new Map();
+const createErrorFromNameLookup: Map<string, () => ErrorWithCode> = new Map();
 
 /**
  * BumpSeedNotInHashMap: 'Bump seed not in hash map'
@@ -18,21 +18,18 @@ const createErrorFromNameLookup: Map<string, () => ErrorWithCode> = new Map()
  * @category generated
  */
 export class BumpSeedNotInHashMapError extends Error {
-  readonly code: number = 0x1770
-  readonly name: string = 'BumpSeedNotInHashMap'
+  readonly code: number = 0x1770;
+  readonly name: string = 'BumpSeedNotInHashMap';
   constructor() {
-    super('Bump seed not in hash map')
+    super('Bump seed not in hash map');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, BumpSeedNotInHashMapError)
+      Error.captureStackTrace(this, BumpSeedNotInHashMapError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1770, () => new BumpSeedNotInHashMapError())
-createErrorFromNameLookup.set(
-  'BumpSeedNotInHashMap',
-  () => new BumpSeedNotInHashMapError()
-)
+createErrorFromCodeLookup.set(0x1770, () => new BumpSeedNotInHashMapError());
+createErrorFromNameLookup.set('BumpSeedNotInHashMap', () => new BumpSeedNotInHashMapError());
 
 /**
  * SignerNotAuthorized: 'Unauthorized signer'
@@ -41,165 +38,18 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class SignerNotAuthorizedError extends Error {
-  readonly code: number = 0x1771
-  readonly name: string = 'SignerNotAuthorized'
+  readonly code: number = 0x1771;
+  readonly name: string = 'SignerNotAuthorized';
   constructor() {
-    super('Unauthorized signer')
+    super('Unauthorized signer');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, SignerNotAuthorizedError)
+      Error.captureStackTrace(this, SignerNotAuthorizedError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1771, () => new SignerNotAuthorizedError())
-createErrorFromNameLookup.set(
-  'SignerNotAuthorized',
-  () => new SignerNotAuthorizedError()
-)
-
-/**
- * InvalidCollectionMaintainer: 'Invalid collection maintainer'
- *
- * @category Errors
- * @category generated
- */
-export class InvalidCollectionMaintainerError extends Error {
-  readonly code: number = 0x1772
-  readonly name: string = 'InvalidCollectionMaintainer'
-  constructor() {
-    super('Invalid collection maintainer')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, InvalidCollectionMaintainerError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(
-  0x1772,
-  () => new InvalidCollectionMaintainerError()
-)
-createErrorFromNameLookup.set(
-  'InvalidCollectionMaintainer',
-  () => new InvalidCollectionMaintainerError()
-)
-
-/**
- * NFTMissingCollection: 'The NFT does not belong to a collection'
- *
- * @category Errors
- * @category generated
- */
-export class NFTMissingCollectionError extends Error {
-  readonly code: number = 0x1773
-  readonly name: string = 'NFTMissingCollection'
-  constructor() {
-    super('The NFT does not belong to a collection')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, NFTMissingCollectionError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1773, () => new NFTMissingCollectionError())
-createErrorFromNameLookup.set(
-  'NFTMissingCollection',
-  () => new NFTMissingCollectionError()
-)
-
-/**
- * NFTMismatchRewardableCollection: 'The NFT does not match the rewardable collection'
- *
- * @category Errors
- * @category generated
- */
-export class NFTMismatchRewardableCollectionError extends Error {
-  readonly code: number = 0x1774
-  readonly name: string = 'NFTMismatchRewardableCollection'
-  constructor() {
-    super('The NFT does not match the rewardable collection')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, NFTMismatchRewardableCollectionError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(
-  0x1774,
-  () => new NFTMismatchRewardableCollectionError()
-)
-createErrorFromNameLookup.set(
-  'NFTMismatchRewardableCollection',
-  () => new NFTMismatchRewardableCollectionError()
-)
-
-/**
- * SellerWalletMismatch: 'The seller doesnt match the provided wallet'
- *
- * @category Errors
- * @category generated
- */
-export class SellerWalletMismatchError extends Error {
-  readonly code: number = 0x1775
-  readonly name: string = 'SellerWalletMismatch'
-  constructor() {
-    super('The seller doesnt match the provided wallet')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, SellerWalletMismatchError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1775, () => new SellerWalletMismatchError())
-createErrorFromNameLookup.set(
-  'SellerWalletMismatch',
-  () => new SellerWalletMismatchError()
-)
-
-/**
- * RewardsAlreadyClaimed: 'The rewards were already claimed for this listing'
- *
- * @category Errors
- * @category generated
- */
-export class RewardsAlreadyClaimedError extends Error {
-  readonly code: number = 0x1776
-  readonly name: string = 'RewardsAlreadyClaimed'
-  constructor() {
-    super('The rewards were already claimed for this listing')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, RewardsAlreadyClaimedError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1776, () => new RewardsAlreadyClaimedError())
-createErrorFromNameLookup.set(
-  'RewardsAlreadyClaimed',
-  () => new RewardsAlreadyClaimedError()
-)
-
-/**
- * IneligibaleForRewards: 'The listings is not eligible for rewards yet'
- *
- * @category Errors
- * @category generated
- */
-export class IneligibaleForRewardsError extends Error {
-  readonly code: number = 0x1777
-  readonly name: string = 'IneligibaleForRewards'
-  constructor() {
-    super('The listings is not eligible for rewards yet')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, IneligibaleForRewardsError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1777, () => new IneligibaleForRewardsError())
-createErrorFromNameLookup.set(
-  'IneligibaleForRewards',
-  () => new IneligibaleForRewardsError()
-)
+createErrorFromCodeLookup.set(0x1771, () => new SignerNotAuthorizedError());
+createErrorFromNameLookup.set('SignerNotAuthorized', () => new SignerNotAuthorizedError());
 
 /**
  * NumericalOverflowError: 'Math numerical overflow'
@@ -208,21 +58,18 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class NumericalOverflowErrorError extends Error {
-  readonly code: number = 0x1778
-  readonly name: string = 'NumericalOverflowError'
+  readonly code: number = 0x1772;
+  readonly name: string = 'NumericalOverflowError';
   constructor() {
-    super('Math numerical overflow')
+    super('Math numerical overflow');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, NumericalOverflowErrorError)
+      Error.captureStackTrace(this, NumericalOverflowErrorError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1778, () => new NumericalOverflowErrorError())
-createErrorFromNameLookup.set(
-  'NumericalOverflowError',
-  () => new NumericalOverflowErrorError()
-)
+createErrorFromCodeLookup.set(0x1772, () => new NumericalOverflowErrorError());
+createErrorFromNameLookup.set('NumericalOverflowError', () => new NumericalOverflowErrorError());
 
 /**
  * MintMismatch: 'The mints do not match'
@@ -231,18 +78,18 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class MintMismatchError extends Error {
-  readonly code: number = 0x1779
-  readonly name: string = 'MintMismatch'
+  readonly code: number = 0x1773;
+  readonly name: string = 'MintMismatch';
   constructor() {
-    super('The mints do not match')
+    super('The mints do not match');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, MintMismatchError)
+      Error.captureStackTrace(this, MintMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1779, () => new MintMismatchError())
-createErrorFromNameLookup.set('MintMismatch', () => new MintMismatchError())
+createErrorFromCodeLookup.set(0x1773, () => new MintMismatchError());
+createErrorFromNameLookup.set('MintMismatch', () => new MintMismatchError());
 
 /**
  * PriceMismatch: 'Listing and offer prices do not match'
@@ -251,156 +98,112 @@ createErrorFromNameLookup.set('MintMismatch', () => new MintMismatchError())
  * @category generated
  */
 export class PriceMismatchError extends Error {
-  readonly code: number = 0x177a
-  readonly name: string = 'PriceMismatch'
+  readonly code: number = 0x1774;
+  readonly name: string = 'PriceMismatch';
   constructor() {
-    super('Listing and offer prices do not match')
+    super('Listing and offer prices do not match');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, PriceMismatchError)
+      Error.captureStackTrace(this, PriceMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x177a, () => new PriceMismatchError())
-createErrorFromNameLookup.set('PriceMismatch', () => new PriceMismatchError())
+createErrorFromCodeLookup.set(0x1774, () => new PriceMismatchError());
+createErrorFromNameLookup.set('PriceMismatch', () => new PriceMismatchError());
 
 /**
- * ListingAlreadyCancelled: 'Cannot update price on an already cancelled listing'
+ * BuyerTokenAccountMismatch: 'Buyer token account owner does not match the buyer'
  *
  * @category Errors
  * @category generated
  */
-export class ListingAlreadyCancelledError extends Error {
-  readonly code: number = 0x177b
-  readonly name: string = 'ListingAlreadyCancelled'
+export class BuyerTokenAccountMismatchError extends Error {
+  readonly code: number = 0x1775;
+  readonly name: string = 'BuyerTokenAccountMismatch';
   constructor() {
-    super('Cannot update price on an already cancelled listing')
+    super('Buyer token account owner does not match the buyer');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, ListingAlreadyCancelledError)
+      Error.captureStackTrace(this, BuyerTokenAccountMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x177b, () => new ListingAlreadyCancelledError())
+createErrorFromCodeLookup.set(0x1775, () => new BuyerTokenAccountMismatchError());
 createErrorFromNameLookup.set(
-  'ListingAlreadyCancelled',
-  () => new ListingAlreadyCancelledError()
-)
+  'BuyerTokenAccountMismatch',
+  () => new BuyerTokenAccountMismatchError(),
+);
 
 /**
- * ListingAlreadyPurchased: 'Cannot update price on an already purchased listing'
+ * SellerTokenAccountMismatch: 'Seller token account owner does not match the seller'
  *
  * @category Errors
  * @category generated
  */
-export class ListingAlreadyPurchasedError extends Error {
-  readonly code: number = 0x177c
-  readonly name: string = 'ListingAlreadyPurchased'
+export class SellerTokenAccountMismatchError extends Error {
+  readonly code: number = 0x1776;
+  readonly name: string = 'SellerTokenAccountMismatch';
   constructor() {
-    super('Cannot update price on an already purchased listing')
+    super('Seller token account owner does not match the seller');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, ListingAlreadyPurchasedError)
+      Error.captureStackTrace(this, SellerTokenAccountMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x177c, () => new ListingAlreadyPurchasedError())
+createErrorFromCodeLookup.set(0x1776, () => new SellerTokenAccountMismatchError());
 createErrorFromNameLookup.set(
-  'ListingAlreadyPurchased',
-  () => new ListingAlreadyPurchasedError()
-)
+  'SellerTokenAccountMismatch',
+  () => new SellerTokenAccountMismatchError(),
+);
 
 /**
- * OfferAlreadyCancelled: 'Cannot update price on an already cancelled offer'
+ * RewardMintDecimalMismatch: 'The number of decimals for auction house treasury mint do not match reward mint decimals'
  *
  * @category Errors
  * @category generated
  */
-export class OfferAlreadyCancelledError extends Error {
-  readonly code: number = 0x177d
-  readonly name: string = 'OfferAlreadyCancelled'
+export class RewardMintDecimalMismatchError extends Error {
+  readonly code: number = 0x1777;
+  readonly name: string = 'RewardMintDecimalMismatch';
   constructor() {
-    super('Cannot update price on an already cancelled offer')
+    super(
+      'The number of decimals for auction house treasury mint do not match reward mint decimals',
+    );
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, OfferAlreadyCancelledError)
+      Error.captureStackTrace(this, RewardMintDecimalMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x177d, () => new OfferAlreadyCancelledError())
+createErrorFromCodeLookup.set(0x1777, () => new RewardMintDecimalMismatchError());
 createErrorFromNameLookup.set(
-  'OfferAlreadyCancelled',
-  () => new OfferAlreadyCancelledError()
-)
+  'RewardMintDecimalMismatch',
+  () => new RewardMintDecimalMismatchError(),
+);
 
 /**
- * OfferAlreadyPurchased: 'Cannot update price on an already purchased offer'
+ * AuctionHouseTreasuryMismatch: 'The treasury does not match the one present on the auction house'
  *
  * @category Errors
  * @category generated
  */
-export class OfferAlreadyPurchasedError extends Error {
-  readonly code: number = 0x177e
-  readonly name: string = 'OfferAlreadyPurchased'
+export class AuctionHouseTreasuryMismatchError extends Error {
+  readonly code: number = 0x1778;
+  readonly name: string = 'AuctionHouseTreasuryMismatch';
   constructor() {
-    super('Cannot update price on an already purchased offer')
+    super('The treasury does not match the one present on the auction house');
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, OfferAlreadyPurchasedError)
+      Error.captureStackTrace(this, AuctionHouseTreasuryMismatchError);
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x177e, () => new OfferAlreadyPurchasedError())
+createErrorFromCodeLookup.set(0x1778, () => new AuctionHouseTreasuryMismatchError());
 createErrorFromNameLookup.set(
-  'OfferAlreadyPurchased',
-  () => new OfferAlreadyPurchasedError()
-)
-
-/**
- * ListingAlreadyExists: 'Cannot re-initialize an existing listing'
- *
- * @category Errors
- * @category generated
- */
-export class ListingAlreadyExistsError extends Error {
-  readonly code: number = 0x177f
-  readonly name: string = 'ListingAlreadyExists'
-  constructor() {
-    super('Cannot re-initialize an existing listing')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, ListingAlreadyExistsError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x177f, () => new ListingAlreadyExistsError())
-createErrorFromNameLookup.set(
-  'ListingAlreadyExists',
-  () => new ListingAlreadyExistsError()
-)
-
-/**
- * OfferAlreadyExists: 'Cannot re-initialize an existing offer'
- *
- * @category Errors
- * @category generated
- */
-export class OfferAlreadyExistsError extends Error {
-  readonly code: number = 0x1780
-  readonly name: string = 'OfferAlreadyExists'
-  constructor() {
-    super('Cannot re-initialize an existing offer')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, OfferAlreadyExistsError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1780, () => new OfferAlreadyExistsError())
-createErrorFromNameLookup.set(
-  'OfferAlreadyExists',
-  () => new OfferAlreadyExistsError()
-)
+  'AuctionHouseTreasuryMismatch',
+  () => new AuctionHouseTreasuryMismatchError(),
+);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.
@@ -408,8 +211,8 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export function errorFromCode(code: number): MaybeErrorWithCode {
-  const createError = createErrorFromCodeLookup.get(code)
-  return createError != null ? createError() : null
+  const createError = createErrorFromCodeLookup.get(code);
+  return createError != null ? createError() : null;
 }
 
 /**
@@ -418,6 +221,6 @@ export function errorFromCode(code: number): MaybeErrorWithCode {
  * @category generated
  */
 export function errorFromName(name: string): MaybeErrorWithCode {
-  const createError = createErrorFromNameLookup.get(name)
-  return createError != null ? createError() : null
+  const createError = createErrorFromNameLookup.get(name);
+  return createError != null ? createError() : null;
 }

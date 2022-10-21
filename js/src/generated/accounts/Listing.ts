@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js'
-import * as beet from '@metaplex-foundation/beet'
-import * as beetSolana from '@metaplex-foundation/beet-solana'
+import * as web3 from '@solana/web3.js';
+import * as beet from '@metaplex-foundation/beet';
+import * as beetSolana from '@metaplex-foundation/beet-solana';
 
 /**
  * Arguments used to create {@link Listing}
@@ -15,19 +15,16 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category generated
  */
 export type ListingArgs = {
-  isInitialized: boolean
-  rewardCenter: web3.PublicKey
-  seller: web3.PublicKey
-  metadata: web3.PublicKey
-  price: beet.bignum
-  tokenSize: beet.bignum
-  bump: number
-  createdAt: beet.bignum
-  canceledAt: beet.COption<beet.bignum>
-  purchaseTicket: beet.COption<web3.PublicKey>
-}
+  rewardCenter: web3.PublicKey;
+  seller: web3.PublicKey;
+  metadata: web3.PublicKey;
+  price: beet.bignum;
+  tokenSize: beet.bignum;
+  bump: number;
+  createdAt: beet.bignum;
+};
 
-const listingDiscriminator = [218, 32, 50, 73, 43, 134, 26, 58]
+export const listingDiscriminator = [218, 32, 50, 73, 43, 134, 26, 58];
 /**
  * Holds the data for the {@link Listing} Account and provides de/serialization
  * functionality for that data
@@ -37,7 +34,6 @@ const listingDiscriminator = [218, 32, 50, 73, 43, 134, 26, 58]
  */
 export class Listing implements ListingArgs {
   private constructor(
-    readonly isInitialized: boolean,
     readonly rewardCenter: web3.PublicKey,
     readonly seller: web3.PublicKey,
     readonly metadata: web3.PublicKey,
@@ -45,8 +41,6 @@ export class Listing implements ListingArgs {
     readonly tokenSize: beet.bignum,
     readonly bump: number,
     readonly createdAt: beet.bignum,
-    readonly canceledAt: beet.COption<beet.bignum>,
-    readonly purchaseTicket: beet.COption<web3.PublicKey>
   ) {}
 
   /**
@@ -54,7 +48,6 @@ export class Listing implements ListingArgs {
    */
   static fromArgs(args: ListingArgs) {
     return new Listing(
-      args.isInitialized,
       args.rewardCenter,
       args.seller,
       args.metadata,
@@ -62,20 +55,15 @@ export class Listing implements ListingArgs {
       args.tokenSize,
       args.bump,
       args.createdAt,
-      args.canceledAt,
-      args.purchaseTicket
-    )
+    );
   }
 
   /**
    * Deserializes the {@link Listing} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static fromAccountInfo(
-    accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
-  ): [Listing, number] {
-    return Listing.deserialize(accountInfo.data, offset)
+  static fromAccountInfo(accountInfo: web3.AccountInfo<Buffer>, offset = 0): [Listing, number] {
+    return Listing.deserialize(accountInfo.data, offset);
   }
 
   /**
@@ -86,13 +74,26 @@ export class Listing implements ListingArgs {
    */
   static async fromAccountAddress(
     connection: web3.Connection,
-    address: web3.PublicKey
+    address: web3.PublicKey,
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
   ): Promise<Listing> {
-    const accountInfo = await connection.getAccountInfo(address)
+    const accountInfo = await connection.getAccountInfo(address, commitmentOrConfig);
     if (accountInfo == null) {
-      throw new Error(`Unable to find Listing account at ${address}`)
+      throw new Error(`Unable to find Listing account at ${address}`);
     }
-    return Listing.fromAccountInfo(accountInfo, 0)[0]
+    return Listing.fromAccountInfo(accountInfo, 0)[0];
+  }
+
+  /**
+   * Provides a {@link web3.Connection.getProgramAccounts} config builder,
+   * to fetch accounts matching filters that can be specified via that builder.
+   *
+   * @param programId - the program that owns the accounts we are filtering
+   */
+  static gpaBuilder(
+    programId: web3.PublicKey = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
+  ) {
+    return beetSolana.GpaBuilder.fromStruct(programId, listingBeet);
   }
 
   /**
@@ -100,7 +101,7 @@ export class Listing implements ListingArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Listing, number] {
-    return listingBeet.deserialize(buf, offset)
+    return listingBeet.deserialize(buf, offset);
   }
 
   /**
@@ -111,41 +112,36 @@ export class Listing implements ListingArgs {
     return listingBeet.serialize({
       accountDiscriminator: listingDiscriminator,
       ...this,
-    })
+    });
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link Listing} for the provided args.
-   *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
+   * {@link Listing}
    */
-  static byteSize(args: ListingArgs) {
-    const instance = Listing.fromArgs(args)
-    return listingBeet.toFixedFromValue({
-      accountDiscriminator: listingDiscriminator,
-      ...instance,
-    }).byteSize
+  static get byteSize() {
+    return listingBeet.byteSize;
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
    * {@link Listing} data from rent
    *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: ListingArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
-    return connection.getMinimumBalanceForRentExemption(
-      Listing.byteSize(args),
-      commitment
-    )
+    return connection.getMinimumBalanceForRentExemption(Listing.byteSize, commitment);
+  }
+
+  /**
+   * Determines if the provided {@link Buffer} has the correct byte size to
+   * hold {@link Listing} data.
+   */
+  static hasCorrectByteSize(buf: Buffer, offset = 0) {
+    return buf.byteLength - offset === Listing.byteSize;
   }
 
   /**
@@ -154,47 +150,44 @@ export class Listing implements ListingArgs {
    */
   pretty() {
     return {
-      isInitialized: this.isInitialized,
       rewardCenter: this.rewardCenter.toBase58(),
       seller: this.seller.toBase58(),
       metadata: this.metadata.toBase58(),
       price: (() => {
-        const x = <{ toNumber: () => number }>this.price
+        const x = <{ toNumber: () => number }>this.price;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
       tokenSize: (() => {
-        const x = <{ toNumber: () => number }>this.tokenSize
+        const x = <{ toNumber: () => number }>this.tokenSize;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
       bump: this.bump,
       createdAt: (() => {
-        const x = <{ toNumber: () => number }>this.createdAt
+        const x = <{ toNumber: () => number }>this.createdAt;
         if (typeof x.toNumber === 'function') {
           try {
-            return x.toNumber()
+            return x.toNumber();
           } catch (_) {
-            return x
+            return x;
           }
         }
-        return x
+        return x;
       })(),
-      canceledAt: this.canceledAt,
-      purchaseTicket: this.purchaseTicket,
-    }
+    };
   }
 }
 
@@ -202,15 +195,14 @@ export class Listing implements ListingArgs {
  * @category Accounts
  * @category generated
  */
-export const listingBeet = new beet.FixableBeetStruct<
+export const listingBeet = new beet.BeetStruct<
   Listing,
   ListingArgs & {
-    accountDiscriminator: number[] /* size: 8 */
+    accountDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['isInitialized', beet.bool],
     ['rewardCenter', beetSolana.publicKey],
     ['seller', beetSolana.publicKey],
     ['metadata', beetSolana.publicKey],
@@ -218,9 +210,7 @@ export const listingBeet = new beet.FixableBeetStruct<
     ['tokenSize', beet.u64],
     ['bump', beet.u8],
     ['createdAt', beet.i64],
-    ['canceledAt', beet.coption(beet.i64)],
-    ['purchaseTicket', beet.coption(beetSolana.publicKey)],
   ],
   Listing.fromArgs,
-  'Listing'
-)
+  'Listing',
+);

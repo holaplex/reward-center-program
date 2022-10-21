@@ -5,7 +5,7 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
+import * as beet from '@metaplex-foundation/beet';
 /**
  * @category enums
  * @category generated
@@ -19,6 +19,7 @@ export enum PayoutOperation {
  * @category userTypes
  * @category generated
  */
-export const payoutOperationBeet = beet.fixedScalarEnum(
+export const payoutOperationBeet = beet.fixedScalarEnum(PayoutOperation) as beet.FixedSizeBeet<
+  PayoutOperation,
   PayoutOperation
-) as beet.FixedSizeBeet<PayoutOperation, PayoutOperation>
+>;

@@ -15,8 +15,6 @@ payout divider - The amount to divide from the sale amount which will result in 
 seller reward payout basis points - The ratio of rewards to be sent to the seller. The rest of the rewards are claimed by the buyer. For example, 5,000 basis points will result in a 50-50 split of rewards to the buyer and the seller.
 
 
-
-
 ## Approach
 
 The authority of an auction house can create a reward center to accompany it so tokens can be distributed when sales are brokered by the auction house. 
@@ -63,3 +61,13 @@ Users cancels their offer resulting in *cancel* CPI call to auction house and ca
 ### Execute Sale
 
 Facilitates the sale of an NFT through a CPI call to auction house *execute_sale* and distributes rewards to the buyer and seller based on the configure reward rules by the auction house authority.
+
+## Testing
+
+In order to run program specs peform the following operations:
+
+```shell
+$ cd program
+$ ./build.sh
+$ ./test.sh
+```

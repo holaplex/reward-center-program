@@ -16,8 +16,8 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{CancelOfferAccounts, *},
-    args::{CancelOfferData, *},
+    accounts::{CloseOfferAccounts, *},
+    args::{CloseOfferData, *},
     *,
 };
 
@@ -152,9 +152,12 @@ async fn reopned_closed_offer_success() {
     );
 
     let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
-        wallet,
-        reward_mint_keypair.pubkey(),
-        auction_house,
+        hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts {
+            wallet,
+            mint: reward_mint_keypair.pubkey(),
+            auction_house_treasury_mint: mint,
+            auction_house,
+        },
         reward_center_params,
     );
 
@@ -298,7 +301,7 @@ async fn reopned_closed_offer_success() {
 
     // CLOSE OFFER TEST
 
-    let close_offer_accounts = CancelOfferAccounts {
+    let close_offer_accounts = CloseOfferAccounts {
         wallet: *buyer_pubkey,
         treasury_mint: mint,
         token_mint: metadata_mint_address,
@@ -310,12 +313,12 @@ async fn reopned_closed_offer_success() {
         reward_center,
     };
 
-    let close_offer_params = CancelOfferData {
+    let close_offer_params = CloseOfferData {
         token_size: 1,
         buyer_price: reward_center_test::ONE_SOL,
     };
 
-    let close_offer_ix = cancel_offer(close_offer_accounts, close_offer_params);
+    let close_offer_ix = close_offer(close_offer_accounts, close_offer_params);
 
     // REOPEN CLOSED OFFER TEST
 
@@ -340,7 +343,18 @@ async fn reopned_closed_offer_success() {
     let reopen_offer_ix = create_offer(reopen_offer_accounts, reopen_offer_params);
 
     let tx = Transaction::new_signed_with_payer(
-        &[close_offer_ix, reopen_offer_ix],
+        &[close_offer_ix],
+        Some(buyer_pubkey),
+        &[&buyer],
+        context.last_blockhash,
+    );
+
+    let tx_response = context.banks_client.process_transaction(tx).await;
+
+    assert!(tx_response.is_ok());
+
+    let tx = Transaction::new_signed_with_payer(
+        &[reopen_offer_ix],
         Some(buyer_pubkey),
         &[&buyer],
         context.last_blockhash,

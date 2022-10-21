@@ -1,16 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 use mpl_auction_house::{
-    constants::PREFIX, program::AuctionHouse as AuctionHouseProgram, AuctionHouse,
+    constants::PREFIX, program::AuctionHouse as AuctionHouseProgram, utils::assert_metadata_valid,
+    AuctionHouse,
 };
 
 use crate::{
     constants::{LISTING, REWARD_CENTER},
-    errors::ListingRewardsError,
-    state::{
-        Listing, RewardCenter,
-        metaplex_anchor::TokenMetadata,
-    },
+    state::{Listing, RewardCenter},
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -30,8 +27,6 @@ pub struct UpdateListing<'info> {
         mut,
         has_one = metadata,
         has_one = reward_center,
-        constraint = listing.canceled_at.is_none() @ ListingRewardsError::ListingAlreadyCancelled,
-        constraint = listing.purchase_ticket.is_none() @ ListingRewardsError::ListingAlreadyPurchased,
         seeds = [
             LISTING.as_bytes(),
             wallet.key().as_ref(),
@@ -46,9 +41,9 @@ pub struct UpdateListing<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump,
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,
@@ -65,11 +60,9 @@ pub struct UpdateListing<'info> {
     )]
     pub auction_house: Box<Account<'info, AuctionHouse>>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    #[account(
-        constraint = metadata.mint.eq(&token_account.mint)
-    )]
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// SPL token account containing token for sale.
     #[account(
@@ -87,6 +80,11 @@ pub fn handler(
     UpdateListingParams { new_price }: UpdateListingParams,
 ) -> Result<()> {
     let listing = &mut ctx.accounts.listing;
+    let metadata = &ctx.accounts.metadata;
+    let token_account = &ctx.accounts.token_account;
+
+    assert_metadata_valid(metadata, token_account)?;
+
     listing.price = new_price;
 
     Ok(())

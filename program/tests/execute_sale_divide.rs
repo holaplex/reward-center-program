@@ -3,7 +3,7 @@
 pub mod reward_center_test;
 use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
 use hpl_reward_center::{
-    pda::{find_listing_address, find_reward_center_address},
+    pda::{find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers,
     state::*,
 };
@@ -153,9 +153,12 @@ async fn execute_sale_divide_success() {
     );
 
     let create_reward_center_ix = hpl_reward_center_sdk::create_reward_center(
-        wallet,
-        reward_mint_keypair.pubkey(),
-        auction_house,
+        hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts {
+            wallet,
+            mint: reward_mint_keypair.pubkey(),
+            auction_house_treasury_mint: mint,
+            auction_house,
+        },
         reward_center_params,
     );
 
@@ -261,15 +264,15 @@ async fn execute_sale_divide_success() {
     // CREATE OFFER TEST
 
     let buyer = Keypair::new();
-    let buyer_pubkey = &buyer.pubkey();
-    airdrop(&mut context, buyer_pubkey, reward_center_test::TEN_SOL)
+    let buyer_address = buyer.pubkey();
+    airdrop(&mut context, &buyer_address, reward_center_test::TEN_SOL)
         .await
         .unwrap();
 
     let create_offer_accounts = CreateOfferAccounts {
-        wallet: *buyer_pubkey,
-        transfer_authority: *buyer_pubkey,
-        payment_account: *buyer_pubkey,
+        wallet: buyer_address,
+        transfer_authority: buyer_address,
+        payment_account: buyer_address,
         treasury_mint: mint,
         token_mint: metadata_mint_address,
         auction_house,
@@ -288,7 +291,7 @@ async fn execute_sale_divide_success() {
 
     let tx = Transaction::new_signed_with_payer(
         &[create_offer_ix],
-        Some(buyer_pubkey),
+        Some(&buyer_address),
         &[&buyer],
         context.last_blockhash,
     );
@@ -312,24 +315,24 @@ async fn execute_sale_divide_success() {
 
     // Creating Associated Token accounts
     let create_buyer_reward_token_ix =
-        create_associated_token_account(&wallet, &buyer_pubkey, &reward_mint_pubkey);
+        create_associated_token_account(&wallet, &buyer_address, &reward_mint_pubkey);
 
     let create_seller_reward_token_ix =
         create_associated_token_account(&wallet, &metadata_owner_address, &reward_mint_pubkey);
 
-    let buyer_token_account = get_associated_token_address(&buyer.pubkey(), &metadata_mint_address);
+    let buyer_token_account = get_associated_token_address(&buyer_address, &metadata_mint_address);
 
     let execute_sale_accounts = ExecuteSaleAccounts {
         auction_house,
         token_account,
         payer: wallet,
-        buyer: buyer.pubkey(),
-        seller: metadata_owner.pubkey(),
+        buyer: buyer_address,
+        seller: metadata_owner_address,
         authority: wallet,
         token_mint: metadata_mint_address,
         treasury_mint: mint,
         buyer_receipt_token_account: buyer_token_account,
-        seller_payment_receipt_account: metadata_owner.pubkey(),
+        seller_payment_receipt_account: metadata_owner_address,
         metadata: metadata_address,
     };
 
@@ -353,6 +356,16 @@ async fn execute_sale_divide_success() {
     );
 
     let tx_response = context.banks_client.process_transaction(tx).await;
+
+    let (offer, _) = find_offer_address(&buyer_address, &metadata_address, &reward_center);
+    let (listing, _) =
+        find_listing_address(&metadata_owner_address, &metadata_address, &reward_center);
+
+    let offer_account = reward_center_test::get_account(&mut context.banks_client, offer).await;
+    let listing_account = reward_center_test::get_account(&mut context.banks_client, listing).await;
+
+    assert_eq!(offer_account, None);
+    assert_eq!(listing_account, None);
 
     assert!(tx_response.is_ok());
 

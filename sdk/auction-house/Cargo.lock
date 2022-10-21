@@ -1624,7 +1624,9 @@ dependencies = [
 
 [[package]]
 name = "mpl-auction-house"
-version = "1.2.0"
+version = "1.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8b64301e39a3528d105f2aca99daecda34cab8aecea188caadd743cc1701151"
 dependencies = [
  "anchor-lang",
  "anchor-spl",

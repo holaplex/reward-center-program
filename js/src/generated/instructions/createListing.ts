@@ -5,13 +5,10 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token'
-import * as beet from '@metaplex-foundation/beet'
-import * as web3 from '@solana/web3.js'
-import {
-  CreateListingParams,
-  createListingParamsBeet,
-} from '../types/CreateListingParams'
+import * as splToken from '@solana/spl-token';
+import * as beet from '@metaplex-foundation/beet';
+import * as web3 from '@solana/web3.js';
+import { CreateListingParams, createListingParamsBeet } from '../types/CreateListingParams';
 
 /**
  * @category Instructions
@@ -19,24 +16,24 @@ import {
  * @category generated
  */
 export type CreateListingInstructionArgs = {
-  createListingParams: CreateListingParams
-}
+  createListingParams: CreateListingParams;
+};
 /**
  * @category Instructions
  * @category CreateListing
  * @category generated
  */
-const createListingStruct = new beet.BeetArgsStruct<
+export const createListingStruct = new beet.BeetArgsStruct<
   CreateListingInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
+    instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['createListingParams', createListingParamsBeet],
   ],
-  'CreateListingInstructionArgs'
-)
+  'CreateListingInstructionArgs',
+);
 /**
  * Accounts required by the _createListing_ instruction
  *
@@ -58,24 +55,26 @@ const createListingStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type CreateListingInstructionAccounts = {
-  auctionHouseProgram: web3.PublicKey
-  listing: web3.PublicKey
-  rewardCenter: web3.PublicKey
-  wallet: web3.PublicKey
-  tokenAccount: web3.PublicKey
-  metadata: web3.PublicKey
-  authority: web3.PublicKey
-  auctionHouse: web3.PublicKey
-  auctionHouseFeeAccount: web3.PublicKey
-  sellerTradeState: web3.PublicKey
-  freeSellerTradeState: web3.PublicKey
-  ahAuctioneerPda: web3.PublicKey
-  programAsSigner: web3.PublicKey
-}
+  auctionHouseProgram: web3.PublicKey;
+  listing: web3.PublicKey;
+  rewardCenter: web3.PublicKey;
+  wallet: web3.PublicKey;
+  tokenAccount: web3.PublicKey;
+  metadata: web3.PublicKey;
+  authority: web3.PublicKey;
+  auctionHouse: web3.PublicKey;
+  auctionHouseFeeAccount: web3.PublicKey;
+  sellerTradeState: web3.PublicKey;
+  freeSellerTradeState: web3.PublicKey;
+  ahAuctioneerPda: web3.PublicKey;
+  programAsSigner: web3.PublicKey;
+  tokenProgram?: web3.PublicKey;
+  systemProgram?: web3.PublicKey;
+  rent?: web3.PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+};
 
-const createListingInstructionDiscriminator = [
-  18, 168, 45, 24, 191, 31, 117, 54,
-]
+export const createListingInstructionDiscriminator = [18, 168, 45, 24, 191, 31, 117, 54];
 
 /**
  * Creates a _CreateListing_ instruction.
@@ -89,117 +88,106 @@ const createListingInstructionDiscriminator = [
  */
 export function createCreateListingInstruction(
   accounts: CreateListingInstructionAccounts,
-  args: CreateListingInstructionArgs
+  args: CreateListingInstructionArgs,
+  programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const {
-    auctionHouseProgram,
-    listing,
-    rewardCenter,
-    wallet,
-    tokenAccount,
-    metadata,
-    authority,
-    auctionHouse,
-    auctionHouseFeeAccount,
-    sellerTradeState,
-    freeSellerTradeState,
-    ahAuctioneerPda,
-    programAsSigner,
-  } = accounts
-
   const [data] = createListingStruct.serialize({
     instructionDiscriminator: createListingInstructionDiscriminator,
     ...args,
-  })
+  });
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: auctionHouseProgram,
+      pubkey: accounts.auctionHouseProgram,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: listing,
+      pubkey: accounts.listing,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: rewardCenter,
+      pubkey: accounts.rewardCenter,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: wallet,
+      pubkey: accounts.wallet,
       isWritable: true,
       isSigner: true,
     },
     {
-      pubkey: tokenAccount,
+      pubkey: accounts.tokenAccount,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: metadata,
+      pubkey: accounts.metadata,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: authority,
+      pubkey: accounts.authority,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: auctionHouse,
+      pubkey: accounts.auctionHouse,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: auctionHouseFeeAccount,
+      pubkey: accounts.auctionHouseFeeAccount,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: sellerTradeState,
+      pubkey: accounts.sellerTradeState,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: freeSellerTradeState,
+      pubkey: accounts.freeSellerTradeState,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: ahAuctioneerPda,
+      pubkey: accounts.ahAuctioneerPda,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: programAsSigner,
+      pubkey: accounts.programAsSigner,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: splToken.TOKEN_PROGRAM_ID,
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: web3.SystemProgram.programId,
+      pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: web3.SYSVAR_RENT_PUBKEY,
+      pubkey: accounts.rent ?? web3.SYSVAR_RENT_PUBKEY,
       isWritable: false,
       isSigner: false,
     },
-  ]
+  ];
+
+  if (accounts.anchorRemainingAccounts != null) {
+    for (const acc of accounts.anchorRemainingAccounts) {
+      keys.push(acc);
+    }
+  }
 
   const ix = new web3.TransactionInstruction({
-    programId: new web3.PublicKey(
-      'rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u'
-    ),
+    programId,
     keys,
     data,
-  })
-  return ix
+  });
+  return ix;
 }

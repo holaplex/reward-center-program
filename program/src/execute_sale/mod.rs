@@ -1,10 +1,7 @@
-use crate::constants::{LISTING, OFFER, PURCHASE_TICKET, REWARD_CENTER};
+use crate::constants::{LISTING, OFFER, REWARD_CENTER};
+use crate::errors::RewardCenterError;
 use crate::metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs};
-use crate::errors::ListingRewardsError;
-use crate::state::{
-    Listing, Offer, PurchaseTicket, RewardCenter,
-    metaplex_anchor::TokenMetadata,
-};
+use crate::state::{Listing, Offer, RewardCenter};
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::token::{transfer, Transfer};
 use anchor_spl::{
@@ -16,6 +13,7 @@ use mpl_auction_house::{
     cpi::accounts::AuctioneerExecuteSale,
     instruction::AuctioneerExecuteSale as AuctioneerExecuteSaleParams,
     program::AuctionHouse as AuctionHouseProgram,
+    utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
 use solana_program::program::invoke_signed;
@@ -26,8 +24,6 @@ pub struct ExecuteSaleParams {
     pub free_trade_state_bump: u8,
     pub seller_trade_state_bump: u8,
     pub program_as_signer_bump: u8,
-    pub price: u64,
-    pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
@@ -42,7 +38,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the buyer rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ RewardCenterError::MintMismatch,
+        constraint = buyer_reward_token_account.owner == buyer.key() @ RewardCenterError::BuyerTokenAccountMismatch,
     )]
     pub buyer_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -54,7 +51,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the seller rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ RewardCenterError::MintMismatch,
+        constraint = seller_reward_token_account.owner == seller.key() @ RewardCenterError::SellerTokenAccountMismatch,
     )]
     pub seller_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -68,8 +66,9 @@ pub struct ExecuteSale<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref(),
         ],
-        bump,
-        constraint = listing.price == offer.price @ ListingRewardsError::PriceMismatch
+        bump = listing.bump,
+        constraint = listing.price == offer.price @ RewardCenterError::PriceMismatch,
+        close = seller,
     )]
     pub listing: Box<Account<'info, Listing>>,
 
@@ -81,28 +80,15 @@ pub struct ExecuteSale<'info> {
             buyer.key().as_ref(),
             metadata.key().as_ref(),
             reward_center.key().as_ref()
-        ],  
-        bump = offer.bump
+        ],
+        bump = offer.bump,
+        close = buyer,
     )]
     pub offer: Box<Account<'info, Offer>>,
 
     /// Payer account for initializing purchase_receipt_account
     #[account(mut)]
     pub payer: Signer<'info>,
-
-    /// The purchase ticket that would be initialized to record an executed sale
-    #[account(
-        init_if_needed,
-        space = PurchaseTicket::size(),
-        payer = payer,
-        seeds = [
-            PURCHASE_TICKET.as_bytes(),
-            listing.key().as_ref(),
-            offer.key().as_ref(),
-        ],
-        bump,
-    )]
-    pub purchase_ticket: Box<Account<'info, PurchaseTicket>>,
 
     ///Token account where the SPL token is stored.
     #[account(
@@ -114,8 +100,9 @@ pub struct ExecuteSale<'info> {
     /// Token mint account for the SPL token.
     pub token_mint: Box<Account<'info, Mint>>,
 
+    /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
-    pub metadata: Box<Account<'info, TokenMetadata>>,
+    pub metadata: UncheckedAccount<'info>,
 
     /// Auction House treasury mint account.
     pub treasury_mint: Box<Account<'info, Mint>>,
@@ -142,7 +129,7 @@ pub struct ExecuteSale<'info> {
             PREFIX.as_bytes(),
             auction_house.key().as_ref(),
             buyer.key().as_ref()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.escrow_payment_bump
     )]
@@ -154,7 +141,7 @@ pub struct ExecuteSale<'info> {
             PREFIX.as_bytes(),
             auction_house.creator.as_ref(),
             auction_house.treasury_mint.as_ref()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = auction_house.bump,
         has_one = treasury_mint,
@@ -168,11 +155,11 @@ pub struct ExecuteSale<'info> {
     #[account(
         mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            auction_house.key().as_ref(), 
+            PREFIX.as_bytes(),
+            auction_house.key().as_ref(),
             FEE_PAYER.as_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+        ],
+        seeds::program = auction_house_program,
         bump = auction_house.fee_payer_bump
     )]
     pub auction_house_fee_account: UncheckedAccount<'info>,
@@ -180,13 +167,13 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Auction House instance treasury account.
     #[account(
-        mut, 
+        mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            auction_house.key().as_ref(), 
+            PREFIX.as_bytes(),
+            auction_house.key().as_ref(),
             TREASURY.as_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+        ],
+        seeds::program = auction_house_program,
         bump = auction_house.treasury_bump
     )]
     pub auction_house_treasury: UncheckedAccount<'info>,
@@ -199,18 +186,18 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Seller trade state PDA account encoding the sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
-            PREFIX.as_bytes(), 
-            seller.key().as_ref(), 
-            auction_house.key().as_ref(), 
-            token_account.key().as_ref(), 
-            auction_house.treasury_mint.as_ref(), 
-            token_mint.key().as_ref(), 
-            &u64::MAX.to_le_bytes(), 
-            &execute_sale_params.token_size.to_le_bytes()
+            PREFIX.as_bytes(),
+            seller.key().as_ref(),
+            auction_house.key().as_ref(),
+            token_account.key().as_ref(),
+            auction_house.treasury_mint.as_ref(),
+            token_mint.key().as_ref(),
+            &u64::MAX.to_le_bytes(),
+            &listing.token_size.to_le_bytes()
         ],
-        seeds::program = auction_house_program, 
+        seeds::program = auction_house_program,
         bump = execute_sale_params.seller_trade_state_bump,
     )]
     pub seller_trade_state: UncheckedAccount<'info>,
@@ -218,18 +205,18 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Free seller trade state PDA account encoding a free sell order.
     #[account(
-        mut, 
+        mut,
         seeds = [
             PREFIX.as_bytes(),
             seller.key().as_ref(),
-            auction_house.key().as_ref(), 
+            auction_house.key().as_ref(),
             token_account.key().as_ref(),
             auction_house.treasury_mint.as_ref(),
             token_account.mint.as_ref(),
-            &0u64.to_le_bytes(), 
-            &execute_sale_params.token_size.to_le_bytes()
-        ], 
-        seeds::program = auction_house_program, 
+            &0u64.to_le_bytes(),
+            &listing.token_size.to_le_bytes()
+        ],
+        seeds::program = auction_house_program,
         bump = execute_sale_params.free_trade_state_bump
     )]
     pub free_seller_trade_state: UncheckedAccount<'info>,
@@ -239,9 +226,9 @@ pub struct ExecuteSale<'info> {
     #[account(
         has_one = auction_house,
         seeds = [
-            REWARD_CENTER.as_bytes(), 
+            REWARD_CENTER.as_bytes(),
             auction_house.key().as_ref()
-        ], 
+        ],
         bump = reward_center.bump
     )]
     pub reward_center: Box<Account<'info, RewardCenter>>,
@@ -249,7 +236,7 @@ pub struct ExecuteSale<'info> {
     #[
         account(
             mut,
-            constraint = reward_center.token_mint == reward_center_reward_token_account.mint @ ListingRewardsError::MintMismatch
+            constraint = reward_center.token_mint == reward_center_reward_token_account.mint @ RewardCenterError::MintMismatch
         )
     ]
     /// The token account holding the reward token for the reward center.
@@ -271,9 +258,9 @@ pub struct ExecuteSale<'info> {
     /// CHECK: Not dangerous. Account seeds checked in constraint.
     #[account(
         seeds = [
-            PREFIX.as_bytes(), 
+            PREFIX.as_bytes(),
             SIGNER.as_bytes()
-        ], 
+        ],
         seeds::program = auction_house_program,
         bump = execute_sale_params.program_as_signer_bump
     )]
@@ -297,24 +284,19 @@ pub fn handler(
         escrow_payment_bump,
         free_trade_state_bump,
         program_as_signer_bump,
-        price,
-        token_size,
         ..
     }: ExecuteSaleParams,
 ) -> Result<()> {
-    let buyer = &ctx.accounts.buyer;
-    let seller = &ctx.accounts.seller;
     let seller_listing = &mut ctx.accounts.listing;
-    let buyer_offer = &mut ctx.accounts.offer;
-    let purchase_ticket = &mut ctx.accounts.purchase_ticket;
 
     let auction_house = &ctx.accounts.auction_house;
     let reward_center = &ctx.accounts.reward_center;
     let metadata = &ctx.accounts.metadata;
+    let token_account = &ctx.accounts.token_account;
+    let price = seller_listing.price;
+    let token_size = seller_listing.token_size;
 
     let auction_house_key = auction_house.key();
-
-    let clock = Clock::get()?;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
@@ -322,9 +304,7 @@ pub fn handler(
         &[reward_center.bump],
     ]];
 
-    // Setting purchase_ticket for listing and offer
-    seller_listing.purchase_ticket = Some(purchase_ticket.key());
-    buyer_offer.purchase_ticket = Some(purchase_ticket.key());
+    assert_metadata_valid(metadata, token_account)?;
 
     // Auction house CPI
     let execute_sale_ctx_accounts = AuctioneerExecuteSale {
@@ -419,15 +399,6 @@ pub fn handler(
             seller_payout,
         )?
     };
-
-    // Initialize Purchase receipt
-    purchase_ticket.buyer = buyer.key();
-    purchase_ticket.seller = seller.key();
-    purchase_ticket.metadata = metadata.key();
-    purchase_ticket.reward_center = reward_center.key();
-    purchase_ticket.token_size = token_size;
-    purchase_ticket.price = price;
-    purchase_ticket.created_at = clock.unix_timestamp;
 
     Ok(())
 }
