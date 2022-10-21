@@ -1,4 +1,10 @@
 use anchor_lang::prelude::Pubkey;
+pub struct CreateRewardCenterAccounts {
+    pub wallet: Pubkey,
+    pub mint: Pubkey,
+    pub auction_house: Pubkey,
+    pub auction_house_treasury_mint: Pubkey,
+}
 
 pub struct CreateListingAccounts {
     pub wallet: Pubkey,

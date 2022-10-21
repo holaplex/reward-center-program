@@ -1,5 +1,5 @@
 use crate::constants::{LISTING, OFFER, REWARD_CENTER};
-use crate::errors::ListingRewardsError;
+use crate::errors::RewardCenterError;
 use crate::metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs};
 use crate::state::{Listing, Offer, RewardCenter};
 use anchor_lang::{prelude::*, InstructionData};
@@ -39,8 +39,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the buyer rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch,
-        constraint = buyer_reward_token_account.owner == buyer.key() @ ListingRewardsError::BuyerTokenAccountMismatch,
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ RewardCenterError::MintMismatch,
+        constraint = buyer_reward_token_account.owner == buyer.key() @ RewardCenterError::BuyerTokenAccountMismatch,
     )]
     pub buyer_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -52,8 +52,8 @@ pub struct ExecuteSale<'info> {
     /// The token account to receive the seller rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ ListingRewardsError::MintMismatch,
-        constraint = seller_reward_token_account.owner == seller.key() @ ListingRewardsError::SellerTokenAccountMismatch,
+        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ RewardCenterError::MintMismatch,
+        constraint = seller_reward_token_account.owner == seller.key() @ RewardCenterError::SellerTokenAccountMismatch,
     )]
     pub seller_reward_token_account: Box<Account<'info, TokenAccount>>,
 
@@ -68,7 +68,7 @@ pub struct ExecuteSale<'info> {
             reward_center.key().as_ref(),
         ],
         bump = listing.bump,
-        constraint = listing.price == offer.price @ ListingRewardsError::PriceMismatch,
+        constraint = listing.price == offer.price @ RewardCenterError::PriceMismatch,
         close = seller,
     )]
     pub listing: Box<Account<'info, Listing>>,
@@ -237,7 +237,7 @@ pub struct ExecuteSale<'info> {
     #[
         account(
             mut,
-            constraint = reward_center.token_mint == reward_center_reward_token_account.mint @ ListingRewardsError::MintMismatch
+            constraint = reward_center.token_mint == reward_center_reward_token_account.mint @ RewardCenterError::MintMismatch
         )
     ]
     /// The token account holding the reward token for the reward center.

@@ -23,9 +23,12 @@ use mpl_auction_house::pda::{
 use spl_associated_token_account::get_associated_token_address;
 
 pub fn create_reward_center(
-    wallet: Pubkey,
-    mint: Pubkey,
-    auction_house: Pubkey,
+    CreateRewardCenterAccounts {
+        wallet,
+        mint,
+        auction_house,
+        auction_house_treasury_mint,
+    }: CreateRewardCenterAccounts,
     create_reward_center_params: CreateRewardCenterParams,
 ) -> Instruction {
     let (reward_center, _) = pda::find_reward_center_address(&auction_house);
@@ -37,6 +40,7 @@ pub fn create_reward_center(
         auction_house,
         reward_center,
         associated_token_account,
+        auction_house_treasury_mint,
         token_program: spl_token::id(),
         associated_token_program: spl_associated_token_account::id(),
         rent: sysvar::rent::id(),

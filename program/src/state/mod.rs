@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::errors::ListingRewardsError;
+use crate::errors::RewardCenterError;
 
 #[derive(AnchorDeserialize, AnchorSerialize, Clone, Debug)]
 pub enum PayoutOperation {
@@ -53,19 +53,18 @@ impl RewardCenter {
                 msg!("Payout operation mode: Multiple");
                 listing_price
                     .checked_mul(self.reward_rules.payout_numeral.into())
-                    .ok_or(ListingRewardsError::NumericalOverflowError.into())
+                    .ok_or(RewardCenterError::NumericalOverflowError.into())
             }
 
             PayoutOperation::Divide => {
                 msg!("Payout operation mode: Divide");
                 listing_price
                     .checked_div(self.reward_rules.payout_numeral.into())
-                    .ok_or(ListingRewardsError::NumericalOverflowError.into())
+                    .ok_or(RewardCenterError::NumericalOverflowError.into())
             }
         }
     }
 
-    // TODO: review the effects of decimals on the payouts. The math is clean when the currency token is the same as the reward token.
     pub fn payouts(&self, listing_price: u64) -> Result<(u64, u64)> {
         let total_token_payout = self
             .calculate_total_token_payout(listing_price, &self.reward_rules.mathematical_operand)?;
@@ -75,11 +74,11 @@ impl RewardCenter {
         let seller_payout = (seller_share as u128)
             .checked_mul(total_token_payout as u128)
             .and_then(|product| product.checked_div(10000))
-            .ok_or(ListingRewardsError::NumericalOverflowError)? as u64;
+            .ok_or(RewardCenterError::NumericalOverflowError)? as u64;
 
         let buyer_payout = total_token_payout
             .checked_sub(seller_payout)
-            .ok_or(ListingRewardsError::NumericalOverflowError)?;
+            .ok_or(RewardCenterError::NumericalOverflowError)?;
 
         Ok((seller_payout, buyer_payout))
     }

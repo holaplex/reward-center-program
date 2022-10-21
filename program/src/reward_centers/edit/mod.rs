@@ -4,7 +4,7 @@ use mpl_auction_house::{constants::PREFIX, AuctionHouse};
 
 use crate::{
     constants::REWARD_CENTER,
-    errors::ListingRewardsError,
+    errors::RewardCenterError,
     state::{RewardCenter, RewardRules},
 };
 
@@ -22,7 +22,7 @@ pub struct EditRewardCenter<'info> {
     #[
       account(
         mut,
-        constraint = wallet.key() == auction_house.authority @ ListingRewardsError::SignerNotAuthorized
+        constraint = wallet.key() == auction_house.authority @ RewardCenterError::SignerNotAuthorized
       )
     ]
     pub wallet: Signer<'info>,

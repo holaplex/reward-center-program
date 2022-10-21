@@ -4,7 +4,7 @@ use solana_program::program::invoke_signed;
 
 use crate::{
     constants::{LISTING, REWARD_CENTER},
-    errors::ListingRewardsError,
+    errors::RewardCenterError,
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
     state::{Listing, RewardCenter},
 };
@@ -205,7 +205,7 @@ pub fn handler(
     listing.bump = *ctx
         .bumps
         .get(LISTING)
-        .ok_or(ListingRewardsError::BumpSeedNotInHashMap)?;
+        .ok_or(RewardCenterError::BumpSeedNotInHashMap)?;
     listing.created_at = clock.unix_timestamp;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ListingRewardsError {
+pub enum RewardCenterError {
     // 6000
     #[msg("Bump seed not in hash map")]
     BumpSeedNotInHashMap,
@@ -10,35 +10,31 @@ pub enum ListingRewardsError {
     #[msg("Unauthorized signer")]
     SignerNotAuthorized,
 
-    // 6005
-    #[msg("The seller doesnt match the provided wallet")]
-    SellerWalletMismatch,
-
-    // 6006
-    #[msg("The rewards were already claimed for this listing")]
-    RewardsAlreadyClaimed,
-
-    // 6007
-    #[msg("The listings is not eligible for rewards yet")]
-    IneligibaleForRewards,
-
-    // 6008
+    // 6002
     #[msg("Math numerical overflow")]
     NumericalOverflowError,
 
-    // 6009
+    // 6003
     #[msg("The mints do not match")]
     MintMismatch,
 
-    // 6010
+    // 6004
     #[msg("Listing and offer prices do not match")]
     PriceMismatch,
 
-    // 6009
+    // 6005
     #[msg("Buyer token account owner does not match the buyer")]
     BuyerTokenAccountMismatch,
 
-    // 6010
+    // 6006
     #[msg("Seller token account owner does not match the seller")]
     SellerTokenAccountMismatch,
+
+    // 6007
+    #[msg("The number of decimals for auction house treasury mint do not match reward mint decimals")]
+    RewardMintDecimalMismatch,
+
+    // 6008
+    #[msg("The treasury does not match the one present on the auction house")]
+    AuctionHouseTreasuryMismatch,
 }

@@ -1,6 +1,6 @@
 use crate::{
     constants::{OFFER, REWARD_CENTER},
-    errors::ListingRewardsError,
+    errors::RewardCenterError,
     state::{Offer, RewardCenter},
 };
 use anchor_lang::prelude::{Result, *};
@@ -176,7 +176,7 @@ pub fn handler(
     offer.bump = *ctx
         .bumps
         .get(OFFER)
-        .ok_or(ListingRewardsError::BumpSeedNotInHashMap)?;
+        .ok_or(RewardCenterError::BumpSeedNotInHashMap)?;
     offer.created_at = clock.unix_timestamp;
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[

@@ -17,7 +17,7 @@ use crate::{
     reward_centers::{create::*, edit::*},
 };
 
-declare_id!("rwdLstiU8aJU1DPdoPtocaNKApMhCFdCg283hz8dd3u");
+declare_id!("RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki");
 
 #[program]
 pub mod reward_center {
