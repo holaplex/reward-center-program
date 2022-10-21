@@ -11,7 +11,6 @@ export type ExecuteSaleParams = {
   freeTradeStateBump: number;
   sellerTradeStateBump: number;
   programAsSignerBump: number;
-  tokenSize: beet.bignum;
 };
 
 /**
@@ -24,7 +23,6 @@ export const executeSaleParamsBeet = new beet.BeetArgsStruct<ExecuteSaleParams>(
     ['freeTradeStateBump', beet.u8],
     ['sellerTradeStateBump', beet.u8],
     ['programAsSignerBump', beet.u8],
-    ['tokenSize', beet.u64],
   ],
   'ExecuteSaleParams',
 );
