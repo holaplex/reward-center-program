@@ -1,7 +1,12 @@
-use std::{fs::File, path::Path, str::FromStr};
+use std::{
+    fs::File,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
-use anyhow::{anyhow, Result as AnyhowResult};
+use anyhow::{anyhow, Context, Result as AnyhowResult};
 use hpl_reward_center::pda::find_reward_center_address;
+use hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts;
 use hpl_reward_center_sdk::create_reward_center;
 use log::{info, warn};
 use mpl_auction_house::pda::find_auction_house_address;
@@ -16,7 +21,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
-use spl_token::{instruction::initialize_mint, native_mint::id as NATIVE_MINT_ID, state::Mint};
+use spl_token::{instruction::initialize_mint, native_mint, state::Mint};
 
 use crate::{
     config::{parse_keypair, parse_solana_config},
@@ -25,14 +30,15 @@ use crate::{
 
 pub fn process_create_reward_center(
     client: RpcClient,
-    keypair_path: Option<String>,
-    config_file: String,
+    keypair_path: Option<PathBuf>,
+    config_file: PathBuf,
     auction_house: Option<String>,
     mint_rewards: Option<String>,
 ) -> AnyhowResult<()> {
-    let solana_options = parse_solana_config();
-    let keypair = parse_keypair(&keypair_path, &solana_options);
-    let wsol_mint = NATIVE_MINT_ID();
+    let solana_options = parse_solana_config()?;
+
+    let keypair = parse_keypair(&keypair_path, &solana_options)?;
+    let wsol_mint = native_mint::id();
 
     let mut instructions: Vec<Instruction> = vec![];
 
@@ -74,10 +80,8 @@ pub fn process_create_reward_center(
 
     let reward_mint_keypair = Keypair::new();
     let rewards_mint_pubkey = match &mint_rewards {
-        Some(rewards_mint) => match Pubkey::from_str(&rewards_mint) {
-            Ok(pubkey) => pubkey,
-            Err(_) => return Err(anyhow!("Failed to parse Pubkey from auction house string")),
-        },
+        Some(rewards_mint) => Pubkey::from_str(&rewards_mint)
+            .context("Failed to parse Pubkey from auction house string")?,
         None => reward_mint_keypair.pubkey(),
     };
 
@@ -124,27 +128,27 @@ pub fn process_create_reward_center(
         mathematical_operand,
         payout_numeral,
         seller_reward_payout_basis_points,
-    }: CreateRewardCenterParams = match Path::new(&config_file).exists() {
-        false => {
-            warn!("Create reward center config doesn't exist");
-            CreateRewardCenterParams {
-                mathematical_operand: PayoutOperation::Divide,
-                payout_numeral: 5,
-                seller_reward_payout_basis_points: 1000,
-            }
-        },
-        true => {
-            let create_reward_center_config_file = File::open(config_file)?;
-            serde_json::from_reader(create_reward_center_config_file)?
-        },
+    }: CreateRewardCenterParams = if Path::new(&config_file).exists() {
+        let create_reward_center_config_file = File::open(config_file)?;
+        serde_json::from_reader(create_reward_center_config_file)?
+    } else {
+        warn!("Create reward center config doesn't exist");
+        CreateRewardCenterParams {
+            mathematical_operand: PayoutOperation::Divide,
+            payout_numeral: 5,
+            seller_reward_payout_basis_points: 1000,
+        }
     };
 
     let (reward_center_pubkey, _) = find_reward_center_address(&auction_house_pubkey);
 
     let create_reward_center_ix = create_reward_center(
-        keypair.pubkey(),
-        rewards_mint_pubkey,
-        auction_house_pubkey,
+        CreateRewardCenterAccounts {
+            wallet: todo!(),
+            mint: todo!(),
+            auction_house: todo!(),
+            auction_house_treasury_mint: todo!(),
+        },
         hpl_reward_center::reward_centers::create::CreateRewardCenterParams {
             reward_rules: {
                 hpl_reward_center::state::RewardRules {
@@ -167,19 +171,20 @@ pub fn process_create_reward_center(
 
     let latest_blockhash = client.get_latest_blockhash()?;
 
-    let transaction = match mint_rewards.is_some() {
-        true => Transaction::new_signed_with_payer(
+    let transaction = if mint_rewards.is_some() {
+        Transaction::new_signed_with_payer(
             &instructions,
             Some(&keypair.pubkey()),
             &[&keypair],
             latest_blockhash,
-        ),
-        false => Transaction::new_signed_with_payer(
+        )
+    } else {
+        Transaction::new_signed_with_payer(
             &instructions,
             Some(&keypair.pubkey()),
             &[&keypair, &reward_mint_keypair],
             latest_blockhash,
-        ),
+        )
     };
 
     let tx_hash = retry(

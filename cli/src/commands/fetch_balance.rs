@@ -1,10 +1,10 @@
 use std::str::FromStr;
 
 use anchor_lang::{prelude::Pubkey, AnchorDeserialize};
-use anyhow::{bail, Result as AnyhowResult};
+use anyhow::{bail, Context, Result as AnyhowResult};
 use hpl_reward_center::state::RewardCenter;
 use log::{error, info};
-use solana_client::rpc_client::RpcClient;
+use solana_client::{client_error::ClientErrorKind, rpc_client::RpcClient, rpc_request::RpcError};
 use solana_program::program_pack::Pack;
 use spl_associated_token_account::get_associated_token_address;
 use spl_token::state::{Account, Mint};
@@ -21,13 +21,14 @@ pub fn process_fetch_reward_center_treasury_balance(
         },
     };
 
-    let reward_center_data = match client.get_account_data(&reward_center_pubkey) {
-        Ok(data) => data,
-        Err(_) => {
-            error!("Reward center account does not exit");
-            bail!("Reward center account does not exit")
-        },
-    };
+    // match my_value {
+    //   SomePattern if condition_is_true => (), // match pattern under condition
+    //   SomePattern => (), // match the same pattern otherwise
+    // }
+
+    let reward_center_data = client
+        .get_account_data(&reward_center_pubkey)
+        .context("Failed to get reward center data")?;
 
     let RewardCenter { token_mint, .. } = RewardCenter::deserialize(&mut &reward_center_data[8..])?;
 

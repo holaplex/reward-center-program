@@ -1,107 +1,105 @@
-use structopt::StructOpt;
+use std::path::PathBuf;
 
-#[derive(Debug, StructOpt)]
-#[structopt(
+use clap::{Parser, Subcommand};
+
+#[derive(Debug, Parser)]
+#[command(
     name = "Reward Center",
     about = "A Metaplex auctioneer program that distributes spl token to the buyer and seller of NFTs"
 )]
 pub struct Opt {
     /// RPC endpoint url to override using the Solana config or the hard-coded default
-    #[structopt(short, long, global = true)]
+    #[arg(short, long, global = true)]
     pub rpc: Option<String>,
 
     /// Timeout to override default value of 90 seconds
-    #[structopt(short = "T", long, global = true, default_value = "90")]
+    #[arg(short = 'T', long, global = true, default_value = "90")]
     pub timeout: u64,
 
-    /// Log level
-    #[structopt(short, long, global = true, default_value = "off")]
-    pub log_level: String,
-
     /// All available commands
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     pub cmd: Command,
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Subcommand)]
 pub enum Command {
     /// Create Reward Center
-    #[structopt(name = "create")]
+    #[clap(name = "create")]
     Create {
         /// Reward center config file path
-        #[structopt(short, long, default_value = "src/json/reward_center.json")]
-        config_file: String,
+        #[arg(short, long, default_value = "src/json/reward_center.json")]
+        config_file: PathBuf,
 
         /// Optional Auction House address
-        #[structopt(short = "a", long)]
+        #[arg(short = 'a', long)]
         auction_house: Option<String>,
 
         /// Optional Rewards mint address
-        #[structopt(short = "M", long)]
+        #[arg(short = 'M', long)]
         mint_rewards: Option<String>,
 
         /// Path to the creator's keypair file (mint auth keypair if required to create)
-        #[structopt(short, long)]
-        keypair: Option<String>,
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
     },
 
     /// Edit reward center's reward rules
-    #[structopt(name = "edit")]
+    #[clap(name = "edit")]
     Edit {
         /// Reward center address
-        #[structopt(short = "R", long)]
+        #[arg(short = 'R', long)]
         reward_center: String,
 
         /// Auction house address
-        #[structopt(short, long)]
+        #[arg(short, long)]
         auction_house: String,
 
         /// Reward center config file path
-        #[structopt(short, long, default_value = "src/json/reward_center.json")]
-        config_file: String,
+        #[arg(short, long, default_value = "src/json/reward_center.json")]
+        config_file: PathBuf,
 
         /// Path to the reward center authority's keypair file
-        #[structopt(short, long)]
-        keypair: Option<String>,
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
     },
 
     /// Fund reward center
-    #[structopt(name = "fund")]
+    #[clap(name = "fund")]
     Fund {
         /// Reward center address
-        #[structopt(short = "R", long)]
+        #[arg(short = 'R', long)]
         reward_center: String,
 
         /// Path to the reward center authority keypair file
-        #[structopt(short, long)]
-        keypair: Option<String>,
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
 
         /// Funding amount
-        #[structopt(short, long)]
+        #[arg(short, long)]
         amount: u64,
     },
 
     /// Fetch Treasury Balance
-    #[structopt(name = "fetch-balance")]
+    #[clap(name = "fetch-balance")]
     FetchTreasuryBalance {
         /// Reward center address
-        #[structopt(short = "R", long)]
+        #[arg(short = 'R', long)]
         reward_center: String,
 
         /// Path to the reward center authority keypair file
-        #[structopt(short, long)]
-        keypair: Option<String>,
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
     },
 
     /// Fetch Reward Center State details
-    #[structopt(name = "fetch-state")]
+    #[clap(name = "fetch-state")]
     FetchRewardCenterState {
         /// Reward center address
-        #[structopt(short = "R", long)]
+        #[arg(short = 'R', long)]
         reward_center: String,
 
         /// Path to the reward center authority keypair file
-        #[structopt(short, long)]
-        keypair: Option<String>,
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
     },
 }

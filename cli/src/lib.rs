@@ -1,3 +1,12 @@
+#![deny(
+    clippy::disallowed_method,
+    clippy::suspicious,
+    clippy::style,
+    missing_debug_implementations,
+    missing_copy_implementations
+)]
+#![warn(clippy::pedantic)]
+
 pub mod commands;
 pub mod config;
 pub mod constants;

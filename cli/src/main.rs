@@ -1,6 +1,16 @@
+#![deny(
+    clippy::disallowed_method,
+    clippy::suspicious,
+    clippy::style,
+    missing_debug_implementations,
+    missing_copy_implementations
+)]
+#![warn(clippy::pedantic)]
+
 use std::{str::FromStr, time::Duration};
 
 use anyhow::Result;
+use clap::Parser;
 use log::*;
 use reward_center::{
     commands::{
@@ -9,37 +19,38 @@ use reward_center::{
         process_fund_reward_center,
     },
     config::*,
-    constants::*,
+    constants::PUBLIC_RPC_URLS,
     opt::*,
 };
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::commitment_config::CommitmentConfig;
-use structopt::StructOpt;
 
-fn main() -> Result<()> {
-    let Opt {
-        log_level,
-        rpc,
-        timeout,
-        cmd,
-    } = Opt::from_args();
+fn main() {
+    env_logger::builder()
+        .filter_level(log::LevelFilter::Info)
+        .parse_default_env()
+        .init();
+    std::process::exit(match run() {
+        Ok(()) => 0,
+        Err(e) => {
+            error!("{:?}", e);
+            1
+        },
+    });
+}
 
-    solana_logger::setup_with(&log_level);
-
-    let sol_config = parse_solana_config();
+fn run() -> Result<()> {
+    let Opt { rpc, timeout, cmd } = Opt::parse();
 
     let (rpc_url, commitment) = if let Some(cli_rpc_url) = rpc {
-        (cli_rpc_url, String::from("confirmed"))
-    } else if let Some(sol_config) = sol_config {
+        (cli_rpc_url, "confirmed".into())
+    } else if let Some(sol_config) = parse_solana_config()? {
         (sol_config.json_rpc_url, sol_config.commitment)
     } else {
         info!(
             "Could not find a valid Solana-CLI config file. Defaulting to https://api.devnet.solana.com devnet node."
         );
-        (
-            String::from("https://api.devnet.solana.com"),
-            String::from("confirmed"),
-        )
+        ("https://api.devnet.solana.com".into(), "confirmed".into())
     };
 
     if PUBLIC_RPC_URLS.contains(&rpc_url.as_str()) {
@@ -47,10 +58,6 @@ fn main() -> Result<()> {
             "Using a public RPC URL is not recommended for heavy tasks as you will be rate-limited and suffer a performance hit"
         );
         warn!("Please use a private RPC endpoint for best performance results.");
-        *USE_RATE_LIMIT.write().unwrap() = true;
-    } else if RATE_LIMIT_DELAYS.contains_key(&rpc_url.as_str()) {
-        *USE_RATE_LIMIT.write().unwrap() = true;
-        *RPC_DELAY_NS.write().unwrap() = RATE_LIMIT_DELAYS[&rpc_url.as_str()];
     }
 
     let commitment_config = CommitmentConfig::from_str(&commitment)?;

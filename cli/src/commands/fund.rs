@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{path::PathBuf, str::FromStr};
 
 use anchor_lang::AnchorDeserialize;
 use anyhow::{anyhow, Result as AnyhowResult};
@@ -20,12 +20,13 @@ use crate::config::{parse_keypair, parse_solana_config};
 
 pub fn process_fund_reward_center(
     client: RpcClient,
-    keypair_path: Option<String>,
+    keypair_path: Option<PathBuf>,
     reward_center: String,
     amount: u64,
 ) -> AnyhowResult<()> {
-    let solana_options = parse_solana_config();
-    let keypair = parse_keypair(&keypair_path, &solana_options);
+    let solana_options = parse_solana_config()?;
+
+    let keypair = parse_keypair(&keypair_path, &solana_options)?;
     let token_program = spl_token::id();
 
     let reward_center_pubkey = match Pubkey::from_str(&reward_center) {

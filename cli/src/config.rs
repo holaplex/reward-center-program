@@ -1,12 +1,12 @@
 use std::{
-    env,
     fs::{read_to_string, File},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, Context, Result};
+use dirs::config_dir;
+use log::debug;
 use serde::{Deserialize, Serialize};
-use serde_yaml;
 use solana_sdk::signature::Keypair;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -16,60 +16,52 @@ pub struct SolanaConfig {
     pub commitment: String,
 }
 
-pub fn parse_solana_config() -> Option<SolanaConfig> {
-    let home = if cfg!(unix) {
-        env::var_os("HOME").expect("Coulnd't find UNIX home key.")
-    } else if cfg!(windows) {
-        let drive = env::var_os("HOMEDRIVE").expect("Coulnd't find Windows home drive key.");
-        let path = env::var_os("HOMEPATH").expect("Coulnd't find Windows home path key.");
-        Path::new(&drive).join(&path).as_os_str().to_owned()
-    } else if cfg!(target_os = "macos") {
-        env::var_os("HOME").expect("Coulnd't find MacOS home key.")
-    } else {
-        panic!("Unsupported OS!");
-    };
-
-    let config_path = Path::new(&home)
-        .join(".config")
-        .join("solana")
-        .join("cli")
-        .join("config.yml");
+pub fn parse_solana_config() -> Result<Option<SolanaConfig>> {
+    let mut config_path = config_dir().ok_or_else(|| anyhow!("Platform is not supported"))?;
+    config_path.extend(["solana", "cli", "config.yml"]);
 
     let conf_file = match File::open(config_path) {
         Ok(f) => f,
-        Err(_) => return None,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(err) => return Err(err).context("Failed to open config file"),
     };
-    serde_yaml::from_reader(&conf_file).ok()
+
+    serde_yaml::from_reader(&conf_file).context("Failed to parse config")
 }
 
 pub fn parse_keypair(
-    keypair_opt: &Option<String>,
+    keypair_opt: &Option<PathBuf>,
     sol_config_option: &Option<SolanaConfig>,
-) -> Keypair {
-    let keypair = match keypair_opt {
-        Some(keypair_path) => read_keypair(&keypair_path).expect("Failed to read keypair file."),
-        None => match sol_config_option {
-            Some(ref sol_config) => {
-                read_keypair(&sol_config.keypair_path).expect("Failed to read keypair file.")
-            },
-            None => read_keypair(&(*shellexpand::tilde("~/.config/solana/id.json")).to_string())
-                .expect("Failed to read keypair file."),
+) -> Result<Keypair> {
+    match (keypair_opt, sol_config_option) {
+        (Some(keypair_path), _) => {
+            read_keypair(&keypair_path).context("Failed to read keypair file.")
         },
-    };
-    keypair
+        (None, Some(ref sol_config)) => {
+            read_keypair(&sol_config.keypair_path).context("Failed to read keypair file.")
+        },
+        (None, None) => {
+            let mut id_path = config_dir().ok_or_else(|| anyhow!("Platform is not supported"))?;
+            id_path.extend(["solana", "id.json"]);
+
+            read_keypair(&id_path).context("Failed to read keypair file.")
+        },
+    }
 }
 
-pub fn read_keypair(path: &String) -> Result<Keypair> {
-    let secret_string: String = read_to_string(path).context("Can't find key file")?;
+pub fn read_keypair<P: AsRef<Path>>(path: P) -> Result<Keypair> {
+    let secret_string = read_to_string(path).context("Can't find key file")?;
 
     // Try to decode the secret string as a JSON array of ints first and then as a base58 encoded string to support Phantom private keys.
-    let secret_bytes: Vec<u8> = match serde_json::from_str(&secret_string) {
-        Ok(bytes) => bytes,
-        Err(_) => match bs58::decode(&secret_string.trim()).into_vec() {
-            Ok(bytes) => bytes,
-            Err(_) => return Err(anyhow!("Unsupported key type!")),
-        },
-    };
+
+    let secret_bytes = serde_json::from_str(&secret_string)
+        .map_err(|e| debug!("Failed to parse keypair as JSON: {}", e))
+        .or_else(|()| {
+            bs58::decode(&secret_string.trim())
+                .into_vec()
+                .map_err(|e| debug!("Failed to parse keypair as base58: {}", e))
+        })
+        .map_err(|()| anyhow!("Unsupported key type!"))?;
 
     let keypair = Keypair::from_bytes(&secret_bytes)?;
     Ok(keypair)
