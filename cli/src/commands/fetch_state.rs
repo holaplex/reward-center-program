@@ -6,11 +6,14 @@ use hpl_reward_center::state::RewardCenter;
 use log::info;
 use solana_client::rpc_client::RpcClient;
 
+/// # Errors
+///
+/// Will return `Err` if reward center address fails to parse
 pub fn process_fetch_reward_center_state(
-    client: RpcClient,
-    reward_center: String,
+    client: &RpcClient,
+    reward_center: &str,
 ) -> AnyhowResult<()> {
-    let reward_center_pubkey = Pubkey::from_str(&reward_center)
+    let reward_center_pubkey = Pubkey::from_str(reward_center)
         .context("Failed to parse Pubkey from reward center string")?;
 
     let reward_center_data = client

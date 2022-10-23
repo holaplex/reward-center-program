@@ -1,5 +1,5 @@
 #![deny(
-    clippy::disallowed_method,
+    clippy::disallowed_methods,
     clippy::suspicious,
     clippy::style,
     missing_debug_implementations,
@@ -11,16 +11,16 @@ use std::{str::FromStr, time::Duration};
 
 use anyhow::Result;
 use clap::Parser;
-use log::*;
+use log::{error, info, warn};
 use reward_center::{
     commands::{
         process_create_reward_center, process_edit_reward_center,
         process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,
         process_fund_reward_center,
     },
-    config::*,
+    config::parse_solana_configuration,
     constants::PUBLIC_RPC_URLS,
-    opt::*,
+    opt::{Command, Opt},
 };
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::commitment_config::CommitmentConfig;
@@ -44,7 +44,7 @@ fn run() -> Result<()> {
 
     let (rpc_url, commitment) = if let Some(cli_rpc_url) = rpc {
         (cli_rpc_url, "confirmed".into())
-    } else if let Some(sol_config) = parse_solana_config()? {
+    } else if let Some(sol_config) = parse_solana_configuration()? {
         (sol_config.json_rpc_url, sol_config.commitment)
     } else {
         info!(
@@ -77,30 +77,38 @@ fn run() -> Result<()> {
             config_file,
             auction_house,
             mint_rewards,
-        } => {
-            process_create_reward_center(client, keypair, config_file, auction_house, mint_rewards)?
-        },
+        } => process_create_reward_center(
+            &client,
+            &keypair,
+            config_file,
+            &auction_house,
+            &mint_rewards,
+        )?,
 
         Command::Edit {
             keypair,
             config_file,
             reward_center,
             auction_house,
-        } => {
-            process_edit_reward_center(client, keypair, reward_center, auction_house, config_file)?
-        },
+        } => process_edit_reward_center(
+            &client,
+            &keypair,
+            &reward_center,
+            &auction_house,
+            config_file,
+        )?,
 
         Command::Fund {
             reward_center,
             keypair,
             amount,
-        } => process_fund_reward_center(client, keypair, reward_center, amount)?,
+        } => process_fund_reward_center(&client, &keypair, &reward_center, amount)?,
 
         Command::FetchRewardCenterState { reward_center, .. } => {
-            process_fetch_reward_center_state(client, reward_center)?
+            process_fetch_reward_center_state(&client, &reward_center)?;
         },
         Command::FetchTreasuryBalance { reward_center, .. } => {
-            process_fetch_reward_center_treasury_balance(client, reward_center)?
+            process_fetch_reward_center_treasury_balance(&client, &reward_center)?;
         },
     }
 

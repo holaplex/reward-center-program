@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Result as AnyhowResult};
+use anyhow::{anyhow, Context, Result as AnyhowResult};
 use hpl_reward_center::{
     reward_centers::edit::EditRewardCenterParams,
     state::{PayoutOperation, RewardRules},
@@ -16,28 +16,30 @@ use solana_client::rpc_client::RpcClient;
 use solana_program::pubkey::Pubkey;
 use solana_sdk::{signer::Signer, transaction::Transaction};
 
-use crate::config::{parse_keypair, parse_solana_config};
+use crate::config::{parse_keypair, parse_solana_configuration};
 
+/// # Errors
+///
+/// Will return `Err` if the following happens
+/// 1. Mint rewards/Auction House/Keypair Path fails to parse/open
+/// 2. Transaction errors due to validation
+/// 3. RPC Errors if timed out
 pub fn process_edit_reward_center(
-    client: RpcClient,
-    keypair_path: Option<PathBuf>,
-    reward_center: String,
-    auction_house: String,
+    client: &RpcClient,
+    keypair_path: &Option<PathBuf>,
+    reward_center: &str,
+    auction_house: &str,
     config_file: PathBuf,
 ) -> AnyhowResult<()> {
-    let solana_options = parse_solana_config()?;
+    let solana_options = parse_solana_configuration()?;
 
-    let keypair = parse_keypair(&keypair_path, &solana_options)?;
+    let keypair = parse_keypair(keypair_path, &solana_options)?;
 
-    let reward_center_pubkey = match Pubkey::from_str(&reward_center) {
-        Ok(pubkey) => pubkey,
-        Err(_) => return Err(anyhow!("Failed to parse Pubkey from reward center string")),
-    };
+    let reward_center_pubkey = Pubkey::from_str(reward_center)
+        .context("Failed to parse Pubkey from reward center string")?;
 
-    let auction_house_pubkey = match Pubkey::from_str(&auction_house) {
-        Ok(pubkey) => pubkey,
-        Err(_) => return Err(anyhow!("Failed to parse Pubkey from auction house string")),
-    };
+    let auction_house_pubkey = Pubkey::from_str(auction_house)
+        .context("Failed to parse Pubkey from auction house string")?;
 
     let edit_reward_center_params: EditRewardCenterParams = if Path::new(&config_file).exists() {
         let create_reward_center_config_file = File::open(config_file)?;

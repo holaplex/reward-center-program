@@ -1,11 +1,11 @@
 use std::{path::PathBuf, str::FromStr};
 
 use anchor_lang::AnchorDeserialize;
-use anyhow::{anyhow, Result as AnyhowResult};
+use anyhow::{anyhow, bail, Context, Result as AnyhowResult};
 use hpl_reward_center::state::RewardCenter;
 use log::{error, info};
 use retry::{delay::Exponential, retry};
-use solana_client::rpc_client::RpcClient;
+use solana_client::{client_error::ClientErrorKind, rpc_client::RpcClient, rpc_request::RpcError};
 use solana_program::{
     instruction::Instruction, program_option::COption, program_pack::Pack, pubkey::Pubkey,
 };
@@ -16,23 +16,26 @@ use spl_token::{
     state::{Account, Mint},
 };
 
-use crate::config::{parse_keypair, parse_solana_config};
+use crate::config::{parse_keypair, parse_solana_configuration};
 
+/// # Errors
+///
+/// Will return `Err` if the following happens
+/// 1. Reward center address fails to parse
+/// 2. Reward center/rewards mint/reward center token account account does not exist
 pub fn process_fund_reward_center(
-    client: RpcClient,
-    keypair_path: Option<PathBuf>,
-    reward_center: String,
+    client: &RpcClient,
+    keypair_path: &Option<PathBuf>,
+    reward_center: &str,
     amount: u64,
 ) -> AnyhowResult<()> {
-    let solana_options = parse_solana_config()?;
+    let solana_options = parse_solana_configuration()?;
 
-    let keypair = parse_keypair(&keypair_path, &solana_options)?;
+    let keypair = parse_keypair(keypair_path, &solana_options)?;
     let token_program = spl_token::id();
 
-    let reward_center_pubkey = match Pubkey::from_str(&reward_center) {
-        Ok(pubkey) => pubkey,
-        Err(_) => return Err(anyhow!("Failed to parse Pubkey from mint rewards string")),
-    };
+    let reward_center_pubkey = Pubkey::from_str(reward_center)
+        .context("Failed to parse Pubkey from mint rewards string")?;
 
     info!("Getting reward center data");
     let reward_center_data = client.get_account_data(&reward_center_pubkey)?;
@@ -99,7 +102,7 @@ pub fn process_fund_reward_center(
                     )?]
                 }
             },
-            Err(_) => {
+            Err(err) if matches!(err.kind(), ClientErrorKind::RpcError(RpcError::ForUser(_))) => {
                 if let COption::Some(mint_authority) = mint_authority {
                     if mint_authority.eq(&keypair.pubkey()) {
                         vec![mint_to_checked(
@@ -112,14 +115,13 @@ pub fn process_fund_reward_center(
                             decimals,
                         )?]
                     } else {
-                        error!("Caller reward token account does not exist");
-                        return Err(anyhow!("Caller reward token account does not exist"));
+                        bail!("Caller reward token account does not exist");
                     }
                 } else {
-                    error!("Mint authority parse failed");
-                    return Err(anyhow!("Error in mint authority account parse"));
+                    bail!("Error in mint authority account parse");
                 }
             },
+            Err(err) => return Err(err).context("Failed to get account data for rewards mint"),
         };
 
     let latest_blockhash = client.get_latest_blockhash()?;

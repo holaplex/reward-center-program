@@ -10,13 +10,16 @@ use serde::{Deserialize, Serialize};
 use solana_sdk::signature::Keypair;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct SolanaConfig {
+pub struct SolanaConfiguration {
     pub json_rpc_url: String,
     pub keypair_path: String,
     pub commitment: String,
 }
 
-pub fn parse_solana_config() -> Result<Option<SolanaConfig>> {
+/// # Errors
+///
+/// Will return `Err` if config dir mismatches and/or the config path is unable to open and/or failed to parse the config file
+pub fn parse_solana_configuration() -> Result<Option<SolanaConfiguration>> {
     let mut config_path = config_dir().ok_or_else(|| anyhow!("Platform is not supported"))?;
     config_path.extend(["solana", "cli", "config.yml"]);
 
@@ -29,9 +32,12 @@ pub fn parse_solana_config() -> Result<Option<SolanaConfig>> {
     serde_yaml::from_reader(&conf_file).context("Failed to parse config")
 }
 
+/// # Errors
+///
+/// Will return `Err` if keypair path is incorrect or failed to parse it correctl
 pub fn parse_keypair(
     keypair_opt: &Option<PathBuf>,
-    sol_config_option: &Option<SolanaConfig>,
+    sol_config_option: &Option<SolanaConfiguration>,
 ) -> Result<Keypair> {
     match (keypair_opt, sol_config_option) {
         (Some(keypair_path), _) => {
@@ -49,6 +55,9 @@ pub fn parse_keypair(
     }
 }
 
+/// # Errors
+///
+/// Will return `Err` if `path` does not exist or the keypair is to unable to parse
 pub fn read_keypair<P: AsRef<Path>>(path: P) -> Result<Keypair> {
     let secret_string = read_to_string(path).context("Can't find key file")?;
 
