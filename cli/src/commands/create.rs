@@ -45,10 +45,8 @@ pub fn process_create_reward_center(
     let token_program = spl_token::id();
 
     let auction_house_pubkey = match &auction_house {
-        Some(cli_auction_house) => match Pubkey::from_str(&cli_auction_house) {
-            Ok(pubkey) => pubkey,
-            Err(_) => return Err(anyhow!("Failed to parse Pubkey from mint rewards string")),
-        },
+        Some(cli_auction_house) => Pubkey::from_str(&cli_auction_house)
+            .context("Failed to parse Pubkey from mint rewards string")?,
         None => find_auction_house_address(&keypair.pubkey(), &wsol_mint).0,
     };
 
@@ -81,7 +79,7 @@ pub fn process_create_reward_center(
     let reward_mint_keypair = Keypair::new();
     let rewards_mint_pubkey = match &mint_rewards {
         Some(rewards_mint) => Pubkey::from_str(&rewards_mint)
-            .context("Failed to parse Pubkey from auction house string")?,
+            .context("Failed to parse Pubkey from rewards mint string")?,
         None => reward_mint_keypair.pubkey(),
     };
 
@@ -144,10 +142,10 @@ pub fn process_create_reward_center(
 
     let create_reward_center_ix = create_reward_center(
         CreateRewardCenterAccounts {
-            wallet: todo!(),
-            mint: todo!(),
-            auction_house: todo!(),
-            auction_house_treasury_mint: todo!(),
+            wallet: keypair.pubkey(),
+            mint: rewards_mint_pubkey,
+            auction_house: auction_house_pubkey,
+            auction_house_treasury_mint: native_mint::id(),
         },
         hpl_reward_center::reward_centers::create::CreateRewardCenterParams {
             reward_rules: {

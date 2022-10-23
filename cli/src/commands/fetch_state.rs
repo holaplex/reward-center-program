@@ -1,30 +1,21 @@
 use std::str::FromStr;
 
 use anchor_lang::{prelude::Pubkey, AnchorDeserialize};
-use anyhow::{bail, Result as AnyhowResult};
+use anyhow::{Context, Result as AnyhowResult};
 use hpl_reward_center::state::RewardCenter;
-use log::{error, info};
+use log::info;
 use solana_client::rpc_client::RpcClient;
 
 pub fn process_fetch_reward_center_state(
     client: RpcClient,
     reward_center: String,
 ) -> AnyhowResult<()> {
-    let reward_center_pubkey = match Pubkey::from_str(&reward_center) {
-        Ok(pubkey) => pubkey,
-        Err(_) => {
-            error!("Reward center account does not exit");
-            bail!("Failed to parse Pubkey from mint rewards string")
-        },
-    };
+    let reward_center_pubkey = Pubkey::from_str(&reward_center)
+        .context("Failed to parse Pubkey from reward center string")?;
 
-    let reward_center_data = match client.get_account_data(&reward_center_pubkey) {
-        Ok(data) => data,
-        Err(_) => {
-            error!("Reward center account does not exit");
-            bail!("Reward center account does not exit")
-        },
-    };
+    let reward_center_data = client
+        .get_account_data(&reward_center_pubkey)
+        .context("Failed to get reward center data")?;
 
     let RewardCenter {
         auction_house,
