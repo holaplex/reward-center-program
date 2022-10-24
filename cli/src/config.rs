@@ -41,7 +41,7 @@ pub fn parse_keypair(
 ) -> Result<Keypair> {
     match (keypair_opt, sol_config_option) {
         (Some(keypair_path), _) => {
-            read_keypair(&keypair_path).context("Failed to read keypair file.")
+            read_keypair(keypair_path).context("Failed to read keypair file.")
         },
         (None, Some(ref sol_config)) => {
             read_keypair(&sol_config.keypair_path).context("Failed to read keypair file.")
