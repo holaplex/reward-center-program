@@ -85,8 +85,8 @@ pub fn generate_create_rewards_mint_ixs(
         get_associated_token_address(rewards_mint_authority, rewards_mint);
 
     let create_associated_token_mint_auth_ix = create_associated_token_account(
-        &mint_auth_rewards_mint_token_account,
         rewards_mint_authority,
+        &mint_auth_rewards_mint_token_account,
         rewards_mint,
     );
 
@@ -150,14 +150,13 @@ pub fn process_create_reward_center(
     let solana_options = parse_solana_configuration()?;
 
     let keypair = parse_keypair(keypair_path, &solana_options)?;
-    let wsol_mint = native_mint::id();
 
     let mut instructions: Vec<Instruction> = vec![];
 
     let auction_house_pubkey = match &auction_house {
         Some(cli_auction_house) => Pubkey::from_str(cli_auction_house)
             .context("Failed to parse Pubkey from mint rewards string")?,
-        None => find_auction_house_address(&keypair.pubkey(), &wsol_mint).0,
+        None => find_auction_house_address(&keypair.pubkey(), &native_mint::id()).0,
     };
 
     if auction_house.is_none() {
