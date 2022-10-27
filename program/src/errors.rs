@@ -31,7 +31,9 @@ pub enum RewardCenterError {
     SellerTokenAccountMismatch,
 
     // 6007
-    #[msg("The number of decimals for auction house treasury mint do not match reward mint decimals")]
+    #[msg(
+        "The number of decimals for auction house treasury mint do not match reward mint decimals"
+    )]
     RewardMintDecimalMismatch,
 
     // 6008
