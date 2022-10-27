@@ -222,7 +222,7 @@ pub fn process_create_reward_center(
         scopes: vec![
             AuthorityScope::Buy,
             AuthorityScope::Cancel,
-            AuthorityScope::Cancel,
+            AuthorityScope::Sell,
             AuthorityScope::Withdraw,
             AuthorityScope::PublicBuy,
             AuthorityScope::Deposit,
@@ -274,7 +274,7 @@ pub fn process_create_reward_center(
         },
         Err(error) => {
             error!("{:?}", error);
-            return Err(anyhow!("Failed to send the transaction"));
+            return Err(anyhow!("ailed to send the transaction"));
         }
     };
 
