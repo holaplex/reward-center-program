@@ -12,7 +12,7 @@ use std::{str::FromStr, time::Duration};
 use anyhow::Result;
 use clap::Parser;
 use log::{error, info, warn};
-use reward_center::{
+use reward_center_cli::{
     commands::{
         process_create_reward_center, process_edit_reward_center,
         process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,

@@ -1,5 +1,5 @@
 [package]
-name = "reward-center"
+name = "reward-center-cli"
 description = "A Metaplex auctioneer program that distributes spl token to the buyer and seller of NFTs"
 version = "0.1.0"
 edition = "2021"

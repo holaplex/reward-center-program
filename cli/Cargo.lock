@@ -2344,7 +2344,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "reward-center"
+name = "reward-center-cli"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
