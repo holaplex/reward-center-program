@@ -80,7 +80,7 @@ pub enum Command {
     },
 
     /// Fetch Treasury Balance
-    #[clap(name = "fetch-balance")]
+    #[clap(name = "balance")]
     FetchTreasuryBalance {
         /// Reward center address
         #[arg(short = 'R', long)]
@@ -92,7 +92,7 @@ pub enum Command {
     },
 
     /// Fetch Reward Center State details
-    #[clap(name = "fetch-state")]
+    #[clap(name = "show")]
     FetchRewardCenterState {
         /// Reward center address
         #[arg(short = 'R', long)]
