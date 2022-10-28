@@ -13,6 +13,7 @@ use mpl_auction_house::{
     utils::assert_metadata_valid,
     AuctionHouse, Auctioneer,
 };
+use solana_program::system_program;
 
 use crate::{
     constants::{OFFER, REWARD_CENTER},
@@ -42,8 +43,7 @@ pub struct CloseOffer<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref()
         ],
-        bump = offer.bump,
-        close = wallet
+        bump = offer.bump
     )]
     pub offer: Box<Account<'info, Offer>>,
 
@@ -158,6 +158,7 @@ pub fn handler(
     let token_account = &ctx.accounts.token_account;
     let wallet = &ctx.accounts.wallet;
     let offer = &ctx.accounts.offer;
+    let offer_account_info = offer.to_account_info();
     let token_size = offer.token_size;
     let buyer_price = offer.price;
     let auction_house_key = auction_house.key();
@@ -236,6 +237,9 @@ pub fn handler(
         &cancel_offer_account_infos,
         reward_center_signer_seeds,
     )?;
+
+    offer_account_info.assign(&system_program::id());
+    offer_account_info.realloc(0, false)?;
 
     Ok(())
 }
