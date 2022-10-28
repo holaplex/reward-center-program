@@ -303,14 +303,7 @@
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "closeListingParams",
-          "type": {
-            "defined": "CloseListingParams"
-          }
-        }
-      ]
+      "args": []
     },
     {
       "name": "createOffer",
@@ -813,18 +806,6 @@
       }
     },
     {
-      "name": "CloseListingParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "tokenSize",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateListingParams",
       "type": {
         "kind": "struct",
@@ -872,14 +853,6 @@
           {
             "name": "escrowPaymentBump",
             "type": "u8"
-          },
-          {
-            "name": "buyerPrice",
-            "type": "u64"
-          },
-          {
-            "name": "tokenSize",
-            "type": "u64"
           }
         ]
       }

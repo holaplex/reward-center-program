@@ -10,7 +10,7 @@ use hpl_reward_center::{
     execute_sale::ExecuteSaleParams,
     id, instruction,
     listings::{
-        close::CloseListingParams, create::CreateListingParams, update::UpdateListingParams,
+        create::CreateListingParams, update::UpdateListingParams,
     },
     offers::{close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
@@ -175,7 +175,7 @@ pub fn close_listing(
         &token_account,
         &treasury_mint,
         &token_mint,
-        1,
+        token_size,
     );
 
     let accounts = rewards_accounts::CloseListing {
@@ -195,10 +195,7 @@ pub fn close_listing(
     }
     .to_account_metas(None);
 
-    let data = instruction::CloseListing {
-        close_listing_params: CloseListingParams { token_size },
-    }
-    .data();
+    let data = instruction::CloseListing {}.data();
 
     Instruction {
         program_id: id(),
@@ -378,9 +375,7 @@ pub fn close_offer(
 
     let data = instruction::CloseOffer {
         close_offer_params: CloseOfferParams {
-            buyer_price,
             escrow_payment_bump,
-            token_size,
         },
     }
     .data();

@@ -53,9 +53,8 @@ pub mod reward_center {
 
     pub fn close_listing(
         ctx: Context<CloseListing>,
-        close_listing_params: CloseListingParams,
     ) -> Result<()> {
-        listings::close::handler(ctx, close_listing_params)
+        listings::close::handler(ctx)
     }
 
     pub fn create_offer(
