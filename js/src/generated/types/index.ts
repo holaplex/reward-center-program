@@ -1,4 +1,3 @@
-export * from './CloseListingParams';
 export * from './CloseOfferParams';
 export * from './CreateListingParams';
 export * from './CreateOfferParams';

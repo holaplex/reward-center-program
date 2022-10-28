@@ -8,30 +8,16 @@
 import * as splToken from '@solana/spl-token';
 import * as beet from '@metaplex-foundation/beet';
 import * as web3 from '@solana/web3.js';
-import { CloseListingParams, closeListingParamsBeet } from '../types/CloseListingParams';
 
 /**
  * @category Instructions
  * @category CloseListing
  * @category generated
  */
-export type CloseListingInstructionArgs = {
-  closeListingParams: CloseListingParams;
-};
-/**
- * @category Instructions
- * @category CloseListing
- * @category generated
- */
-export const closeListingStruct = new beet.BeetArgsStruct<
-  CloseListingInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */;
-  }
->(
-  [
-    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['closeListingParams', closeListingParamsBeet],
-  ],
+export const closeListingStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number[] /* size: 8 */;
+}>(
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
   'CloseListingInstructionArgs',
 );
 /**
@@ -76,20 +62,16 @@ export const closeListingInstructionDiscriminator = [33, 15, 192, 81, 78, 175, 1
  * Creates a _CloseListing_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param args to provide as instruction data to the program
- *
  * @category Instructions
  * @category CloseListing
  * @category generated
  */
 export function createCloseListingInstruction(
   accounts: CloseListingInstructionAccounts,
-  args: CloseListingInstructionArgs,
   programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
   const [data] = closeListingStruct.serialize({
     instructionDiscriminator: closeListingInstructionDiscriminator,
-    ...args,
   });
   const keys: web3.AccountMeta[] = [
     {

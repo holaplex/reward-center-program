@@ -15,13 +15,8 @@ use mpl_auction_house::{
 };
 use solana_program::program::invoke_signed;
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CloseListingParams {
-    pub token_size: u64,
-}
 
 #[derive(Accounts, Clone)]
-#[instruction(close_listing_params: CloseListingParams)]
 pub struct CloseListing<'info> {
     /// User wallet account.
     #[account(mut)]
@@ -118,12 +113,12 @@ pub struct CloseListing<'info> {
 
 pub fn handler(
     ctx: Context<CloseListing>,
-    CloseListingParams { token_size }: CloseListingParams,
 ) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
     let metadata = &ctx.accounts.metadata;
     let token_account = &ctx.accounts.token_account;
+    let listing = &ctx.accounts.listing;
 
     let auction_house_key = auction_house.key();
 
@@ -150,7 +145,7 @@ pub fn handler(
 
     let close_listing_params = AuctioneerCancelParams {
         buyer_price: u64::MAX,
-        token_size,
+        token_size: listing.token_size,
     };
 
     let (cancel_listing_ix, cancel_listing_account_infos) =

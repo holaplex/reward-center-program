@@ -24,8 +24,6 @@ use solana_program::program::invoke_signed;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CloseOfferParams {
     pub escrow_payment_bump: u8,
-    pub buyer_price: u64,
-    pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
@@ -151,8 +149,6 @@ pub struct CloseOffer<'info> {
 pub fn handler(
     ctx: Context<CloseOffer>,
     CloseOfferParams {
-        buyer_price,
-        token_size,
         escrow_payment_bump,
     }: CloseOfferParams,
 ) -> Result<()> {
@@ -161,6 +157,9 @@ pub fn handler(
     let metadata = &ctx.accounts.metadata;
     let token_account = &ctx.accounts.token_account;
     let wallet = &ctx.accounts.wallet;
+    let offer = &ctx.accounts.offer;
+    let token_size = offer.token_size;
+    let buyer_price = offer.price;
     let auction_house_key = auction_house.key();
 
     assert_metadata_valid(metadata, token_account)?;
