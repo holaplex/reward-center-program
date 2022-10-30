@@ -51,9 +51,7 @@ pub mod reward_center {
         listings::update::handler(ctx, update_listing_params)
     }
 
-    pub fn close_listing(
-        ctx: Context<CloseListing>,
-    ) -> Result<()> {
+    pub fn close_listing(ctx: Context<CloseListing>) -> Result<()> {
         listings::close::handler(ctx)
     }
 

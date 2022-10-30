@@ -15,7 +15,6 @@ use mpl_auction_house::{
 };
 use solana_program::program::invoke_signed;
 
-
 #[derive(Accounts, Clone)]
 pub struct CloseListing<'info> {
     /// User wallet account.
@@ -111,9 +110,7 @@ pub struct CloseListing<'info> {
     pub auction_house_program: Program<'info, AuctionHouseProgram>,
 }
 
-pub fn handler(
-    ctx: Context<CloseListing>,
-) -> Result<()> {
+pub fn handler(ctx: Context<CloseListing>) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
     let metadata = &ctx.accounts.metadata;
