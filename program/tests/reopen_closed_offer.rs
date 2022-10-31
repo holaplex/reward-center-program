@@ -343,18 +343,7 @@ async fn reopned_closed_offer_success() {
     let reopen_offer_ix = create_offer(reopen_offer_accounts, reopen_offer_params);
 
     let tx = Transaction::new_signed_with_payer(
-        &[close_offer_ix],
-        Some(buyer_pubkey),
-        &[&buyer],
-        context.last_blockhash,
-    );
-
-    let tx_response = context.banks_client.process_transaction(tx).await;
-
-    assert!(tx_response.is_ok());
-
-    let tx = Transaction::new_signed_with_payer(
-        &[reopen_offer_ix],
+        &[close_offer_ix, reopen_offer_ix],
         Some(buyer_pubkey),
         &[&buyer],
         context.last_blockhash,

@@ -9,9 +9,7 @@ use hpl_reward_center::{
     accounts as rewards_accounts,
     execute_sale::ExecuteSaleParams,
     id, instruction,
-    listings::{
-        create::CreateListingParams, update::UpdateListingParams,
-    },
+    listings::{create::CreateListingParams, update::UpdateListingParams},
     offers::{close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
