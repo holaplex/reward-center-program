@@ -30,3 +30,9 @@ pub struct ExecuteSaleData {
     pub token_size: u64,
     pub reward_mint: Pubkey,
 }
+
+pub struct BuyListingData {
+    pub price: u64,
+    pub token_size: u64,
+    pub reward_mint: Pubkey,
+}

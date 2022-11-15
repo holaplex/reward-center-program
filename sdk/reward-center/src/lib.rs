@@ -9,7 +9,7 @@ use hpl_reward_center::{
     accounts as rewards_accounts,
     execute_sale::ExecuteSaleParams,
     id, instruction,
-    listings::{create::CreateListingParams, update::UpdateListingParams},
+    listings::{buy::BuyListingParams, create::CreateListingParams, update::UpdateListingParams},
     offers::{close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
@@ -493,6 +493,126 @@ pub fn execute_sale(
             free_trade_state_bump,
             program_as_signer_bump,
             seller_trade_state_bump,
+        },
+    }
+    .data();
+
+    Instruction {
+        program_id: id(),
+        accounts,
+        data,
+    }
+}
+
+pub fn buy_listing(
+    BuyListingAccounts {
+        transfer_authority,
+        payment_account,
+        auction_house,
+        seller,
+        buyer,
+        authority,
+        treasury_mint,
+        token_mint,
+        token_account,
+        metadata,
+        seller_payment_receipt_account,
+        buyer_receipt_token_account,
+    }: BuyListingAccounts,
+    BuyListingData {
+        token_size,
+        price,
+        reward_mint,
+    }: BuyListingData,
+) -> Instruction {
+    let (reward_center, _) = find_reward_center_address(&auction_house);
+    let (listing, _) = find_listing_address(&seller, &metadata, &reward_center);
+
+    let (auction_house_fee_account, _) =
+        mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
+    let (auction_house_treasury, _) = find_auction_house_treasury_address(&auction_house);
+    let (ah_auctioneer_pda, _) =
+        mpl_auction_house::pda::find_auctioneer_pda(&auction_house, &reward_center);
+    let (escrow_payment_account, escrow_payment_bump) =
+        mpl_auction_house::pda::find_escrow_payment_address(&auction_house, &buyer);
+
+    let reward_center_reward_token_account =
+        get_associated_token_address(&reward_center, &reward_mint);
+    let buyer_reward_token_account = get_associated_token_address(&buyer, &reward_mint);
+    let seller_reward_token_account = get_associated_token_address(&seller, &reward_mint);
+
+    let (buyer_trade_state, buyer_trade_state_bump) = find_public_bid_trade_state_address(
+        &buyer,
+        &auction_house,
+        &treasury_mint,
+        &token_mint,
+        price,
+        token_size,
+    );
+
+    let (free_seller_trade_state, free_trade_state_bump) = find_trade_state_address(
+        &seller,
+        &auction_house,
+        &token_account,
+        &treasury_mint,
+        &token_mint,
+        0,
+        token_size,
+    );
+
+    let (seller_trade_state, seller_trade_state_bump) = find_auctioneer_trade_state_address(
+        &seller,
+        &auction_house,
+        &token_account,
+        &treasury_mint,
+        &token_mint,
+        token_size,
+    );
+
+    let (program_as_signer, program_as_signer_bump) =
+        mpl_auction_house::pda::find_program_as_signer_address();
+
+    let accounts = rewards_accounts::BuyListing {
+        buyer,
+        payment_account,
+        transfer_authority,
+        buyer_reward_token_account,
+        seller,
+        seller_reward_token_account,
+        listing,
+        authority,
+        treasury_mint,
+        token_mint,
+        token_account,
+        metadata,
+        buyer_receipt_token_account,
+        seller_payment_receipt_account,
+        auction_house_fee_account,
+        ah_auctioneer_pda,
+        escrow_payment_account,
+        reward_center,
+        reward_center_reward_token_account,
+        auction_house,
+        auction_house_treasury,
+        buyer_trade_state,
+        free_seller_trade_state,
+        seller_trade_state,
+        program_as_signer,
+        auction_house_program: mpl_auction_house::id(),
+        ata_program: spl_associated_token_account::id(),
+        token_program: spl_token::id(),
+        system_program: system_program::id(),
+        rent: sysvar::rent::id(),
+    }
+    .to_account_metas(None);
+
+    let data = instruction::BuyListing {
+        buy_listing_params: BuyListingParams {
+            escrow_payment_bump,
+            free_trade_state_bump,
+            program_as_signer_bump,
+            seller_trade_state_bump,
+            buyer_trade_state_bump,
         },
     }
     .data();

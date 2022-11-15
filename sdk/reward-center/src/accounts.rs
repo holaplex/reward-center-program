@@ -75,3 +75,18 @@ pub struct ExecuteSaleAccounts {
     pub seller_payment_receipt_account: Pubkey,
     pub buyer_receipt_token_account: Pubkey,
 }
+
+pub struct BuyListingAccounts {
+    pub buyer: Pubkey,
+    pub transfer_authority: Pubkey,
+    pub payment_account: Pubkey,
+    pub seller: Pubkey,
+    pub authority: Pubkey,
+    pub auction_house: Pubkey,
+    pub treasury_mint: Pubkey,
+    pub token_mint: Pubkey,
+    pub token_account: Pubkey,
+    pub metadata: Pubkey,
+    pub seller_payment_receipt_account: Pubkey,
+    pub buyer_receipt_token_account: Pubkey,
+}
