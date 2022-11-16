@@ -1,4 +1,3 @@
-pub mod accept_offer;
 pub mod constants;
 pub mod errors;
 pub mod execute_sale;
@@ -13,10 +12,14 @@ use anchor_lang::prelude::*;
 use mpl_auction_house::instruction::AuctioneerSell as AuctioneerSellParams;
 
 use crate::{
-    accept_offer::*,
     execute_sale::*,
+<<<<<<< HEAD
     listings::{buy::*, close::*, create::*, update::*},
     offers::{close::*, create::*},
+=======
+    listings::{close::*, create::*, update::*},
+    offers::{accept::*, close::*, create::*},
+>>>>>>> 810f5d8 (fix: folder restructure)
     reward_centers::{create::*, edit::*},
 };
 
@@ -70,6 +73,14 @@ pub mod reward_center {
         close_offer_params: CloseOfferParams,
     ) -> Result<()> {
         offers::close::handler(ctx, close_offer_params)
+    }
+
+    pub fn accept_offer(
+        ctx: Context<AcceptOffer>,
+        execute_sale_params: ExecuteSaleParams,
+        auctioneer_sell_params: AuctioneerSellParams,
+    ) -> Result<()> {
+        offers::accept::handler(ctx, execute_sale_params, auctioneer_sell_params)
     }
 
     pub fn execute_sale(
