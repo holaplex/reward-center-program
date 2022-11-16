@@ -278,81 +278,8 @@ pub struct ExecuteSale<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub struct ExecuteSaleIXInput<'info> {
-    seller_listing_price: u64,
-    seller_listing_token_size: u64,
-    auction_house: &'info Box<Account<'info, AuctionHouse>>,
-    reward_center: &'info Box<Account<'info, RewardCenter>>,
-    metadata: &'info UncheckedAccount<'info>,
-    token_account: &'info Box<Account<'info, TokenAccount>>,
-    reward_center_reward_token_account: &'info Box<Account<'info, TokenAccount>>,
-    buyer_reward_token_account: &'info Box<Account<'info, TokenAccount>>,
-    seller_reward_token_account: &'info Box<Account<'info, TokenAccount>>,
-
-    // Other account infos needed for CPI
-    buyer_account_info: AccountInfo<'info>,
-    seller_account_info: AccountInfo<'info>,
-    ah_auctioneer_pda_account_info: AccountInfo<'info>,
-    auction_house_account_info: AccountInfo<'info>,
-    auction_house_fee_account_info: AccountInfo<'info>,
-    auction_house_treasury_account_info: AccountInfo<'info>,
-    buyer_receipt_token_account_info: AccountInfo<'info>,
-    seller_payment_receipt_account_info: AccountInfo<'info>,
-    buyer_trade_state_account_info: AccountInfo<'info>,
-    free_trade_state_account_info: AccountInfo<'info>,
-    seller_trade_state_account_info: AccountInfo<'info>,
-    escrow_payment_account_account_info: AccountInfo<'info>,
-    program_as_signer_account_info: AccountInfo<'info>,
-    authority_account_info: AccountInfo<'info>,
-    token_mint_account_info: AccountInfo<'info>,
-    treasury_mint_account_info: AccountInfo<'info>,
-
-    // Program accounts
-    system_program_account_info: AccountInfo<'info>,
-    token_program_account_info: AccountInfo<'info>,
-    ata_program_account_info: AccountInfo<'info>,
-    rent_account_info: AccountInfo<'info>,
-}
-
-/// `execute_sale_ix` is an inner instruction helper that takes in all the needed of inputs and parameters,
-/// allowing internal calls to `execute_sale` to be made.
-pub fn inner_ix<'info>(
-    ExecuteSaleIXInput {
-        seller_listing_price: price,
-        seller_listing_token_size: token_size,
-        auction_house,
-        reward_center,
-        reward_center_reward_token_account,
-        buyer_reward_token_account,
-        seller_reward_token_account,
-        metadata,
-        token_account,
-
-        // Account infos,
-        buyer_account_info,
-        seller_account_info,
-        ah_auctioneer_pda_account_info,
-        auction_house_account_info,
-        auction_house_fee_account_info,
-        auction_house_treasury_account_info,
-        buyer_receipt_token_account_info,
-        seller_payment_receipt_account_info,
-        buyer_trade_state_account_info,
-        free_trade_state_account_info,
-        seller_trade_state_account_info,
-        escrow_payment_account_account_info,
-        program_as_signer_account_info,
-        authority_account_info,
-        token_mint_account_info,
-        treasury_mint_account_info,
-
-        // Program infos
-        system_program_account_info,
-        token_program_account_info,
-        ata_program_account_info,
-        rent_account_info,
-        ..
-    }: ExecuteSaleIXInput<'info>,
+pub fn handler(
+    ctx: Context<ExecuteSale>,
     ExecuteSaleParams {
         escrow_payment_bump,
         free_trade_state_bump,
@@ -360,8 +287,14 @@ pub fn inner_ix<'info>(
         ..
     }: ExecuteSaleParams,
 ) -> Result<()> {
-    msg!("execute_sale_ix");
-    let reward_center_account_info = reward_center.to_account_info();
+    let seller_listing = &mut ctx.accounts.listing;
+
+    let auction_house = &ctx.accounts.auction_house;
+    let reward_center = &ctx.accounts.reward_center;
+    let metadata = &ctx.accounts.metadata;
+    let token_account = &ctx.accounts.token_account;
+    let price = seller_listing.price;
+    let token_size = seller_listing.token_size;
 
     let auction_house_key = auction_house.key();
 
@@ -375,29 +308,32 @@ pub fn inner_ix<'info>(
 
     // Auction house CPI
     let execute_sale_ctx_accounts = AuctioneerExecuteSale {
-        buyer: buyer_account_info,
-        seller: seller_account_info,
-        token_account: token_account.to_account_info(),
-        ah_auctioneer_pda: ah_auctioneer_pda_account_info,
-        auction_house: auction_house_account_info,
-        auction_house_fee_account: auction_house_fee_account_info,
-        auction_house_treasury: auction_house_treasury_account_info,
-        buyer_receipt_token_account: buyer_receipt_token_account_info,
-        seller_payment_receipt_account: seller_payment_receipt_account_info,
-        buyer_trade_state: buyer_trade_state_account_info,
-        free_trade_state: free_trade_state_account_info,
-        seller_trade_state: seller_trade_state_account_info,
-        escrow_payment_account: escrow_payment_account_account_info,
-        program_as_signer: program_as_signer_account_info,
-        authority: authority_account_info,
-        metadata: metadata.to_account_info(),
-        token_mint: token_mint_account_info,
-        treasury_mint: treasury_mint_account_info,
-        auctioneer_authority: reward_center_account_info,
-        system_program: system_program_account_info,
-        token_program: token_program_account_info,
-        ata_program: ata_program_account_info,
-        rent: rent_account_info,
+        buyer: ctx.accounts.buyer.to_account_info(),
+        seller: ctx.accounts.seller.to_account_info(),
+        token_account: ctx.accounts.token_account.to_account_info(),
+        ah_auctioneer_pda: ctx.accounts.ah_auctioneer_pda.to_account_info(),
+        auction_house: ctx.accounts.auction_house.to_account_info(),
+        auction_house_fee_account: ctx.accounts.auction_house_fee_account.to_account_info(),
+        auction_house_treasury: ctx.accounts.auction_house_treasury.to_account_info(),
+        buyer_receipt_token_account: ctx.accounts.buyer_receipt_token_account.to_account_info(),
+        seller_payment_receipt_account: ctx
+            .accounts
+            .seller_payment_receipt_account
+            .to_account_info(),
+        buyer_trade_state: ctx.accounts.buyer_trade_state.to_account_info(),
+        free_trade_state: ctx.accounts.free_seller_trade_state.to_account_info(),
+        seller_trade_state: ctx.accounts.seller_trade_state.to_account_info(),
+        escrow_payment_account: ctx.accounts.escrow_payment_account.to_account_info(),
+        program_as_signer: ctx.accounts.program_as_signer.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+        metadata: ctx.accounts.metadata.to_account_info(),
+        token_mint: ctx.accounts.token_mint.to_account_info(),
+        treasury_mint: ctx.accounts.treasury_mint.to_account_info(),
+        auctioneer_authority: ctx.accounts.reward_center.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+        token_program: ctx.accounts.token_program.to_account_info(),
+        ata_program: ctx.accounts.ata_program.to_account_info(),
+        rent: ctx.accounts.rent.to_account_info(),
     };
 
     let execute_sale_params = AuctioneerExecuteSaleParams {
@@ -412,7 +348,7 @@ pub fn inner_ix<'info>(
         make_auctioneer_instruction(AuctioneerInstructionArgs {
             accounts: execute_sale_ctx_accounts,
             instruction_data: execute_sale_params.data(),
-            auctioneer_authority: reward_center.key(),
+            auctioneer_authority: ctx.accounts.reward_center.key(),
         });
 
     invoke_signed(
@@ -424,15 +360,18 @@ pub fn inner_ix<'info>(
     let (seller_payout, buyer_payout) = reward_center.payouts(price)?;
 
     // Buyer transfer
-    let reward_center_reward_token_balance = reward_center_reward_token_account.amount;
+    let reward_center_reward_token_balance = ctx.accounts.reward_center_reward_token_account.amount;
     if reward_center_reward_token_balance >= buyer_payout {
         transfer(
             CpiContext::new_with_signer(
-                token_program_account_info,
+                ctx.accounts.token_program.to_account_info(),
                 Transfer {
-                    authority: reward_center.to_account_info(),
-                    from: reward_center_reward_token_account.to_account_info(),
-                    to: buyer_reward_token_account.to_account_info(),
+                    authority: ctx.accounts.reward_center.to_account_info(),
+                    from: ctx
+                        .accounts
+                        .reward_center_reward_token_account
+                        .to_account_info(),
+                    to: ctx.accounts.buyer_reward_token_account.to_account_info(),
                 },
                 reward_center_signer_seeds,
             ),
@@ -441,16 +380,19 @@ pub fn inner_ix<'info>(
     }
 
     // Seller transfer
-    reward_center_reward_token_account.reload()?;
-    let reward_center_reward_token_balance = reward_center_reward_token_account.amount;
+    ctx.accounts.reward_center_reward_token_account.reload()?;
+    let reward_center_reward_token_balance = ctx.accounts.reward_center_reward_token_account.amount;
     if reward_center_reward_token_balance >= seller_payout {
         transfer(
             CpiContext::new_with_signer(
-                token_program_account_info,
+                ctx.accounts.token_program.to_account_info(),
                 Transfer {
-                    authority: reward_center.to_account_info(),
-                    from: reward_center_reward_token_account.to_account_info(),
-                    to: seller_reward_token_account.to_account_info(),
+                    authority: ctx.accounts.reward_center.to_account_info(),
+                    from: ctx
+                        .accounts
+                        .reward_center_reward_token_account
+                        .to_account_info(),
+                    to: ctx.accounts.seller_reward_token_account.to_account_info(),
                 },
                 reward_center_signer_seeds,
             ),
@@ -458,75 +400,5 @@ pub fn inner_ix<'info>(
         )?
     };
 
-    Ok(())
-}
-
-pub fn handler(ctx: Context<ExecuteSale>, params: ExecuteSaleParams) -> Result<()> {
-    let seller_listing = &ctx.accounts.listing;
-
-    let auction_house = &ctx.accounts.auction_house;
-    let reward_center = &ctx.accounts.reward_center;
-    let metadata = &ctx.accounts.metadata;
-    let token_account = &ctx.accounts.token_account;
-    let reward_center_reward_token_account = &ctx.accounts.reward_center_reward_token_account;
-    let buyer_reward_token_account = &ctx.accounts.buyer_reward_token_account;
-    let seller_reward_token_account = &ctx.accounts.seller_reward_token_account;
-
-    let price = seller_listing.price;
-    let token_size = seller_listing.token_size;
-
-    inner_ix(
-        ExecuteSaleIXInput {
-            seller_listing_price: seller_listing.price,
-            seller_listing_token_size: seller_listing.token_size,
-            auction_house,
-            reward_center,
-            metadata,
-            token_account,
-            reward_center_reward_token_account,
-            buyer_reward_token_account,
-            seller_reward_token_account,
-
-            // Account infos for CPI
-            buyer_account_info: ctx.accounts.buyer.to_account_info(),
-            seller_account_info: ctx.accounts.seller.to_account_info(),
-            ah_auctioneer_pda_account_info: ctx.accounts.ah_auctioneer_pda.to_account_info(),
-            auction_house_account_info: ctx.accounts.auction_house.to_account_info(),
-            auction_house_fee_account_info: ctx
-                .accounts
-                .auction_house_fee_account
-                .to_account_info(),
-            auction_house_treasury_account_info: ctx
-                .accounts
-                .auction_house_treasury
-                .to_account_info(),
-            buyer_receipt_token_account_info: ctx
-                .accounts
-                .buyer_receipt_token_account
-                .to_account_info(),
-            seller_payment_receipt_account_info: ctx
-                .accounts
-                .seller_payment_receipt_account
-                .to_account_info(),
-            buyer_trade_state_account_info: ctx.accounts.buyer_trade_state.to_account_info(),
-            free_trade_state_account_info: ctx.accounts.free_seller_trade_state.to_account_info(),
-            seller_trade_state_account_info: ctx.accounts.seller_trade_state.to_account_info(),
-            escrow_payment_account_account_info: ctx
-                .accounts
-                .escrow_payment_account
-                .to_account_info(),
-            program_as_signer_account_info: ctx.accounts.program_as_signer.to_account_info(),
-            authority_account_info: ctx.accounts.authority.to_account_info(),
-            token_mint_account_info: ctx.accounts.token_mint.to_account_info(),
-            treasury_mint_account_info: ctx.accounts.treasury_mint.to_account_info(),
-
-            // Program accounts
-            system_program_account_info: ctx.accounts.system_program.to_account_info(),
-            token_program_account_info: ctx.accounts.token_program.to_account_info(),
-            ata_program_account_info: ctx.accounts.ata_program.to_account_info(),
-            rent_account_info: ctx.accounts.rent.to_account_info(),
-        },
-        params,
-    )?;
     Ok(())
 }

@@ -10,8 +10,10 @@ pub mod reward_centers;
 pub mod state;
 
 use anchor_lang::prelude::*;
+use mpl_auction_house::instruction::AuctioneerSell as AuctioneerSellParams;
 
 use crate::{
+    accept_offer::*,
     execute_sale::*,
     listings::{buy::*, close::*, create::*, update::*},
     offers::{close::*, create::*},
@@ -82,5 +84,13 @@ pub mod reward_center {
         buy_listing_params: BuyListingParams,
     ) -> Result<()> {
         listings::buy::handler(ctx, buy_listing_params)
+    }
+
+    pub fn accept_offer(
+        ctx: Context<AcceptOffer>,
+        execute_sale_params: ExecuteSaleParams,
+        auctioneer_sell_params: AuctioneerSellParams,
+    ) -> Result<()> {
+        accept_offer::handler(ctx, execute_sale_params, auctioneer_sell_params)
     }
 }
