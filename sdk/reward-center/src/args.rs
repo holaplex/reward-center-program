@@ -25,13 +25,13 @@ pub struct CloseOfferData {
     pub token_size: u64,
 }
 
-pub struct ExecuteSaleData {
+pub struct BuyListingData {
     pub price: u64,
     pub token_size: u64,
     pub reward_mint: Pubkey,
 }
 
-pub struct BuyListingData {
+pub struct AcceptOfferData {
     pub price: u64,
     pub token_size: u64,
     pub reward_mint: Pubkey,

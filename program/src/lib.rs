@@ -1,6 +1,5 @@
 pub mod constants;
 pub mod errors;
-pub mod execute_sale;
 pub mod listings;
 pub mod metaplex_cpi;
 pub mod offers;
@@ -9,17 +8,10 @@ pub mod reward_centers;
 pub mod state;
 
 use anchor_lang::prelude::*;
-use mpl_auction_house::instruction::AuctioneerSell as AuctioneerSellParams;
 
 use crate::{
-    execute_sale::*,
-<<<<<<< HEAD
     listings::{buy::*, close::*, create::*, update::*},
-    offers::{close::*, create::*},
-=======
-    listings::{close::*, create::*, update::*},
     offers::{accept::*, close::*, create::*},
->>>>>>> 810f5d8 (fix: folder restructure)
     reward_centers::{create::*, edit::*},
 };
 
@@ -75,21 +67,6 @@ pub mod reward_center {
         offers::close::handler(ctx, close_offer_params)
     }
 
-    pub fn accept_offer(
-        ctx: Context<AcceptOffer>,
-        execute_sale_params: ExecuteSaleParams,
-        auctioneer_sell_params: AuctioneerSellParams,
-    ) -> Result<()> {
-        offers::accept::handler(ctx, execute_sale_params, auctioneer_sell_params)
-    }
-
-    pub fn execute_sale(
-        ctx: Context<ExecuteSale>,
-        execute_sale_params: ExecuteSaleParams,
-    ) -> Result<()> {
-        execute_sale::handler(ctx, execute_sale_params)
-    }
-
     pub fn buy_listing<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyListing<'info>>,
         buy_listing_params: BuyListingParams,
@@ -97,11 +74,10 @@ pub mod reward_center {
         listings::buy::handler(ctx, buy_listing_params)
     }
 
-    pub fn accept_offer(
-        ctx: Context<AcceptOffer>,
-        execute_sale_params: ExecuteSaleParams,
-        auctioneer_sell_params: AuctioneerSellParams,
+    pub fn accept_offer<'info>(
+        ctx: Context<'_, '_, '_, 'info, AcceptOffer<'info>>,
+        accept_offer_params: AcceptOfferParams,
     ) -> Result<()> {
-        accept_offer::handler(ctx, execute_sale_params, auctioneer_sell_params)
+        offers::accept::handler(ctx, accept_offer_params)
     }
 }

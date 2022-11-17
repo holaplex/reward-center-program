@@ -62,10 +62,11 @@ pub struct CloseOfferAccounts {
     pub auction_house: Pubkey,
 }
 
-pub struct ExecuteSaleAccounts {
+pub struct BuyListingAccounts {
     pub buyer: Pubkey,
+    pub transfer_authority: Pubkey,
+    pub payment_account: Pubkey,
     pub seller: Pubkey,
-    pub payer: Pubkey,
     pub authority: Pubkey,
     pub auction_house: Pubkey,
     pub treasury_mint: Pubkey,
@@ -76,10 +77,8 @@ pub struct ExecuteSaleAccounts {
     pub buyer_receipt_token_account: Pubkey,
 }
 
-pub struct BuyListingAccounts {
+pub struct AcceptOfferAccounts {
     pub buyer: Pubkey,
-    pub transfer_authority: Pubkey,
-    pub payment_account: Pubkey,
     pub seller: Pubkey,
     pub authority: Pubkey,
     pub auction_house: Pubkey,
