@@ -76,8 +76,8 @@ pub mod reward_center {
         execute_sale::handler(ctx, execute_sale_params)
     }
 
-    pub fn buy_listing(
-        ctx: Context<BuyListing>,
+    pub fn buy_listing<'info>(
+        ctx: Context<'_, '_, '_, 'info, BuyListing<'info>>,
         buy_listing_params: BuyListingParams,
     ) -> Result<()> {
         listings::buy::handler(ctx, buy_listing_params)

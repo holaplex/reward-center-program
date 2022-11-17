@@ -25,7 +25,7 @@ use hpl_reward_center_sdk::{
 use mpl_testing_utils::solana::airdrop;
 use solana_program_test::*;
 use solana_sdk::{program_pack::Pack, signature::Keypair, system_instruction::create_account};
-use std::{println, str::FromStr};
+use std::str::FromStr;
 
 use mpl_token_metadata::state::Collection;
 
@@ -248,7 +248,7 @@ async fn close_listing_success() {
     );
 
     let tx_response = context.banks_client.process_transaction(tx).await;
-    println!("{:?}", tx_response);
+
     assert!(tx_response.is_ok());
 
     let tx = Transaction::new_signed_with_payer(

@@ -288,8 +288,8 @@ pub struct BuyListing<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn handler(
-    ctx: Context<BuyListing>,
+pub fn handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, BuyListing<'info>>,
     BuyListingParams {
         buyer_trade_state_bump,
         escrow_payment_bump,
@@ -303,6 +303,7 @@ pub fn handler(
     let auction_house = &ctx.accounts.auction_house;
     let token_account = &ctx.accounts.token_account;
     let listing = &ctx.accounts.listing;
+    let remaining_accounts = ctx.remaining_accounts;
 
     let listing_price = listing.price;
     let token_size = listing.token_size;
@@ -413,11 +414,13 @@ pub fn handler(
             auctioneer_authority: ctx.accounts.reward_center.key(),
         });
 
-    invoke_signed(
-        &execute_sale_ix,
-        &execute_sale_account_infos,
-        reward_center_signer_seeds,
-    )?;
+    // Append the remaining accounts to execute_sale account infos which will be the creators accounts for paying royalties
+    let account_infos = execute_sale_account_infos
+        .into_iter()
+        .chain(remaining_accounts.iter().cloned())
+        .collect::<Vec<AccountInfo>>();
+
+    invoke_signed(&execute_sale_ix, &account_infos, reward_center_signer_seeds)?;
 
     let (seller_payout, buyer_payout) = reward_center.payouts(listing_price)?;
 

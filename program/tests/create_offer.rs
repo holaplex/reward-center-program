@@ -24,7 +24,7 @@ use hpl_reward_center_sdk::{
 use mpl_testing_utils::solana::airdrop;
 use solana_program_test::*;
 use solana_sdk::{program_pack::Pack, signature::Keypair, system_instruction::create_account};
-use std::{println, str::FromStr};
+use std::str::FromStr;
 
 use mpl_token_metadata::state::Collection;
 
