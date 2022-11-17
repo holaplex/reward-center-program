@@ -296,7 +296,6 @@ async fn create_offer_success() {
     );
 
     let tx_response = context.banks_client.process_transaction(tx).await;
-
     assert!(tx_response.is_ok());
 
     ()
