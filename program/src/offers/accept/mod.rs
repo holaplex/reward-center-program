@@ -53,7 +53,8 @@ pub struct AcceptOffer<'info> {
     /// The token account to receive the seller rewards.
     #[account(
         mut,
-        constraint = reward_center.token_mint == buyer_reward_token_account.mint @ RewardCenterError::MintMismatch,
+        // Transitive equality check enforced by check on buyer_reward_token_account
+        constraint = buyer_reward_token_account.mint == seller_reward_token_account.mint @ RewardCenterError::MintMismatch,
         constraint = seller_reward_token_account.owner == seller.key() @ RewardCenterError::SellerTokenAccountMismatch,
     )]
     pub seller_reward_token_account: Box<Account<'info, TokenAccount>>,
