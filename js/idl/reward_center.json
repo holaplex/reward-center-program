@@ -1,5 +1,5 @@
 {
-  "version": "0.2.2",
+  "version": "0.2.3",
   "name": "reward_center",
   "instructions": [
     {
@@ -517,11 +517,21 @@
       ]
     },
     {
-      "name": "executeSale",
+      "name": "buyListing",
       "accounts": [
         {
           "name": "buyer",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "paymentAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "transferAuthority",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -543,16 +553,6 @@
           "name": "listing",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "offer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
         },
         {
           "name": "tokenAccount",
@@ -672,9 +672,162 @@
       ],
       "args": [
         {
-          "name": "executeSaleParams",
+          "name": "buyListingParams",
           "type": {
-            "defined": "ExecuteSaleParams"
+            "defined": "BuyListingParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "acceptOffer",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "buyerRewardTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "seller",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sellerRewardTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "offer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "treasuryMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sellerPaymentReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "buyerReceiptTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowPaymentAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "auctionHouse",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "auctionHouseFeeAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "auctionHouseTreasury",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "buyerTradeState",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sellerTradeState",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "freeSellerTradeState",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rewardCenter",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rewardCenterRewardTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "ahAuctioneerPda",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programAsSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "auctionHouseProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "ataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "acceptOfferParams",
+          "type": {
+            "defined": "AcceptOfferParams"
           }
         }
       ]
@@ -782,10 +935,14 @@
   ],
   "types": [
     {
-      "name": "ExecuteSaleParams",
+      "name": "BuyListingParams",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "buyerTradeStateBump",
+            "type": "u8"
+          },
           {
             "name": "escrowPaymentBump",
             "type": "u8"
@@ -841,6 +998,34 @@
           {
             "name": "newPrice",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AcceptOfferParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrowPaymentBump",
+            "type": "u8"
+          },
+          {
+            "name": "freeTradeStateBump",
+            "type": "u8"
+          },
+          {
+            "name": "programAsSignerBump",
+            "type": "u8"
+          },
+          {
+            "name": "sellerTradeStateBump",
+            "type": "u8"
+          },
+          {
+            "name": "buyerTradeStateBump",
+            "type": "u8"
           }
         ]
       }
@@ -991,6 +1176,11 @@
       "code": 6008,
       "name": "AuctionHouseTreasuryMismatch",
       "msg": "The treasury does not match the one present on the auction house"
+    },
+    {
+      "code": 6009,
+      "name": "BumpMismatch",
+      "msg": "The account address bumps do not match"
     }
   ],
   "metadata": {
