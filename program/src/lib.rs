@@ -1,6 +1,5 @@
 pub mod constants;
 pub mod errors;
-pub mod execute_sale;
 pub mod listings;
 pub mod metaplex_cpi;
 pub mod offers;
@@ -11,9 +10,8 @@ pub mod state;
 use anchor_lang::prelude::*;
 
 use crate::{
-    execute_sale::*,
     listings::{buy::*, close::*, create::*, update::*},
-    offers::{close::*, create::*},
+    offers::{accept::*, close::*, create::*},
     reward_centers::{create::*, edit::*},
 };
 
@@ -69,17 +67,17 @@ pub mod reward_center {
         offers::close::handler(ctx, close_offer_params)
     }
 
-    pub fn execute_sale(
-        ctx: Context<ExecuteSale>,
-        execute_sale_params: ExecuteSaleParams,
-    ) -> Result<()> {
-        execute_sale::handler(ctx, execute_sale_params)
-    }
-
     pub fn buy_listing<'info>(
         ctx: Context<'_, '_, '_, 'info, BuyListing<'info>>,
         buy_listing_params: BuyListingParams,
     ) -> Result<()> {
         listings::buy::handler(ctx, buy_listing_params)
+    }
+
+    pub fn accept_offer<'info>(
+        ctx: Context<'_, '_, '_, 'info, AcceptOffer<'info>>,
+        accept_offer_params: AcceptOfferParams,
+    ) -> Result<()> {
+        offers::accept::handler(ctx, accept_offer_params)
     }
 }

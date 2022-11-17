@@ -17,8 +17,8 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{ExecuteSaleAccounts, *},
-    args::{ExecuteSaleData, *},
+    accounts::{AcceptOfferAccounts, *},
+    args::{AcceptOfferData, *},
     *,
 };
 
@@ -207,27 +207,6 @@ async fn reopen_purchased_listing_success() {
         1,
     );
 
-    let create_listing_accounts = CreateListingAccounts {
-        wallet: metadata_owner.pubkey(),
-        listing,
-        reward_center,
-        token_account,
-        metadata: metadata.pubkey,
-        authority: wallet,
-        auction_house,
-        seller_trade_state,
-        free_seller_trade_state,
-    };
-
-    let create_listing_params = CreateListingData {
-        price: reward_center_test::ONE_SOL,
-        token_size: 1,
-        trade_state_bump,
-        free_trade_state_bump,
-    };
-
-    let create_listing_ix = create_listing(create_listing_accounts, create_listing_params);
-
     let tx = Transaction::new_signed_with_payer(
         &[
             create_auction_house_ix,
@@ -243,17 +222,6 @@ async fn reopen_purchased_listing_success() {
             &reward_mint_authority_keypair,
             &reward_mint_keypair,
         ],
-        context.last_blockhash,
-    );
-
-    let tx_response = context.banks_client.process_transaction(tx).await;
-
-    assert!(tx_response.is_ok());
-
-    let tx = Transaction::new_signed_with_payer(
-        &[create_listing_ix],
-        Some(&metadata_owner_address),
-        &[&metadata_owner],
         context.last_blockhash,
     );
 
@@ -300,9 +268,7 @@ async fn reopen_purchased_listing_success() {
 
     assert!(tx_response.is_ok());
 
-    context.warp_to_slot(120 * 400).unwrap();
-
-    // EXECUTE SALE TEST
+    // ACCEPT OFFER
 
     let auction_house_fee_account = &find_auction_house_fee_account_address(&auction_house).0;
 
@@ -323,12 +289,11 @@ async fn reopen_purchased_listing_success() {
 
     let buyer_token_account = get_associated_token_address(&buyer.pubkey(), &metadata_mint_address);
 
-    let execute_sale_accounts = ExecuteSaleAccounts {
+    let accept_offer_accounts = AcceptOfferAccounts {
         auction_house,
         token_account,
         buyer: buyer.pubkey(),
         seller: metadata_owner.pubkey(),
-        payer: wallet,
         authority: wallet,
         token_mint: metadata_mint_address,
         treasury_mint: mint,
@@ -337,22 +302,22 @@ async fn reopen_purchased_listing_success() {
         metadata: metadata_address,
     };
 
-    let execute_sale_params = ExecuteSaleData {
+    let accept_offer_data = AcceptOfferData {
         price: reward_center_test::ONE_SOL,
         token_size: 1,
         reward_mint: reward_mint_pubkey,
     };
 
-    let execute_sale_ix = execute_sale(execute_sale_accounts, execute_sale_params);
+    let accept_offer = accept_offer(accept_offer_accounts, accept_offer_data);
 
     let tx = Transaction::new_signed_with_payer(
         &[
             create_buyer_reward_token_ix,
             create_seller_reward_token_ix,
-            execute_sale_ix,
+            accept_offer,
         ],
-        Some(&wallet),
-        &[&context.payer],
+        Some(&metadata_owner.pubkey()),
+        &[&context.payer, &metadata_owner],
         context.last_blockhash,
     );
 
