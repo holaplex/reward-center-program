@@ -160,6 +160,7 @@ pub struct AcceptOffer<'info> {
     )]
     pub auction_house_treasury: UncheckedAccount<'info>,
 
+    /// CHECK: Not dangerous. Account seeds checked in constraint.
     /// Buyer trade state PDA account encoding the buy order.
     #[account(
         mut,

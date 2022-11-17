@@ -206,6 +206,26 @@ createErrorFromNameLookup.set(
 );
 
 /**
+ * BumpMismatch: 'The account address bumps do not match'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class BumpMismatchError extends Error {
+  readonly code: number = 0x1779;
+  readonly name: string = 'BumpMismatch';
+  constructor() {
+    super('The account address bumps do not match');
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, BumpMismatchError);
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1779, () => new BumpMismatchError());
+createErrorFromNameLookup.set('BumpMismatch', () => new BumpMismatchError());
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated
