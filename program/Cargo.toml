@@ -1,6 +1,6 @@
 [package]
 name = "hpl-reward-center"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 description = "Reward buyers and sellers of NFTs with spl tokens"
 authors = ["Holaplex Developers <hola@holaplex.com>"]
