@@ -50,7 +50,6 @@ async fn create_offer_success() {
             name: "Test",
             symbol: "TST",
             uri: "https://nfts.exp.com/1.json",
-            creators: None,
             seller_fee_basis_points: 10,
             is_mutable: false,
             collection: Some(Collection {

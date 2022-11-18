@@ -1,7 +1,9 @@
 #![cfg(feature = "test-bpf")]
 
 pub mod reward_center_test;
-use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
+use anchor_client::solana_sdk::{
+    instruction::AccountMeta, pubkey::Pubkey, signature::Signer, transaction::Transaction,
+};
 use hpl_reward_center::{
     pda::{find_listing_address, find_reward_center_address},
     reward_centers,
@@ -51,7 +53,6 @@ async fn reopen_purchased_listing_success() {
             name: "Test",
             symbol: "TST",
             uri: "https://nfts.exp.com/1.json",
-            creators: None,
             seller_fee_basis_points: 10,
             is_mutable: false,
             collection: Some(Collection {
@@ -308,7 +309,11 @@ async fn reopen_purchased_listing_success() {
         reward_mint: reward_mint_pubkey,
     };
 
-    let accept_offer = accept_offer(accept_offer_accounts, accept_offer_data);
+    let accept_offer = accept_offer(
+        accept_offer_accounts,
+        accept_offer_data,
+        vec![AccountMeta::new(metadata_owner_address, false)],
+    );
 
     let tx = Transaction::new_signed_with_payer(
         &[

@@ -3,7 +3,7 @@ pub mod args;
 
 use accounts::*;
 use anchor_client::solana_sdk::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
-use anchor_lang::{prelude::*, InstructionData};
+use anchor_lang::{prelude::*, solana_program::instruction::AccountMeta, InstructionData};
 use args::*;
 use hpl_reward_center::{
     accounts as rewards_accounts, id, instruction,
@@ -403,6 +403,7 @@ pub fn buy_listing(
         price,
         reward_mint,
     }: BuyListingData,
+    creators: Vec<AccountMeta>,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
     let (listing, _) = find_listing_address(&seller, &metadata, &reward_center);
@@ -498,7 +499,7 @@ pub fn buy_listing(
 
     Instruction {
         program_id: id(),
-        accounts,
+        accounts: accounts.into_iter().chain(creators).collect(),
         data,
     }
 }
@@ -521,6 +522,7 @@ pub fn accept_offer(
         price,
         reward_mint,
     }: AcceptOfferData,
+    creators: Vec<AccountMeta>,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
     let (offer, _) = find_offer_address(&buyer, &metadata, &reward_center);
@@ -614,7 +616,7 @@ pub fn accept_offer(
 
     Instruction {
         program_id: id(),
-        accounts,
+        accounts: accounts.into_iter().chain(creators).collect(),
         data,
     }
 }

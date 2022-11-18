@@ -10,7 +10,6 @@ pub struct Params<'a> {
     pub name: &'a str,
     pub symbol: &'a str,
     pub uri: &'a str,
-    pub creators: Option<Vec<Creator>>,
     pub seller_fee_basis_points: u16,
     pub is_mutable: bool,
     pub collection: Option<Collection>,
@@ -23,7 +22,6 @@ pub async fn create<'a>(
         name,
         symbol,
         uri,
-        creators,
         seller_fee_basis_points,
         is_mutable,
         collection,
@@ -38,6 +36,12 @@ pub async fn create<'a>(
     airdrop(context, owner_pubkey, airdrop_amount)
         .await
         .unwrap();
+
+    let creators = Some(vec![Creator {
+        address: *owner_pubkey,
+        share: 100,
+        verified: false,
+    }]);
 
     test_metadata
         .create_v2(
