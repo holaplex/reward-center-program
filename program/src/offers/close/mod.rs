@@ -204,6 +204,7 @@ pub fn handler(
             accounts: withdraw_offer_ctx_accounts,
             instruction_data: withdraw_offer_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(
@@ -236,6 +237,7 @@ pub fn handler(
             accounts: cancel_offer_ctx_accounts,
             instruction_data: close_offer_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(

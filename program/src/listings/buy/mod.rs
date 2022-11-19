@@ -1,6 +1,7 @@
 use crate::{
     constants::{LISTING, REWARD_CENTER},
     errors::RewardCenterError,
+    metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
     state::{Listing, RewardCenter},
 };
 use anchor_lang::{
@@ -368,68 +369,54 @@ pub fn handler<'info>(
         token_size,
     )?;
 
-    let cpi_program = ctx.accounts.auction_house_program.to_account_info();
-    let cpi_accounts = AuctioneerExecuteSale {
-        buyer: ctx.accounts.buyer.to_account_info(),
-        seller: ctx.accounts.seller.to_account_info(),
-        token_account: ctx.accounts.token_account.to_account_info(),
-        ah_auctioneer_pda: ctx.accounts.ah_auctioneer_pda.to_account_info(),
-        auction_house: ctx.accounts.auction_house.to_account_info(),
-        auction_house_fee_account: ctx.accounts.auction_house_fee_account.to_account_info(),
-        auction_house_treasury: ctx.accounts.auction_house_treasury.to_account_info(),
-        buyer_receipt_token_account: ctx.accounts.buyer_receipt_token_account.to_account_info(),
-        seller_payment_receipt_account: ctx
-            .accounts
-            .seller_payment_receipt_account
-            .to_account_info(),
-        buyer_trade_state: ctx.accounts.buyer_trade_state.to_account_info(),
-        free_trade_state: ctx.accounts.free_seller_trade_state.to_account_info(),
-        seller_trade_state: ctx.accounts.seller_trade_state.to_account_info(),
-        escrow_payment_account: ctx.accounts.escrow_payment_account.to_account_info(),
-        program_as_signer: ctx.accounts.program_as_signer.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-        metadata: ctx.accounts.metadata.to_account_info(),
-        token_mint: ctx.accounts.token_mint.to_account_info(),
-        treasury_mint: ctx.accounts.treasury_mint.to_account_info(),
-        auctioneer_authority: ctx.accounts.reward_center.to_account_info(),
-        system_program: ctx.accounts.system_program.to_account_info(),
-        token_program: ctx.accounts.token_program.to_account_info(),
-        ata_program: ctx.accounts.ata_program.to_account_info(),
-        rent: ctx.accounts.rent.to_account_info(),
-    };
-
-    let execute_sale_data = AuctioneerExecuteSaleParams {
-        escrow_payment_bump,
-        program_as_signer_bump,
-        token_size,
-        buyer_price: listing_price,
-        _free_trade_state_bump: free_trade_state_bump,
-    };
-
-    let mut cpi_account_metas: Vec<AccountMeta> = cpi_accounts
-        .to_account_metas(None)
-        .into_iter()
-        .zip(cpi_accounts.to_account_infos())
-        .map(|mut pair| {
-            pair.0.is_signer = pair.1.is_signer;
-            if pair.0.pubkey == ctx.accounts.reward_center.key() {
-                pair.0.is_signer = true;
+    let (execute_sale_ix, execute_sale_account_infos) =
+        make_auctioneer_instruction(AuctioneerInstructionArgs {
+            accounts: AuctioneerExecuteSale {
+                buyer: ctx.accounts.buyer.to_account_info(),
+                seller: ctx.accounts.seller.to_account_info(),
+                token_account: ctx.accounts.token_account.to_account_info(),
+                ah_auctioneer_pda: ctx.accounts.ah_auctioneer_pda.to_account_info(),
+                auction_house: ctx.accounts.auction_house.to_account_info(),
+                auction_house_fee_account: ctx.accounts.auction_house_fee_account.to_account_info(),
+                auction_house_treasury: ctx.accounts.auction_house_treasury.to_account_info(),
+                buyer_receipt_token_account: ctx
+                    .accounts
+                    .buyer_receipt_token_account
+                    .to_account_info(),
+                seller_payment_receipt_account: ctx
+                    .accounts
+                    .seller_payment_receipt_account
+                    .to_account_info(),
+                buyer_trade_state: ctx.accounts.buyer_trade_state.to_account_info(),
+                free_trade_state: ctx.accounts.free_seller_trade_state.to_account_info(),
+                seller_trade_state: ctx.accounts.seller_trade_state.to_account_info(),
+                escrow_payment_account: ctx.accounts.escrow_payment_account.to_account_info(),
+                program_as_signer: ctx.accounts.program_as_signer.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
+                metadata: ctx.accounts.metadata.to_account_info(),
+                token_mint: ctx.accounts.token_mint.to_account_info(),
+                treasury_mint: ctx.accounts.treasury_mint.to_account_info(),
+                auctioneer_authority: ctx.accounts.reward_center.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+                token_program: ctx.accounts.token_program.to_account_info(),
+                ata_program: ctx.accounts.ata_program.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
+            },
+            instruction_data: AuctioneerExecuteSaleParams {
+                escrow_payment_bump,
+                program_as_signer_bump,
+                token_size,
+                buyer_price: listing_price,
+                _free_trade_state_bump: free_trade_state_bump,
             }
-            pair.0
-        })
-        .collect();
-
-    cpi_account_metas.append(&mut ctx.remaining_accounts.to_vec().to_account_metas(None));
-
-    let execute_sale_ix = solana_program::instruction::Instruction {
-        program_id: cpi_program.key(),
-        accounts: cpi_account_metas,
-        data: execute_sale_data.data(),
-    };
+            .data(),
+            auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: Some(ctx.remaining_accounts),
+        });
 
     invoke_signed(
         &execute_sale_ix,
-        &cpi_accounts.to_account_infos(),
+        &execute_sale_account_infos,
         reward_center_signer_seeds,
     )?;
 
