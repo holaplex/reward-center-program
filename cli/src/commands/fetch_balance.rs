@@ -5,9 +5,7 @@ use anyhow::{Context, Result as AnyhowResult};
 use hpl_reward_center::state::RewardCenter;
 use log::info;
 use solana_client::rpc_client::RpcClient;
-use solana_program::program_pack::Pack;
 use spl_associated_token_account::get_associated_token_address;
-use spl_token::state::{Account, Mint};
 
 /// # Errors
 ///
@@ -27,20 +25,18 @@ pub fn process_fetch_reward_center_treasury_balance(
 
     let RewardCenter { token_mint, .. } = RewardCenter::deserialize(&mut &reward_center_data[8..])?;
 
-    let token_mint_data = client
-        .get_account_data(&token_mint)
-        .context("Reward center rewards token mint does not exit")?;
-
-    let Mint { decimals, .. } = Mint::unpack(&token_mint_data[..])?;
+    info!("Token mint: {}", token_mint.to_string());
 
     let reward_center_rewards_token_account =
         get_associated_token_address(&reward_center_pubkey, &token_mint);
 
-    let reward_center_rewards_token_account_data = client
-        .get_account_data(&token_mint)
-        .context("Reward center rewards token account does not exit")?;
+    let token_res = client
+        .get_token_account_balance(&reward_center_rewards_token_account)
+        .context("Unable to fetch reward center rewards balacne")?;
 
-    let Account { amount, .. } = Account::unpack(&reward_center_rewards_token_account_data[..])?;
+    let token_balance = token_res
+        .ui_amount
+        .unwrap_or_else(|| (token_res.amount.parse::<f64>().unwrap()) / token_res.decimals as f64);
 
     info!(
         "Reward center rewards mint address: {}",
@@ -52,10 +48,7 @@ pub fn process_fetch_reward_center_treasury_balance(
         reward_center_rewards_token_account.to_string()
     );
 
-    info!(
-        "Reward center treasury balance: {}",
-        amount.saturating_div(10u64.saturating_pow(decimals.into()))
-    );
+    info!("Reward center treasury balance: {}", token_balance);
 
     Ok(())
 }
