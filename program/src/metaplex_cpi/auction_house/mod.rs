@@ -17,7 +17,7 @@ pub fn make_auctioneer_instruction<'c, 'info, T: ToAccountInfos<'info> + ToAccou
         remaining_accounts,
     }: AuctioneerInstructionArgs<'c, 'info, T>,
 ) -> (Instruction, Vec<AccountInfo<'info>>) {
-    let account_infos = accounts.to_account_infos();
+    let mut account_infos = accounts.to_account_infos();
 
     let mut accounts: Vec<AccountMeta> = accounts
         .to_account_metas(None)
@@ -34,6 +34,7 @@ pub fn make_auctioneer_instruction<'c, 'info, T: ToAccountInfos<'info> + ToAccou
 
     if let Some(remaining_accounts) = remaining_accounts {
         accounts.append(&mut remaining_accounts.to_vec().to_account_metas(None));
+        account_infos.append(&mut remaining_accounts.to_vec());
     };
 
     (
