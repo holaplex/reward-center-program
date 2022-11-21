@@ -150,6 +150,7 @@ pub fn handler(ctx: Context<CloseListing>) -> Result<()> {
             accounts: cancel_listing_ctx_accounts,
             instruction_data: close_listing_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(

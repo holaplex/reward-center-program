@@ -243,6 +243,7 @@ pub fn handler(
             accounts: create_listing_ctx_accounts,
             instruction_data: create_listing_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(
