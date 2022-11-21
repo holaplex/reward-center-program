@@ -1343,7 +1343,7 @@ dependencies = [
 
 [[package]]
 name = "hpl-reward-center"
-version = "0.2.2"
+version = "0.2.4"
 dependencies = [
  "anchor-client",
  "anchor-lang",

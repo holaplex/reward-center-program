@@ -10,12 +10,15 @@ use mpl_auction_house::{
         AuctioneerCancel as AuctioneerCancelParams, AuctioneerWithdraw as AuctioneerWithdrawParams,
     },
     program::AuctionHouse as AuctionHouseProgram,
-    utils::assert_metadata_valid,
+    utils::{assert_derivation, assert_metadata_valid},
     AuctionHouse, Auctioneer,
 };
+use solana_program::system_program;
 
 use crate::{
     constants::{OFFER, REWARD_CENTER},
+    errors::RewardCenterError,
+    id,
     metaplex_cpi::auction_house::{make_auctioneer_instruction, AuctioneerInstructionArgs},
     state::{Offer, RewardCenter},
 };
@@ -24,8 +27,6 @@ use solana_program::program::invoke_signed;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CloseOfferParams {
     pub escrow_payment_bump: u8,
-    pub buyer_price: u64,
-    pub token_size: u64,
 }
 
 #[derive(Accounts, Clone)]
@@ -36,18 +37,9 @@ pub struct CloseOffer<'info> {
     pub wallet: Signer<'info>,
 
     /// The Offer config account used for bids
-    #[account(
-        mut,
-        seeds = [
-            OFFER.as_bytes(),
-            wallet.key().as_ref(),
-            metadata.key().as_ref(),
-            reward_center.key().as_ref()
-        ],
-        bump = offer.bump,
-        close = wallet
-    )]
-    pub offer: Box<Account<'info, Offer>>,
+    /// CHECK: Seed check in close offer logic
+    #[account(mut)]
+    pub offer: UncheckedAccount<'info>,
 
     pub treasury_mint: Box<Account<'info, Mint>>,
 
@@ -151,8 +143,6 @@ pub struct CloseOffer<'info> {
 pub fn handler(
     ctx: Context<CloseOffer>,
     CloseOfferParams {
-        buyer_price,
-        token_size,
         escrow_payment_bump,
     }: CloseOfferParams,
 ) -> Result<()> {
@@ -161,9 +151,25 @@ pub fn handler(
     let metadata = &ctx.accounts.metadata;
     let token_account = &ctx.accounts.token_account;
     let wallet = &ctx.accounts.wallet;
+    let offer_unchecked = &ctx.accounts.offer;
+    let offer_account_info = offer_unchecked.to_account_info();
+    let offer = try_deserialize_offer(&offer_account_info)?;
+    let token_size = offer.token_size;
+    let buyer_price = offer.price;
     let auction_house_key = auction_house.key();
 
     assert_metadata_valid(metadata, token_account)?;
+    let offer_bump = assert_derivation(
+        &id(),
+        &offer_account_info,
+        &[
+            OFFER.as_bytes(),
+            wallet.key().as_ref(),
+            metadata.key().as_ref(),
+            reward_center.key().as_ref(),
+        ],
+    )?;
+    require_eq!(offer_bump, offer.bump, RewardCenterError::BumpMismatch);
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
@@ -198,6 +204,7 @@ pub fn handler(
             accounts: withdraw_offer_ctx_accounts,
             instruction_data: withdraw_offer_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(
@@ -230,6 +237,7 @@ pub fn handler(
             accounts: cancel_offer_ctx_accounts,
             instruction_data: close_offer_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
+            remaining_accounts: None,
         });
 
     invoke_signed(
@@ -238,5 +246,21 @@ pub fn handler(
         reward_center_signer_seeds,
     )?;
 
+    let dest_starting_lamports = wallet.lamports();
+    **wallet.lamports.borrow_mut() = dest_starting_lamports
+        .checked_add(offer_account_info.lamports())
+        .unwrap();
+    **offer_account_info.lamports.borrow_mut() = 0;
+
+    offer_account_info.assign(&system_program::id());
+    offer_account_info.realloc(0, false)?;
+
     Ok(())
+}
+
+fn try_deserialize_offer(offer: &AccountInfo) -> Result<Offer> {
+    let offer_ref_data = offer.try_borrow_mut_data()?;
+    let mut offer_data: &[u8] = &offer_ref_data;
+
+    Offer::try_deserialize(&mut offer_data)
 }

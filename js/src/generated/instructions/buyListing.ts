@@ -8,42 +8,42 @@
 import * as splToken from '@solana/spl-token';
 import * as beet from '@metaplex-foundation/beet';
 import * as web3 from '@solana/web3.js';
-import { ExecuteSaleParams, executeSaleParamsBeet } from '../types/ExecuteSaleParams';
+import { BuyListingParams, buyListingParamsBeet } from '../types/BuyListingParams';
 
 /**
  * @category Instructions
- * @category ExecuteSale
+ * @category BuyListing
  * @category generated
  */
-export type ExecuteSaleInstructionArgs = {
-  executeSaleParams: ExecuteSaleParams;
+export type BuyListingInstructionArgs = {
+  buyListingParams: BuyListingParams;
 };
 /**
  * @category Instructions
- * @category ExecuteSale
+ * @category BuyListing
  * @category generated
  */
-export const executeSaleStruct = new beet.BeetArgsStruct<
-  ExecuteSaleInstructionArgs & {
+export const buyListingStruct = new beet.BeetArgsStruct<
+  BuyListingInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */;
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['executeSaleParams', executeSaleParamsBeet],
+    ['buyListingParams', buyListingParamsBeet],
   ],
-  'ExecuteSaleInstructionArgs',
+  'BuyListingInstructionArgs',
 );
 /**
- * Accounts required by the _executeSale_ instruction
+ * Accounts required by the _buyListing_ instruction
  *
  * @property [_writable_] buyer
+ * @property [_writable_] paymentAccount
+ * @property [] transferAuthority
  * @property [_writable_] buyerRewardTokenAccount
  * @property [_writable_] seller
  * @property [_writable_] sellerRewardTokenAccount
  * @property [_writable_] listing
- * @property [_writable_] offer
- * @property [_writable_, **signer**] payer
  * @property [_writable_] tokenAccount
  * @property [] tokenMint
  * @property [] metadata
@@ -64,17 +64,17 @@ export const executeSaleStruct = new beet.BeetArgsStruct<
  * @property [] programAsSigner
  * @property [] auctionHouseProgram
  * @category Instructions
- * @category ExecuteSale
+ * @category BuyListing
  * @category generated
  */
-export type ExecuteSaleInstructionAccounts = {
+export type BuyListingInstructionAccounts = {
   buyer: web3.PublicKey;
+  paymentAccount: web3.PublicKey;
+  transferAuthority: web3.PublicKey;
   buyerRewardTokenAccount: web3.PublicKey;
   seller: web3.PublicKey;
   sellerRewardTokenAccount: web3.PublicKey;
   listing: web3.PublicKey;
-  offer: web3.PublicKey;
-  payer: web3.PublicKey;
   tokenAccount: web3.PublicKey;
   tokenMint: web3.PublicKey;
   metadata: web3.PublicKey;
@@ -101,31 +101,41 @@ export type ExecuteSaleInstructionAccounts = {
   anchorRemainingAccounts?: web3.AccountMeta[];
 };
 
-export const executeSaleInstructionDiscriminator = [37, 74, 217, 157, 79, 49, 35, 6];
+export const buyListingInstructionDiscriminator = [115, 149, 42, 108, 44, 49, 140, 153];
 
 /**
- * Creates a _ExecuteSale_ instruction.
+ * Creates a _BuyListing_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category ExecuteSale
+ * @category BuyListing
  * @category generated
  */
-export function createExecuteSaleInstruction(
-  accounts: ExecuteSaleInstructionAccounts,
-  args: ExecuteSaleInstructionArgs,
+export function createBuyListingInstruction(
+  accounts: BuyListingInstructionAccounts,
+  args: BuyListingInstructionArgs,
   programId = new web3.PublicKey('RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki'),
 ) {
-  const [data] = executeSaleStruct.serialize({
-    instructionDiscriminator: executeSaleInstructionDiscriminator,
+  const [data] = buyListingStruct.serialize({
+    instructionDiscriminator: buyListingInstructionDiscriminator,
     ...args,
   });
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.buyer,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.paymentAccount,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.transferAuthority,
+      isWritable: false,
       isSigner: false,
     },
     {
@@ -147,16 +157,6 @@ export function createExecuteSaleInstruction(
       pubkey: accounts.listing,
       isWritable: true,
       isSigner: false,
-    },
-    {
-      pubkey: accounts.offer,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.payer,
-      isWritable: true,
-      isSigner: true,
     },
     {
       pubkey: accounts.tokenAccount,

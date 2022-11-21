@@ -1,6 +1,6 @@
 {
   "name": "@holaplex/hpl-reward-center",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "description": "HPL Reward Center JavaScript API.",
   "main": "dist/src/generated/index.js",
   "types": "dist/src/generated/index.d.ts",

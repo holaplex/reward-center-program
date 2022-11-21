@@ -1,9 +1,11 @@
 #![cfg(feature = "test-bpf")]
 
 pub mod reward_center_test;
-use anchor_client::solana_sdk::{pubkey::Pubkey, signature::Signer, transaction::Transaction};
+use anchor_client::solana_sdk::{
+    instruction::AccountMeta, pubkey::Pubkey, signature::Signer, transaction::Transaction,
+};
 use hpl_reward_center::{
-    pda::{find_listing_address, find_offer_address, find_reward_center_address},
+    pda::{find_listing_address, find_reward_center_address},
     reward_centers,
     state::*,
 };
@@ -17,9 +19,9 @@ use mpl_auction_house::{
 use reward_center_test::fixtures::metadata;
 
 use hpl_reward_center_sdk::{
-    accounts::{ExecuteSaleAccounts, *},
-    args::{ExecuteSaleData, *},
-    *,
+    accounts::{BuyListingAccounts, *},
+    args::{BuyListingData, *},
+    buy_listing, *,
 };
 
 use mpl_testing_utils::solana::airdrop;
@@ -37,7 +39,7 @@ use spl_token::{
 };
 
 #[tokio::test]
-async fn execute_sale_divide_success() {
+async fn buy_listing_success() {
     let program = reward_center_test::setup_program();
     let mut context = program.start_with_context().await;
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -51,7 +53,6 @@ async fn execute_sale_divide_success() {
             name: "Test",
             symbol: "TST",
             uri: "https://nfts.exp.com/1.json",
-            creators: None,
             seller_fee_basis_points: 10,
             is_mutable: false,
             collection: Some(Collection {
@@ -127,7 +128,7 @@ async fn execute_sale_divide_success() {
 
     let reward_center_params = reward_centers::create::CreateRewardCenterParams {
         reward_rules: RewardRules {
-            mathematical_operand: PayoutOperation::Divide,
+            mathematical_operand: PayoutOperation::Multiple,
             seller_reward_payout_basis_points: 1000,
             payout_numeral: 5,
         },
@@ -261,48 +262,13 @@ async fn execute_sale_divide_success() {
 
     assert!(tx_response.is_ok());
 
-    // CREATE OFFER TEST
-
+    // BUY LISTING TEST
     let buyer = Keypair::new();
-    let buyer_address = buyer.pubkey();
-    airdrop(&mut context, &buyer_address, reward_center_test::TEN_SOL)
+    let buyer_pubkey = &buyer.pubkey();
+    airdrop(&mut context, buyer_pubkey, reward_center_test::TEN_SOL)
         .await
         .unwrap();
 
-    let create_offer_accounts = CreateOfferAccounts {
-        wallet: buyer_address,
-        transfer_authority: buyer_address,
-        payment_account: buyer_address,
-        treasury_mint: mint,
-        token_mint: metadata_mint_address,
-        auction_house,
-        reward_center,
-        token_account,
-        metadata: metadata_address,
-        authority: wallet,
-    };
-
-    let create_offer_params = CreateOfferData {
-        token_size: 1,
-        buyer_price: reward_center_test::ONE_SOL,
-    };
-
-    let create_offer_ix = create_offer(create_offer_accounts, create_offer_params);
-
-    let tx = Transaction::new_signed_with_payer(
-        &[create_offer_ix],
-        Some(&buyer_address),
-        &[&buyer],
-        context.last_blockhash,
-    );
-
-    let tx_response = context.banks_client.process_transaction(tx).await;
-
-    assert!(tx_response.is_ok());
-
-    context.warp_to_slot(120 * 400).unwrap();
-
-    // EXECUTE SALE TEST
     let auction_house_fee_account = &find_auction_house_fee_account_address(&auction_house).0;
 
     airdrop(
@@ -315,57 +281,52 @@ async fn execute_sale_divide_success() {
 
     // Creating Associated Token accounts
     let create_buyer_reward_token_ix =
-        create_associated_token_account(&wallet, &buyer_address, &reward_mint_pubkey);
+        create_associated_token_account(&wallet, &buyer_pubkey, &reward_mint_pubkey);
 
     let create_seller_reward_token_ix =
         create_associated_token_account(&wallet, &metadata_owner_address, &reward_mint_pubkey);
 
-    let buyer_token_account = get_associated_token_address(&buyer_address, &metadata_mint_address);
+    let buyer_token_account = get_associated_token_address(&buyer.pubkey(), &metadata_mint_address);
 
-    let execute_sale_accounts = ExecuteSaleAccounts {
+    let buy_listing_accounts = BuyListingAccounts {
         auction_house,
         token_account,
-        payer: wallet,
-        buyer: buyer_address,
-        seller: metadata_owner_address,
+        buyer: buyer.pubkey(),
+        transfer_authority: *buyer_pubkey,
+        payment_account: *buyer_pubkey,
+        seller: metadata_owner.pubkey(),
         authority: wallet,
         token_mint: metadata_mint_address,
         treasury_mint: mint,
         buyer_receipt_token_account: buyer_token_account,
-        seller_payment_receipt_account: metadata_owner_address,
+        seller_payment_receipt_account: metadata_owner.pubkey(),
         metadata: metadata_address,
     };
 
-    let execute_sale_params = ExecuteSaleData {
+    let buy_listing_params = BuyListingData {
         price: reward_center_test::ONE_SOL,
         token_size: 1,
         reward_mint: reward_mint_pubkey,
     };
 
-    let execute_sale_ix = execute_sale(execute_sale_accounts, execute_sale_params);
+    let buy_listing_ix = buy_listing(
+        buy_listing_accounts,
+        buy_listing_params,
+        vec![AccountMeta::new(metadata_owner_address, false)],
+    );
 
     let tx = Transaction::new_signed_with_payer(
         &[
             create_buyer_reward_token_ix,
             create_seller_reward_token_ix,
-            execute_sale_ix,
+            buy_listing_ix,
         ],
-        Some(&wallet),
-        &[&context.payer],
+        Some(&buyer_pubkey),
+        &[&context.payer, &buyer],
         context.last_blockhash,
     );
 
     let tx_response = context.banks_client.process_transaction(tx).await;
-
-    let (offer, _) = find_offer_address(&buyer_address, &metadata_address, &reward_center);
-    let (listing, _) =
-        find_listing_address(&metadata_owner_address, &metadata_address, &reward_center);
-
-    let offer_account = reward_center_test::get_account(&mut context.banks_client, offer).await;
-    let listing_account = reward_center_test::get_account(&mut context.banks_client, listing).await;
-
-    assert_eq!(offer_account, None);
-    assert_eq!(listing_account, None);
 
     assert!(tx_response.is_ok());
 

@@ -39,4 +39,8 @@ pub enum RewardCenterError {
     // 6008
     #[msg("The treasury does not match the one present on the auction house")]
     AuctionHouseTreasuryMismatch,
+
+    // 6009
+    #[msg("The account address bumps do not match")]
+    BumpMismatch,
 }

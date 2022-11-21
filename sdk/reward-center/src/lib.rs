@@ -3,16 +3,12 @@ pub mod args;
 
 use accounts::*;
 use anchor_client::solana_sdk::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
-use anchor_lang::{prelude::*, InstructionData};
+use anchor_lang::{prelude::*, solana_program::instruction::AccountMeta, InstructionData};
 use args::*;
 use hpl_reward_center::{
-    accounts as rewards_accounts,
-    execute_sale::ExecuteSaleParams,
-    id, instruction,
-    listings::{
-        close::CloseListingParams, create::CreateListingParams, update::UpdateListingParams,
-    },
-    offers::{close::CloseOfferParams, create::CreateOfferParams},
+    accounts as rewards_accounts, id, instruction,
+    listings::{buy::BuyListingParams, create::CreateListingParams, update::UpdateListingParams},
+    offers::{accept::AcceptOfferParams, close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
 };
@@ -175,7 +171,7 @@ pub fn close_listing(
         &token_account,
         &treasury_mint,
         &token_mint,
-        1,
+        token_size,
     );
 
     let accounts = rewards_accounts::CloseListing {
@@ -195,10 +191,7 @@ pub fn close_listing(
     }
     .to_account_metas(None);
 
-    let data = instruction::CloseListing {
-        close_listing_params: CloseListingParams { token_size },
-    }
-    .data();
+    let data = instruction::CloseListing {}.data();
 
     Instruction {
         program_id: id(),
@@ -378,9 +371,7 @@ pub fn close_offer(
 
     let data = instruction::CloseOffer {
         close_offer_params: CloseOfferParams {
-            buyer_price,
             escrow_payment_bump,
-            token_size,
         },
     }
     .data();
@@ -392,12 +383,13 @@ pub fn close_offer(
     }
 }
 
-pub fn execute_sale(
-    ExecuteSaleAccounts {
+pub fn buy_listing(
+    BuyListingAccounts {
+        transfer_authority,
+        payment_account,
         auction_house,
         seller,
         buyer,
-        payer,
         authority,
         treasury_mint,
         token_mint,
@@ -405,15 +397,15 @@ pub fn execute_sale(
         metadata,
         seller_payment_receipt_account,
         buyer_receipt_token_account,
-    }: ExecuteSaleAccounts,
-    ExecuteSaleData {
+    }: BuyListingAccounts,
+    BuyListingData {
         token_size,
         price,
         reward_mint,
-    }: ExecuteSaleData,
+    }: BuyListingData,
+    creators: Vec<AccountMeta>,
 ) -> Instruction {
     let (reward_center, _) = find_reward_center_address(&auction_house);
-    let (offer, _) = find_offer_address(&buyer, &metadata, &reward_center);
     let (listing, _) = find_listing_address(&seller, &metadata, &reward_center);
 
     let (auction_house_fee_account, _) =
@@ -429,7 +421,7 @@ pub fn execute_sale(
     let buyer_reward_token_account = get_associated_token_address(&buyer, &reward_mint);
     let seller_reward_token_account = get_associated_token_address(&seller, &reward_mint);
 
-    let (buyer_trade_state, _) = find_public_bid_trade_state_address(
+    let (buyer_trade_state, buyer_trade_state_bump) = find_public_bid_trade_state_address(
         &buyer,
         &auction_house,
         &treasury_mint,
@@ -460,14 +452,14 @@ pub fn execute_sale(
     let (program_as_signer, program_as_signer_bump) =
         mpl_auction_house::pda::find_program_as_signer_address();
 
-    let accounts = rewards_accounts::ExecuteSale {
+    let accounts = rewards_accounts::BuyListing {
         buyer,
+        payment_account,
+        transfer_authority,
         buyer_reward_token_account,
         seller,
         seller_reward_token_account,
         listing,
-        offer,
-        payer,
         authority,
         treasury_mint,
         token_mint,
@@ -494,19 +486,137 @@ pub fn execute_sale(
     }
     .to_account_metas(None);
 
-    let data = instruction::ExecuteSale {
-        execute_sale_params: ExecuteSaleParams {
+    let data = instruction::BuyListing {
+        buy_listing_params: BuyListingParams {
             escrow_payment_bump,
             free_trade_state_bump,
             program_as_signer_bump,
             seller_trade_state_bump,
+            buyer_trade_state_bump,
         },
     }
     .data();
 
     Instruction {
         program_id: id(),
-        accounts,
+        accounts: accounts.into_iter().chain(creators).collect(),
+        data,
+    }
+}
+
+pub fn accept_offer(
+    AcceptOfferAccounts {
+        auction_house,
+        seller,
+        buyer,
+        authority,
+        treasury_mint,
+        token_mint,
+        token_account,
+        metadata,
+        seller_payment_receipt_account,
+        buyer_receipt_token_account,
+    }: AcceptOfferAccounts,
+    AcceptOfferData {
+        token_size,
+        price,
+        reward_mint,
+    }: AcceptOfferData,
+    creators: Vec<AccountMeta>,
+) -> Instruction {
+    let (reward_center, _) = find_reward_center_address(&auction_house);
+    let (offer, _) = find_offer_address(&buyer, &metadata, &reward_center);
+
+    let (auction_house_fee_account, _) =
+        mpl_auction_house::pda::find_auction_house_fee_account_address(&auction_house);
+    let (auction_house_treasury, _) = find_auction_house_treasury_address(&auction_house);
+    let (ah_auctioneer_pda, _) =
+        mpl_auction_house::pda::find_auctioneer_pda(&auction_house, &reward_center);
+    let (escrow_payment_account, escrow_payment_bump) =
+        mpl_auction_house::pda::find_escrow_payment_address(&auction_house, &buyer);
+
+    let reward_center_reward_token_account =
+        get_associated_token_address(&reward_center, &reward_mint);
+    let buyer_reward_token_account = get_associated_token_address(&buyer, &reward_mint);
+    let seller_reward_token_account = get_associated_token_address(&seller, &reward_mint);
+
+    let (buyer_trade_state, buyer_trade_state_bump) = find_public_bid_trade_state_address(
+        &buyer,
+        &auction_house,
+        &treasury_mint,
+        &token_mint,
+        price,
+        token_size,
+    );
+
+    let (free_seller_trade_state, free_trade_state_bump) = find_trade_state_address(
+        &seller,
+        &auction_house,
+        &token_account,
+        &treasury_mint,
+        &token_mint,
+        0,
+        token_size,
+    );
+
+    let (seller_trade_state, seller_trade_state_bump) = find_auctioneer_trade_state_address(
+        &seller,
+        &auction_house,
+        &token_account,
+        &treasury_mint,
+        &token_mint,
+        token_size,
+    );
+
+    let (program_as_signer, program_as_signer_bump) =
+        mpl_auction_house::pda::find_program_as_signer_address();
+
+    let accounts = rewards_accounts::AcceptOffer {
+        buyer,
+        buyer_reward_token_account,
+        seller,
+        seller_reward_token_account,
+        offer,
+        authority,
+        treasury_mint,
+        token_mint,
+        token_account,
+        metadata,
+        buyer_receipt_token_account,
+        seller_payment_receipt_account,
+        auction_house_fee_account,
+        ah_auctioneer_pda,
+        escrow_payment_account,
+        reward_center,
+        reward_center_reward_token_account,
+        auction_house,
+        auction_house_treasury,
+        buyer_trade_state,
+        free_seller_trade_state,
+        seller_trade_state,
+        program_as_signer,
+        auction_house_program: mpl_auction_house::id(),
+        ata_program: spl_associated_token_account::id(),
+        token_program: spl_token::id(),
+        system_program: system_program::id(),
+        rent: sysvar::rent::id(),
+    }
+    .to_account_metas(None);
+
+    let data = instruction::AcceptOffer {
+        accept_offer_params: AcceptOfferParams {
+            escrow_payment_bump,
+            free_trade_state_bump,
+            program_as_signer_bump,
+            seller_trade_state_bump,
+            buyer_trade_state_bump,
+        },
+    }
+    .data();
+
+    Instruction {
+        program_id: id(),
+        accounts: accounts.into_iter().chain(creators).collect(),
         data,
     }
 }

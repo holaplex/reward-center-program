@@ -6,7 +6,8 @@
  */
 
 import * as beet from '@metaplex-foundation/beet';
-export type ExecuteSaleParams = {
+export type BuyListingParams = {
+  buyerTradeStateBump: number;
   escrowPaymentBump: number;
   freeTradeStateBump: number;
   sellerTradeStateBump: number;
@@ -17,12 +18,13 @@ export type ExecuteSaleParams = {
  * @category userTypes
  * @category generated
  */
-export const executeSaleParamsBeet = new beet.BeetArgsStruct<ExecuteSaleParams>(
+export const buyListingParamsBeet = new beet.BeetArgsStruct<BuyListingParams>(
   [
+    ['buyerTradeStateBump', beet.u8],
     ['escrowPaymentBump', beet.u8],
     ['freeTradeStateBump', beet.u8],
     ['sellerTradeStateBump', beet.u8],
     ['programAsSignerBump', beet.u8],
   ],
-  'ExecuteSaleParams',
+  'BuyListingParams',
 );
