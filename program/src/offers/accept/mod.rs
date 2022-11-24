@@ -301,34 +301,31 @@ pub fn handler<'info>(
         &[reward_center_bump],
     ]];
 
-    let create_listing_ctx_accounts = AuctioneerSell {
-        metadata: metadata.to_account_info(),
-        wallet: ctx.accounts.seller.to_account_info(),
-        token_account: ctx.accounts.token_account.to_account_info(),
-        auction_house: ctx.accounts.auction_house.to_account_info(),
-        auction_house_fee_account: ctx.accounts.auction_house_fee_account.to_account_info(),
-        seller_trade_state: ctx.accounts.seller_trade_state.to_account_info(),
-        free_seller_trade_state: ctx.accounts.free_seller_trade_state.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-        auctioneer_authority: ctx.accounts.reward_center.to_account_info(),
-        ah_auctioneer_pda: ctx.accounts.ah_auctioneer_pda.to_account_info(),
-        token_program: ctx.accounts.token_program.to_account_info(),
-        system_program: ctx.accounts.system_program.to_account_info(),
-        program_as_signer: ctx.accounts.program_as_signer.to_account_info(),
-        rent: ctx.accounts.rent.to_account_info(),
-    };
-
-    let create_listing_params = AuctioneerSellParams {
-        trade_state_bump: seller_trade_state_bump,
-        free_trade_state_bump,
-        program_as_signer_bump,
-        token_size,
-    };
-
     let (create_listing_ix, create_listing_account_infos) =
         make_auctioneer_instruction(AuctioneerInstructionArgs {
-            accounts: create_listing_ctx_accounts,
-            instruction_data: create_listing_params.data(),
+            accounts: AuctioneerSell {
+                metadata: metadata.to_account_info(),
+                wallet: ctx.accounts.seller.to_account_info(),
+                token_account: ctx.accounts.token_account.to_account_info(),
+                auction_house: ctx.accounts.auction_house.to_account_info(),
+                auction_house_fee_account: ctx.accounts.auction_house_fee_account.to_account_info(),
+                seller_trade_state: ctx.accounts.seller_trade_state.to_account_info(),
+                free_seller_trade_state: ctx.accounts.free_seller_trade_state.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
+                auctioneer_authority: ctx.accounts.reward_center.to_account_info(),
+                ah_auctioneer_pda: ctx.accounts.ah_auctioneer_pda.to_account_info(),
+                token_program: ctx.accounts.token_program.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+                program_as_signer: ctx.accounts.program_as_signer.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
+            },
+            instruction_data: AuctioneerSellParams {
+                trade_state_bump: seller_trade_state_bump,
+                free_trade_state_bump,
+                program_as_signer_bump,
+                token_size,
+            }
+            .data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
             remaining_accounts: None,
         });
