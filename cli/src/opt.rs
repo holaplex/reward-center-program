@@ -74,7 +74,7 @@ pub enum Command {
         #[arg(short, long)]
         keypair: Option<PathBuf>,
 
-        /// Funding amount
+        /// Funding amount (excluding decimals)
         #[arg(short, long)]
         amount: u64,
     },
@@ -101,5 +101,21 @@ pub enum Command {
         /// Path to the reward center authority keypair file
         #[arg(short, long)]
         keypair: Option<PathBuf>,
+    },
+
+    /// Withdraw from Reward center treasury
+    #[clap(name = "withdraw-reward-center")]
+    WithdrawRewardCenter {
+        /// Reward center address
+        #[arg(short = 'R', long)]
+        reward_center: String,
+
+        /// Path to the reward center authority keypair file
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
+
+        /// Amount to withdraw (excluding decimals)
+        #[arg(short, long)]
+        amount: u64,
     },
 }

@@ -6,13 +6,15 @@ pub mod offers;
 pub mod pda;
 pub mod reward_centers;
 pub mod state;
+pub mod withdraw;
 
 use anchor_lang::prelude::*;
 
 use crate::{
     listings::{buy::*, close::*, create::*, update::*},
     offers::{accept::*, close::*, create::*},
-    reward_centers::{create::*, edit::*, withdraw::*},
+    reward_centers::{create::*, edit::*},
+    withdraw::reward_center::*,
 };
 
 declare_id!("RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki");
@@ -39,7 +41,7 @@ pub mod reward_center {
         ctx: Context<WithdrawRewardCenterFunds>,
         withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams,
     ) -> Result<()> {
-        reward_centers::withdraw::handler(ctx, withdraw_reward_center_funds_params)
+        withdraw::reward_center::handler(ctx, withdraw_reward_center_funds_params)
     }
 
     pub fn create_listing(

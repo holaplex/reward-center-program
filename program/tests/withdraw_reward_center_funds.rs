@@ -150,9 +150,7 @@ async fn withdraw_reward_center_funds_success() {
             rewards_mint: reward_mint_keypair.pubkey(),
             auction_house,
         },
-        reward_centers::withdraw::WithdrawRewardCenterFundsParams {
-            withdrawal_amount: 100_000_000_000,
-        },
+        100_000_000_000,
     );
 
     let tx = Transaction::new_signed_with_payer(

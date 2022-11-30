@@ -10,10 +10,8 @@ use hpl_reward_center::{
     listings::{buy::BuyListingParams, create::CreateListingParams, update::UpdateListingParams},
     offers::{accept::AcceptOfferParams, close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
-    reward_centers::{
-        create::CreateRewardCenterParams, edit::EditRewardCenterParams,
-        withdraw::WithdrawRewardCenterFundsParams,
-    },
+    reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
+    withdraw::reward_center::WithdrawRewardCenterFundsParams,
 };
 use mpl_auction_house::pda::{
     find_auction_house_treasury_address, find_auctioneer_trade_state_address,
@@ -91,7 +89,7 @@ pub fn withdraw_reward_center_funds(
         auction_house,
         rewards_mint,
     }: WithdrawRewardCenterFundsAccounts,
-    withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams,
+    withdrawal_amount: u64,
 ) -> Instruction {
     let (reward_center, _) = pda::find_reward_center_address(&auction_house);
 
@@ -111,7 +109,7 @@ pub fn withdraw_reward_center_funds(
     .to_account_metas(None);
 
     let data = instruction::WithdrawRewardCenterFunds {
-        withdraw_reward_center_funds_params,
+        withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams { withdrawal_amount },
     }
     .data();
 
