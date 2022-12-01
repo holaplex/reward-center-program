@@ -6,13 +6,12 @@ use solana_program::program_pack::IsInitialized;
 
 use crate::{constants::REWARD_CENTER, errors::RewardCenterError, state::RewardCenter};
 
-/// Options to set on the reward center
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct WithdrawRewardCenterFundsParams {
     pub withdrawal_amount: u64,
 }
 
-/// Accounts for the [`create_reward_center` handler](reward_center/fn.create_reward_center.html).
+/// Accounts for the [`withdraw_reward_center_funds` handler](reward_center/fn.withdraw_reward_center_funds.html).
 #[derive(Accounts, Clone)]
 #[instruction(withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams)]
 pub struct WithdrawRewardCenterFunds<'info> {
