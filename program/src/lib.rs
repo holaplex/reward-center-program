@@ -1,5 +1,6 @@
 pub mod constants;
 pub mod errors;
+pub mod events;
 pub mod listings;
 pub mod metaplex_cpi;
 pub mod offers;

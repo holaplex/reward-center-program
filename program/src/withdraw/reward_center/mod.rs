@@ -4,7 +4,10 @@ use anchor_spl::token::{transfer, Token, TokenAccount, Transfer};
 use mpl_auction_house::{constants::PREFIX, AuctionHouse};
 use solana_program::program_pack::IsInitialized;
 
-use crate::{constants::REWARD_CENTER, errors::RewardCenterError, state::RewardCenter};
+use crate::{
+    constants::REWARD_CENTER, errors::RewardCenterError, events::RewardCenterTreasuryWithdrawn,
+    state::RewardCenter,
+};
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct WithdrawRewardCenterFundsParams {
@@ -67,7 +70,7 @@ pub struct WithdrawRewardCenterFunds<'info> {
 
 pub fn handler(
     ctx: Context<WithdrawRewardCenterFunds>,
-    withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams,
+    WithdrawRewardCenterFundsParams { withdrawal_amount }: WithdrawRewardCenterFundsParams,
 ) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let reward_center_bump = ctx.accounts.reward_center.bump;
@@ -76,14 +79,8 @@ pub fn handler(
 
     let auction_house = &ctx.accounts.auction_house;
     let auction_house_key = auction_house.key();
-    let withdrawal_amount = withdraw_reward_center_funds_params.withdrawal_amount;
 
     let token_program = &ctx.accounts.token_program;
-
-    msg!(
-        "Withdrawing {} token from reward center treasury",
-        withdrawal_amount
-    );
 
     let reward_center_signer_seeds: &[&[&[u8]]] = &[&[
         REWARD_CENTER.as_bytes(),
@@ -102,6 +99,13 @@ pub fn handler(
     );
 
     transfer(token_transfer_ctx, withdrawal_amount)?;
+
+    emit!(RewardCenterTreasuryWithdrawn {
+        reward_center_authority: ctx.accounts.wallet.key(),
+        destination_reward_token_account: destination_reward_token_account.key(),
+        rewards_mint: ctx.accounts.reward_center.token_mint.key(),
+        withdrawal_amount: withdrawal_amount
+    });
 
     Ok(())
 }
