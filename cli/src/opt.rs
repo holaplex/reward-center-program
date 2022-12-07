@@ -43,6 +43,18 @@ pub enum Command {
         keypair: Option<PathBuf>,
     },
 
+    /// Create address lookup table
+    #[clap(name = "create-atl")]
+    CreateAddressTable {
+        /// Optional Auction House address
+        #[arg(short = 'a', long)]
+        auction_house: String,
+
+        /// Path to the address look up table's authority keypair file
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
+    },
+
     /// Edit reward center's reward rules
     #[clap(name = "edit")]
     Edit {

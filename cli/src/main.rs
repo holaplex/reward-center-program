@@ -14,9 +14,9 @@ use clap::Parser;
 use log::{error, info, warn};
 use reward_center_cli::{
     commands::{
-        process_create_reward_center, process_edit_reward_center,
-        process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,
-        process_fund_reward_center,
+        process_create_address_table_lookup, process_create_reward_center,
+        process_edit_reward_center, process_fetch_reward_center_state,
+        process_fetch_reward_center_treasury_balance, process_fund_reward_center,
     },
     config::parse_solana_configuration,
     constants::PUBLIC_RPC_URLS,
@@ -84,6 +84,11 @@ fn run() -> Result<()> {
             &auction_house,
             &mint_rewards,
         )?,
+
+        Command::CreateAddressTable {
+            auction_house,
+            keypair,
+        } => process_create_address_table_lookup(&client, &keypair, &auction_house)?,
 
         Command::Edit {
             keypair,

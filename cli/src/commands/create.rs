@@ -220,7 +220,7 @@ pub fn process_create_reward_center(
 
     if auction_house.is_none() {
         info!(
-            "Auction house account not passed. Creating a new auction house with default parameters"
+            "Auction house account not passed. Creating a new auction house with default parameters of address {}", auction_house_pubkey.to_string()
         );
 
         let create_auction_house_ix =
