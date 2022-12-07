@@ -4,18 +4,26 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Context, Result as AnyhowResult, anyhow};
+use anyhow::{anyhow, Context, Result as AnyhowResult};
 use hpl_reward_center::pda::find_reward_center_address;
 use hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts;
 use hpl_reward_center_sdk::create_reward_center;
-use log::{info, warn, error};
-use mpl_auction_house::{pda::{find_auction_house_address, find_auction_house_treasury_address, find_auction_house_fee_account_address}, state::AuthorityScope};
+use log::{error, info, warn};
+use mpl_auction_house::{
+    pda::{
+        find_auction_house_address, find_auction_house_fee_account_address,
+        find_auction_house_treasury_address,
+    },
+    state::AuthorityScope,
+};
 use mpl_auction_house_sdk::{
-    create_auction_house, CreateAuctionHouseAccounts, CreateAuctionHouseData,
-    delegate_auctioneer, DelegateAuctioneerAccounts, DelegateAuctioneerData,
+    create_auction_house, delegate_auctioneer, CreateAuctionHouseAccounts, CreateAuctionHouseData,
+    DelegateAuctioneerAccounts, DelegateAuctioneerData,
 };
 use solana_client::rpc_client::RpcClient;
-use solana_program::{instruction::Instruction, program_pack::Pack, pubkey::Pubkey, system_instruction::transfer};
+use solana_program::{
+    instruction::Instruction, program_pack::Pack, pubkey::Pubkey, system_instruction::transfer,
+};
 use solana_sdk::{
     signature::Keypair, signer::Signer, system_instruction::create_account,
     transaction::Transaction,
@@ -95,6 +103,57 @@ pub fn generate_create_rewards_mint_ixs(
         init_rewards_reward_mint_ix,
         create_associated_token_mint_auth_ix,
     ])
+}
+
+#[must_use]
+pub fn generate_delegate_auctioneer_ix(
+    auction_house: Pubkey,
+    authority: Pubkey,
+    reward_center: Pubkey,
+) -> Instruction {
+    let delegate_auctioneer_accounts = DelegateAuctioneerAccounts {
+        auction_house,
+        authority,
+        auctioneer_authority: reward_center,
+    };
+
+    let delegate_auctioneer_data = DelegateAuctioneerData {
+        scopes: vec![
+            AuthorityScope::Buy,
+            AuthorityScope::Cancel,
+            AuthorityScope::Sell,
+            AuthorityScope::Withdraw,
+            AuthorityScope::PublicBuy,
+            AuthorityScope::Deposit,
+            AuthorityScope::ExecuteSale,
+        ],
+    };
+
+    delegate_auctioneer(delegate_auctioneer_accounts, delegate_auctioneer_data)
+}
+
+#[must_use]
+pub fn generate_rent_exempt_ixs(
+    auction_house: Pubkey,
+    authority: Pubkey,
+    rent_amount: u64,
+) -> (Instruction, Instruction) {
+    let (auction_house_treasury, _auction_house_treasury_bump) =
+        find_auction_house_treasury_address(&auction_house);
+
+    let auction_house_treasury_rent_exempt_ix =
+        transfer(&authority, &auction_house_treasury, rent_amount);
+
+    let (auction_house_fee_account, _auction_house_fee_account_bump) =
+        find_auction_house_fee_account_address(&auction_house);
+
+    let auction_house_fee_account_rent_exempt_ix =
+        transfer(&authority, &auction_house_fee_account, rent_amount);
+
+    (
+        auction_house_treasury_rent_exempt_ix,
+        auction_house_fee_account_rent_exempt_ix,
+    )
 }
 
 #[must_use]
@@ -214,39 +273,21 @@ pub fn process_create_reward_center(
 
     instructions.push(create_reward_center_ix);
 
-    let delegate_auctioneer_accounts = DelegateAuctioneerAccounts { 
-        auction_house: auction_house_pubkey, authority: keypair.pubkey(), auctioneer_authority: reward_center_pubkey
-    };
-
-    let delegate_auctioneer_data = DelegateAuctioneerData {
-        scopes: vec![
-            AuthorityScope::Buy,
-            AuthorityScope::Cancel,
-            AuthorityScope::Sell,
-            AuthorityScope::Withdraw,
-            AuthorityScope::PublicBuy,
-            AuthorityScope::Deposit,
-            AuthorityScope::ExecuteSale,
-            ],
-        };
-
-    let delegate_auctioneer_ix = delegate_auctioneer(delegate_auctioneer_accounts, delegate_auctioneer_data);
+    let delegate_auctioneer_ix = generate_delegate_auctioneer_ix(
+        auction_house_pubkey,
+        keypair.pubkey(),
+        reward_center_pubkey,
+    );
 
     instructions.push(delegate_auctioneer_ix);
 
     let rent_exempt = client.get_minimum_balance_for_rent_exemption(0)?;
 
-    let (auction_house_treasury, _auction_house_treasury_bump) = find_auction_house_treasury_address(&auction_house_pubkey);
-
-    let treasury_rent_exempt_ix = transfer(&keypair.pubkey(), &auction_house_treasury, rent_exempt);
+    let (treasury_rent_exempt_ix, fee_account_rent_exempt_ix) =
+        generate_rent_exempt_ixs(auction_house_pubkey, keypair.pubkey(), rent_exempt);
 
     instructions.push(treasury_rent_exempt_ix);
-
-    let (auction_house_fee_account, _auction_house_fee_account_bump) = find_auction_house_fee_account_address(&auction_house_pubkey);
-
-    let auction_house_fee_account_rent_exempt_ix = transfer(&keypair.pubkey(), &auction_house_fee_account, rent_exempt);
-
-    instructions.push(auction_house_fee_account_rent_exempt_ix);
+    instructions.push(fee_account_rent_exempt_ix);
 
     let latest_blockhash = client.get_latest_blockhash()?;
 
@@ -275,7 +316,7 @@ pub fn process_create_reward_center(
         Err(error) => {
             error!("{:?}", error);
             return Err(anyhow!("ailed to send the transaction"));
-        }
+        },
     };
 
     info!(

@@ -12,6 +12,9 @@ use spl_associated_token_account::get_associated_token_address;
 /// Will return `Err` if the following happens
 /// 1. Reward center address fails to parse
 /// 2. Reward center/rewards mint/reward center token account account does not exist
+/// # Panics
+///
+/// Will panic if treasury balance amount does not parse
 pub fn process_fetch_reward_center_treasury_balance(
     client: &RpcClient,
     reward_center: &str,
@@ -34,9 +37,9 @@ pub fn process_fetch_reward_center_treasury_balance(
         .get_token_account_balance(&reward_center_rewards_token_account)
         .context("Unable to fetch reward center rewards balacne")?;
 
-    let token_balance = token_res
-        .ui_amount
-        .unwrap_or_else(|| (token_res.amount.parse::<f64>().unwrap()) / token_res.decimals as f64);
+    let token_balance = token_res.ui_amount.unwrap_or_else(|| {
+        (token_res.amount.parse::<f64>().unwrap()) / f64::from(token_res.decimals)
+    });
 
     info!(
         "Reward center rewards mint address: {}",
