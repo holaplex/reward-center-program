@@ -17,6 +17,7 @@ use reward_center_cli::{
         process_create_address_table_lookup, process_create_reward_center,
         process_edit_reward_center, process_fetch_reward_center_state,
         process_fetch_reward_center_treasury_balance, process_fund_reward_center,
+        process_withdraw_auction_house_treasury,
     },
     config::parse_solana_configuration,
     constants::PUBLIC_RPC_URLS,
@@ -115,6 +116,11 @@ fn run() -> Result<()> {
         Command::FetchTreasuryBalance { reward_center, .. } => {
             process_fetch_reward_center_treasury_balance(&client, &reward_center)?;
         },
+        Command::WithdrawAuctionHouse {
+            auction_house,
+            keypair,
+            amount,
+        } => process_withdraw_auction_house_treasury(&client, &keypair, &auction_house, amount)?,
     }
 
     info!("Done :)");

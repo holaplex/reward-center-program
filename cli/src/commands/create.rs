@@ -17,8 +17,9 @@ use mpl_auction_house::{
     state::AuthorityScope,
 };
 use mpl_auction_house_sdk::{
-    create_auction_house, delegate_auctioneer, CreateAuctionHouseAccounts, CreateAuctionHouseData,
-    DelegateAuctioneerAccounts, DelegateAuctioneerData,
+    accounts::{CreateAuctionHouseAccounts, DelegateAuctioneerAccounts},
+    args::{CreateAuctionHouseData, DelegateAuctioneerData},
+    create_auction_house, delegate_auctioneer,
 };
 use solana_client::rpc_client::RpcClient;
 use solana_program::{

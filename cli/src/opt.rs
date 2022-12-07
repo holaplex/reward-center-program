@@ -47,7 +47,7 @@ pub enum Command {
     #[clap(name = "create-atl")]
     CreateAddressTable {
         /// Optional Auction House address
-        #[arg(short = 'a', long)]
+        #[arg(short, long)]
         auction_house: String,
 
         /// Path to the address look up table's authority keypair file
@@ -113,5 +113,21 @@ pub enum Command {
         /// Path to the reward center authority keypair file
         #[arg(short, long)]
         keypair: Option<PathBuf>,
+    },
+
+    /// Withdraw from Auction House treasury
+    #[clap(name = "withdraw-auction-house")]
+    WithdrawAuctionHouse {
+        /// Auction house address
+        #[arg(short = 'A', long)]
+        auction_house: String,
+
+        /// Path to the reward center authority keypair file
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
+
+        /// Amount to withdraw (excluding decimals)
+        #[arg(short = 'a', long)]
+        amount: u64,
     },
 }
