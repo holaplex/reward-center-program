@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result as AnyhowResult};
+use anyhow::{bail, Context, Result as AnyhowResult};
 use hpl_reward_center::pda::find_reward_center_address;
 use hpl_reward_center_sdk::accounts::CreateRewardCenterAccounts;
 use hpl_reward_center_sdk::create_reward_center;
@@ -315,7 +315,7 @@ pub fn process_create_reward_center(
         },
         Err(error) => {
             error!("{:?}", error);
-            return Err(anyhow!("ailed to send the transaction"));
+            bail!("Failed to send the transaction")
         },
     };
 
