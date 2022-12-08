@@ -11,6 +11,7 @@ use hpl_reward_center::{
     offers::{accept::AcceptOfferParams, close::CloseOfferParams, create::CreateOfferParams},
     pda::{self, find_listing_address, find_offer_address, find_reward_center_address},
     reward_centers::{create::CreateRewardCenterParams, edit::EditRewardCenterParams},
+    withdraw::reward_center::WithdrawRewardCenterFundsParams,
 };
 use mpl_auction_house::pda::{
     find_auction_house_treasury_address, find_auctioneer_trade_state_address,
@@ -72,6 +73,43 @@ pub fn edit_reward_center(
 
     let data = instruction::EditRewardCenter {
         edit_reward_center_params,
+    }
+    .data();
+
+    Instruction {
+        program_id: id(),
+        accounts,
+        data,
+    }
+}
+
+pub fn withdraw_reward_center_funds(
+    WithdrawRewardCenterFundsAccounts {
+        wallet,
+        auction_house,
+        rewards_mint,
+    }: WithdrawRewardCenterFundsAccounts,
+    withdrawal_amount: u64,
+) -> Instruction {
+    let (reward_center, _) = pda::find_reward_center_address(&auction_house);
+
+    let reward_center_reward_token_account =
+        get_associated_token_address(&reward_center, &rewards_mint);
+
+    let destination_reward_token_account = get_associated_token_address(&wallet, &rewards_mint);
+
+    let accounts = rewards_accounts::WithdrawRewardCenterFunds {
+        wallet,
+        auction_house,
+        reward_center,
+        reward_center_reward_token_account,
+        destination_reward_token_account,
+        token_program: spl_token::id(),
+    }
+    .to_account_metas(None);
+
+    let data = instruction::WithdrawRewardCenterFunds {
+        withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams { withdrawal_amount },
     }
     .data();
 

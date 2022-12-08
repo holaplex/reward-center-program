@@ -1,11 +1,13 @@
 pub mod constants;
 pub mod errors;
+pub mod events;
 pub mod listings;
 pub mod metaplex_cpi;
 pub mod offers;
 pub mod pda;
 pub mod reward_centers;
 pub mod state;
+pub mod withdraw;
 
 use anchor_lang::prelude::*;
 
@@ -13,6 +15,7 @@ use crate::{
     listings::{buy::*, close::*, create::*, update::*},
     offers::{accept::*, close::*, create::*},
     reward_centers::{create::*, edit::*},
+    withdraw::reward_center::*,
 };
 
 declare_id!("RwDDvPp7ta9qqUwxbBfShsNreBaSsKvFcHzMxfBC3Ki");
@@ -33,6 +36,13 @@ pub mod reward_center {
         edit_reward_center_params: EditRewardCenterParams,
     ) -> Result<()> {
         reward_centers::edit::handler(ctx, edit_reward_center_params)
+    }
+
+    pub fn withdraw_reward_center_funds(
+        ctx: Context<WithdrawRewardCenterFunds>,
+        withdraw_reward_center_funds_params: WithdrawRewardCenterFundsParams,
+    ) -> Result<()> {
+        withdraw::reward_center::handler(ctx, withdraw_reward_center_funds_params)
     }
 
     pub fn create_listing(

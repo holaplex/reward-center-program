@@ -67,7 +67,7 @@ pub fn process_fund_reward_center(
                     ..
                 } = Account::unpack(&data[..])?;
 
-                if token_balance < amount {
+                if token_balance < amount_to_transfer_with_decimals {
                     if let COption::Some(mint_authority) = mint_authority {
                         if mint_authority.eq(&keypair.pubkey()) {
                             vec![mint_to_checked(

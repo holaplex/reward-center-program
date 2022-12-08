@@ -6,6 +6,12 @@ pub struct CreateRewardCenterAccounts {
     pub auction_house_treasury_mint: Pubkey,
 }
 
+pub struct WithdrawRewardCenterFundsAccounts {
+    pub wallet: Pubkey,
+    pub rewards_mint: Pubkey,
+    pub auction_house: Pubkey,
+}
+
 pub struct CreateListingAccounts {
     pub wallet: Pubkey,
     pub listing: Pubkey,
