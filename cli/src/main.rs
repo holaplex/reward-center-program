@@ -116,11 +116,18 @@ fn run() -> Result<()> {
         Command::FetchTreasuryBalance { reward_center, .. } => {
             process_fetch_reward_center_treasury_balance(&client, &reward_center)?;
         },
+
         Command::WithdrawAuctionHouse {
             auction_house,
             keypair,
             amount,
         } => process_withdraw_auction_house_treasury(&client, &keypair, &auction_house, amount)?,
+
+        Command::WithdrawRewardCenter {
+            reward_center,
+            keypair,
+            amount,
+        } => process_withdraw_reward_center(&client, &keypair, &reward_center, amount),
     }
 
     info!("Done :)");

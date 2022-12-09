@@ -43,4 +43,12 @@ pub enum RewardCenterError {
     // 6009
     #[msg("The account address bumps do not match")]
     BumpMismatch,
+
+    // 6010
+    #[msg("The given token account owner does not match")]
+    TokenOwnerMismatch,
+
+    // 6011
+    #[msg("The given token account has insufficient funds")]
+    InsufficientFunds,
 }
