@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use anchor_lang::AnchorDeserialize;
 use anyhow::{Context, Result as AnyhowResult};
 use log::info;
-use mpl_auction_house::AuctionHouse;
+use mpl_auction_house::{pda::find_auction_house_treasury_address, AuctionHouse};
 use mpl_auction_house_sdk::{accounts::WithdrawFromTreasuryAccounts, withdraw_from_treasury};
 use retry::{delay::Exponential, retry};
 use solana_client::rpc_client::RpcClient;
@@ -43,20 +43,41 @@ pub fn process_withdraw_auction_house_treasury(
         ..
     } = AuctionHouse::deserialize(&mut &auction_house_data[8..])?;
 
-    let token_mint_data = client.get_account_data(&treasury_mint)?;
+    let token_mint_data = client
+        .get_account_data(&treasury_mint)
+        .context("Failed to get treasury mint account data")?;
 
     let Mint { decimals, .. } = Mint::unpack(&token_mint_data[..])?;
 
-    let mut amount_to_withdraw_with_decimals =
-        amount.saturating_mul(10u64.saturating_pow(decimals.into()));
+    let amount_with_decimals = amount.saturating_mul(10u64.saturating_pow(decimals.into()));
 
-    if treasury_mint.eq(&spl_token::native_mint::id()) {
-        info!("Deducting the rent amount from the withdrawal value");
+    let amount_to_withdraw = if treasury_mint.eq(&spl_token::native_mint::id()) {
         let rent_exemption_lamports = client.get_minimum_balance_for_rent_exemption(0)?;
+        info!("Deducting the rent amount from the withdrawal value");
 
-        amount_to_withdraw_with_decimals =
-            amount_to_withdraw_with_decimals - rent_exemption_lamports;
-    }
+        let auction_house_treasury_address =
+            find_auction_house_treasury_address(&auction_house_pubkey).0;
+
+        let auction_house_treasury_data = client
+            .get_account(&auction_house_treasury_address)
+            .context("Failed to get auction house treasury account data")?;
+
+        let lamports_with_rent_deduction = auction_house_treasury_data
+            .lamports
+            .saturating_sub(rent_exemption_lamports);
+
+        if lamports_with_rent_deduction >= amount_with_decimals {
+            amount_with_decimals
+        } else {
+            info!(
+                "Deducting {} SOL from AH treasury, as given amount includes rent",
+                lamports_with_rent_deduction
+            );
+            lamports_with_rent_deduction
+        }
+    } else {
+        amount_with_decimals
+    };
 
     let instructions: Vec<Instruction> = vec![withdraw_from_treasury(
         WithdrawFromTreasuryAccounts {
@@ -65,7 +86,7 @@ pub fn process_withdraw_auction_house_treasury(
             auction_house: auction_house_pubkey,
             authority,
         },
-        amount_to_withdraw_with_decimals,
+        amount_to_withdraw,
     )];
 
     let latest_blockhash = client.get_latest_blockhash()?;

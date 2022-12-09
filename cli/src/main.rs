@@ -17,7 +17,7 @@ use reward_center_cli::{
         process_create_address_table_lookup, process_create_reward_center,
         process_edit_reward_center, process_fetch_reward_center_state,
         process_fetch_reward_center_treasury_balance, process_fund_reward_center,
-        process_withdraw_auction_house_treasury, process_withdraw_reward_center,
+        process_withdraw_auction_house_treasury, process_withdraw_reward_center_treasury,
     },
     config::parse_solana_configuration,
     constants::PUBLIC_RPC_URLS,
@@ -127,7 +127,7 @@ fn run() -> Result<()> {
             reward_center,
             keypair,
             amount,
-        } => process_withdraw_reward_center(&client, &keypair, &reward_center, amount)?,
+        } => process_withdraw_reward_center_treasury(&client, &keypair, &reward_center, amount)?,
     }
 
     info!("Done :)");

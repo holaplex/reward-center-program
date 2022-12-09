@@ -20,7 +20,7 @@ use crate::config::{parse_keypair, parse_solana_configuration};
 /// Will return `Err` if the following happens
 /// 1. Reward center address fails to parse
 /// 2. Withdrawal amount is greater than the treasury balance
-pub fn process_withdraw_reward_center(
+pub fn process_withdraw_reward_center_treasury(
     client: &RpcClient,
     keypair_path: &Option<PathBuf>,
     reward_center: &str,

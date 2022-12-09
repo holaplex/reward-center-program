@@ -77,7 +77,7 @@ pub fn process_create_address_table_lookup(
 
     let recent_slot = client
         .get_slot_with_commitment(CommitmentConfig::finalized())
-        .unwrap();
+        .context("Failed to fetch recent slot")?;
 
     let (create_address_lookup_table_ix, address_lookup_table_pubkey) =
         create_lookup_table(keypair.pubkey(), keypair.pubkey(), recent_slot);
