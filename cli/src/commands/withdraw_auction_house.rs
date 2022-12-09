@@ -47,8 +47,16 @@ pub fn process_withdraw_auction_house_treasury(
 
     let Mint { decimals, .. } = Mint::unpack(&token_mint_data[..])?;
 
-    let amount_to_withdraw_with_decimals =
+    let mut amount_to_withdraw_with_decimals =
         amount.saturating_mul(10u64.saturating_pow(decimals.into()));
+
+    if treasury_mint.eq(&spl_token::native_mint::id()) {
+        info!("Deducting the rent amount from the withdrawal value");
+        let rent_exemption_lamports = client.get_minimum_balance_for_rent_exemption(0)?;
+
+        amount_to_withdraw_with_decimals =
+            amount_to_withdraw_with_decimals - rent_exemption_lamports;
+    }
 
     let instructions: Vec<Instruction> = vec![withdraw_from_treasury(
         WithdrawFromTreasuryAccounts {
@@ -68,7 +76,11 @@ pub fn process_withdraw_auction_house_treasury(
         latest_blockhash,
     );
 
-    info!("Withdrawing {} tokens from auction house", amount);
+    info!(
+        "Withdrawing {} tokens of treasury mint address {} from auction house",
+        amount,
+        treasury_mint.to_string()
+    );
 
     let tx_hash = retry(
         Exponential::from_millis_with_factor(250, 2.0).take(3),
