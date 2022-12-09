@@ -53,7 +53,6 @@ pub fn process_withdraw_auction_house_treasury(
 
     let amount_to_withdraw = if treasury_mint.eq(&spl_token::native_mint::id()) {
         let rent_exemption_lamports = client.get_minimum_balance_for_rent_exemption(0)?;
-        info!("Deducting the rent amount from the withdrawal value");
 
         let auction_house_treasury_address =
             find_auction_house_treasury_address(&auction_house_pubkey).0;
