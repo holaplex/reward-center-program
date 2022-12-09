@@ -20,7 +20,7 @@ use crate::config::{parse_keypair, parse_solana_configuration};
 /// Will return `Err` if the following happens
 /// 1. Reward center address fails to parse
 /// 2. Withdrawal amount is greater than the treasury balance
-pub fn process_withdraw_reward_center(
+pub fn process_withdraw_reward_center_treasury(
     client: &RpcClient,
     keypair_path: &Option<PathBuf>,
     reward_center: &str,
@@ -29,7 +29,6 @@ pub fn process_withdraw_reward_center(
     let solana_options = parse_solana_configuration()?;
 
     let keypair = parse_keypair(keypair_path, &solana_options)?;
-    let token_program = spl_token::id();
 
     let reward_center_pubkey = Pubkey::from_str(reward_center)
         .context("Failed to parse Pubkey from mint rewards string")?;
@@ -46,9 +45,6 @@ pub fn process_withdraw_reward_center(
     let token_mint_data = client.get_account_data(&token_mint)?;
 
     let Mint { decimals, .. } = Mint::unpack(&token_mint_data[..])?;
-
-    let caller_reward_mint_token_account =
-        get_associated_token_address(&keypair.pubkey(), &token_mint);
 
     let reward_center_reward_mint_token_account =
         get_associated_token_address(&reward_center_pubkey, &token_mint);
@@ -74,7 +70,7 @@ pub fn process_withdraw_reward_center(
                 }
 
                 vec![withdraw_reward_center_funds(
-                    WithdrawRewardCenterAccounts {
+                    WithdrawRewardCenterFundsAccounts {
                         wallet: keypair.pubkey(),
                         rewards_mint: token_mint,
                         auction_house,

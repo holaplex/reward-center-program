@@ -43,6 +43,18 @@ pub enum Command {
         keypair: Option<PathBuf>,
     },
 
+    /// Create address lookup table
+    #[clap(name = "create-atl")]
+    CreateAddressTable {
+        /// Optional Auction House address
+        #[arg(short, long)]
+        auction_house: String,
+
+        /// Path to the address look up table's authority keypair file
+        #[arg(short, long)]
+        keypair: Option<PathBuf>,
+    },
+
     /// Edit reward center's reward rules
     #[clap(name = "edit")]
     Edit {
@@ -115,7 +127,23 @@ pub enum Command {
         keypair: Option<PathBuf>,
 
         /// Amount to withdraw (excluding decimals)
+        #[arg(short = 'a', long)]
+        amount: u64,
+    },
+
+    /// Withdraw from Auction House treasury
+    #[clap(name = "withdraw-auction-house")]
+    WithdrawAuctionHouse {
+        /// Auction house address
+        #[arg(short = 'A', long)]
+        auction_house: String,
+
+        /// Path to the reward center authority keypair file
         #[arg(short, long)]
+        keypair: Option<PathBuf>,
+
+        /// Amount to withdraw (excluding decimals)
+        #[arg(short = 'a', long)]
         amount: u64,
     },
 }

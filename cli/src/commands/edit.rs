@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{anyhow, Context, Result as AnyhowResult};
+use anyhow::{bail, Context, Result as AnyhowResult};
 use hpl_reward_center::{
     reward_centers::edit::EditRewardCenterParams,
     state::{PayoutOperation, RewardRules},
@@ -59,7 +59,7 @@ pub fn process_edit_reward_center(
         }
     } else {
         error!("Update reward center config doesn't exist");
-        return Err(anyhow!("Update config missing"));
+        bail!("Update config missing")
     };
 
     let edit_reward_center_ix = edit_reward_center(

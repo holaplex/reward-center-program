@@ -14,9 +14,10 @@ use clap::Parser;
 use log::{error, info, warn};
 use reward_center_cli::{
     commands::{
-        process_create_reward_center, process_edit_reward_center,
-        process_fetch_reward_center_state, process_fetch_reward_center_treasury_balance,
-        process_fund_reward_center, process_withdraw_reward_center,
+        process_create_address_table_lookup, process_create_reward_center,
+        process_edit_reward_center, process_fetch_reward_center_state,
+        process_fetch_reward_center_treasury_balance, process_fund_reward_center,
+        process_withdraw_auction_house_treasury, process_withdraw_reward_center_treasury,
     },
     config::parse_solana_configuration,
     constants::PUBLIC_RPC_URLS,
@@ -85,6 +86,11 @@ fn run() -> Result<()> {
             &mint_rewards,
         )?,
 
+        Command::CreateAddressTable {
+            auction_house,
+            keypair,
+        } => process_create_address_table_lookup(&client, &keypair, &auction_house)?,
+
         Command::Edit {
             keypair,
             config_file,
@@ -111,11 +117,17 @@ fn run() -> Result<()> {
             process_fetch_reward_center_treasury_balance(&client, &reward_center)?;
         },
 
+        Command::WithdrawAuctionHouse {
+            auction_house,
+            keypair,
+            amount,
+        } => process_withdraw_auction_house_treasury(&client, &keypair, &auction_house, amount)?,
+
         Command::WithdrawRewardCenter {
             reward_center,
             keypair,
             amount,
-        } => process_withdraw_reward_center(&client, &keypair, &reward_center, amount),
+        } => process_withdraw_reward_center_treasury(&client, &keypair, &reward_center, amount)?,
     }
 
     info!("Done :)");
