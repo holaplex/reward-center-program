@@ -1,14 +1,13 @@
 pub mod accounts;
 pub mod args;
 
-use accounts::{
-    CreateAuctionHouseAccounts, DelegateAuctioneerAccounts, WithdrawFromTreasuryAccounts,
-};
+use accounts::*;
+use args::*;
+
 use anchor_client::solana_sdk::sysvar;
 use anchor_client::solana_sdk::{instruction::Instruction, system_program};
 use anchor_lang::{prelude::*, InstructionData};
 use anchor_spl::{associated_token::AssociatedToken, token::spl_token};
-use args::{CreateAuctionHouseData, DelegateAuctioneerData};
 use mpl_auction_house::pda::{
     find_auction_house_address, find_auction_house_fee_account_address,
     find_auction_house_treasury_address, find_auctioneer_pda,
