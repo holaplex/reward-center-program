@@ -1,7 +1,7 @@
 [package]
 name = "reward-center-cli"
 description = "A Metaplex auctioneer program that distributes spl token to the buyer and seller of NFTs"
-version = "0.1.0"
+version = "0.2.4"
 edition = "2021"
 repository = "https://github.com/holaplex/reward-center-program"
 license = "GPL-3.0-or-later"
