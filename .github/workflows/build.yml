@@ -1,0 +1,114 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: cli
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install libudev-dev on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev
+
+      - name: Install Latest Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+          override: true
+
+      - name: Install cargo-cache
+        run: |
+          cargo install cargo-cache
+
+      - name: Cache Dependencies
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('cli/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build
+        id: build
+        shell: bash
+        run: |
+          binary_extension=""
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            binary_extension=".exe"
+            binary_path="reward-center-cli-windows-latest${binary_extension}"
+          elif [[ "${RUNNER_OS}" == "macOS" ]]; then
+            binary_path="reward-center-cli-macos-intel-latest"
+          elif [[ "${RUNNER_OS}" == "Linux" ]]; then
+            binary_path="reward-center-cli-ubuntu-latest"
+          else
+            echo "error: unknown OS: ${RUNNER_OS}"
+            exit 1
+          fi
+          echo "binary_path=${binary_path}" >> $GITHUB_OUTPUT
+
+          # clean build for release
+          if [[ "${GITHUB_REF}" = refs/tags/* ]]; then
+            cargo clean
+          fi
+
+          cargo build --all --release --locked
+          cp "target/release/reward-center-cli${binary_extension}" "${binary_path}"
+          # strip "${binary_path}"
+
+      - name: Rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - name: Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+
+      - name: Cleanup Dependencies
+        run: |
+          cargo cache clean-unref
+
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v3
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        with:
+          name: ${{ matrix.os }}
+          path: cli/${{ steps.build.outputs.binary_path }}
+          if-no-files-found: error
+
+      - name: Release Tags
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: cli/${{ steps.build.outputs.binary_path }}
