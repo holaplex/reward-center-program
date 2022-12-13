@@ -92,7 +92,10 @@ pub fn process_create_address_table_lookup(
     let instructions: Vec<Instruction> =
         vec![create_address_lookup_table_ix, extend_lookup_table_ix];
 
-    let latest_blockhash = client.get_latest_blockhash().unwrap();
+    let latest_blockhash = client
+        .get_latest_blockhash()
+        .context("Failed to get latest blockhash")?;
+
     let tx_hash = client.send_and_confirm_transaction(&Transaction::new_signed_with_payer(
         &instructions,
         Some(&keypair.pubkey()),
