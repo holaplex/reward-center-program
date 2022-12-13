@@ -56,6 +56,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      - name: Rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --manifest-path cli/Cargo.toml --all -- --check
+
+      - name: Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --manifest-path cli/Cargo.toml -- -D warnings
+
       - name: Build
         id: build
         shell: bash
@@ -82,18 +94,6 @@ jobs:
           cargo build --all --release --locked
           cp "target/release/reward-center-cli${binary_extension}" "${binary_path}"
           # strip "${binary_path}"
-
-      - name: Rustfmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-
-      - name: Clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
 
       - name: Cleanup Dependencies
         run: |
