@@ -1,0 +1,100 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install libudev-dev on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev
+
+      - name: Install Latest Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+          override: true
+
+      - name: Install cargo-cache
+        run: |
+          cargo install cargo-cache
+
+      - name: Cache Dependencies
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            cli/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('cli/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build
+        id: build
+        shell: bash
+        run: |
+          cd cli
+          binary_extension=""
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            binary_extension=".exe"
+            binary_path="reward-center-cli-windows-latest${binary_extension}"
+          elif [[ "${RUNNER_OS}" == "macOS" ]]; then
+            binary_path="reward-center-cli-macos-intel-latest"
+          elif [[ "${RUNNER_OS}" == "Linux" ]]; then
+            binary_path="reward-center-cli-ubuntu-latest"
+          else
+            echo "error: unknown OS: ${RUNNER_OS}"
+            exit 1
+          fi
+          echo "::set-output name=binary_path::${binary_path}"
+
+          # clean build for release
+          if [[ "${GITHUB_REF}" = refs/tags/* ]]; then
+            cargo clean
+          fi
+
+          cargo build --all --release --locked
+          cp "target/release/reward-center-cli${binary_extension}" "${binary_path}"
+          strip "${binary_path}"
+
+      - name: Cleanup Dependencies
+        run: |
+          cd cli
+          cargo cache clean-unref
+
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v3
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        with:
+          name: ${{ matrix.os }}
+          path: ${{ steps.build.outputs.binary_path }}
+
+      - name: Release Tags
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ steps.build.outputs.binary_path }}
