@@ -81,10 +81,10 @@ jobs:
           cp "target/release/reward-center-cli${binary_extension}" "${binary_path}"
           strip "${binary_path}"
 
-      - name: Cleanup Dependencies
-        run: |
-          cd cli
-          cargo cache clean-unref
+      # - name: Cleanup Dependencies
+      #   run: |
+      #     cd cli
+      #     cargo cache clean-unref
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v3
