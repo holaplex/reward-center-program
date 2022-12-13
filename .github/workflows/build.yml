@@ -17,6 +17,9 @@ jobs:
           - macos-latest
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: cli
 
     steps:
       - name: Checkout
@@ -48,7 +51,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            cli/target/
+            target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('cli/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -57,7 +60,6 @@ jobs:
         id: build
         shell: bash
         run: |
-          cd cli
           binary_extension=""
           if [[ "${RUNNER_OS}" == "Windows" ]]; then
             binary_extension=".exe"
@@ -70,7 +72,7 @@ jobs:
             echo "error: unknown OS: ${RUNNER_OS}"
             exit 1
           fi
-          echo "::set-output name=binary_path::${binary_path}"
+          echo "binary_path=${binary_path}" >> $GITHUB_OUTPUT
 
           # clean build for release
           if [[ "${GITHUB_REF}" = refs/tags/* ]]; then
@@ -79,22 +81,34 @@ jobs:
 
           cargo build --all --release --locked
           cp "target/release/reward-center-cli${binary_extension}" "${binary_path}"
-          strip "${binary_path}"
+          # strip "${binary_path}"
 
-      # - name: Cleanup Dependencies
-      #   run: |
-      #     cd cli
-      #     cargo cache clean-unref
+      - name: Rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - name: Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+
+      - name: Cleanup Dependencies
+        run: |
+          cargo cache clean-unref
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v3
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           name: ${{ matrix.os }}
-          path: ${{ steps.build.outputs.binary_path }}
+          path: cli/${{ steps.build.outputs.binary_path }}
+          if-no-files-found: error
 
       - name: Release Tags
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ steps.build.outputs.binary_path }}
+          files: cli/${{ steps.build.outputs.binary_path }}
