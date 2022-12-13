@@ -57,12 +57,14 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Rustfmt
+        if: runner.os == 'Linux' || runner.os == 'macOS'
         uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --manifest-path cli/Cargo.toml --all -- --check
 
       - name: Clippy
+        if: runner.os == 'Linux' || runner.os == 'macOS'
         uses: actions-rs/cargo@v1
         with:
           command: clippy
