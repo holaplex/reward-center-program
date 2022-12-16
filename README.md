@@ -37,6 +37,10 @@ The authority of an auction house creates a reward center and sets the reward ru
 
 The authority of an auction house with a reward center adjusts its configuration (e.g. collection oracle, reward rules).
 
+### Withdraw Reward Center Funds
+
+The authority of a reward center can withdraw the tokens stored in reward center treasury.
+
 ### Create Listing
 
 User puts an NFT up for sale through the reward center program. This results in a CPI call to the *sale* instruction of auction house. A listing record is generated to track sale order.
@@ -47,8 +51,11 @@ User cancels their listing resulting in *cancel* CPI call to auction house and c
 
 ### Update Listing
 
-THe owner of a listing adjusts the sale price of the NFT.
+The owner of a listing adjusts the sale price of the NFT.
 
+### Buy Listing
+
+Facilitates the sale of an NFT without needing to create an offer account by CPI calls to auction house *deposit* *public_buy* and *execute_sale* respectively. It then distributes rewards to the buyer and seller based on the configure reward rules by the auction house authority.
 
 ### Create Offer
 
@@ -58,9 +65,9 @@ User places an offer on an NFT resulting in a *public_bid* CPI call to auction h
 
 Users cancels their offer resulting in *cancel* CPI call to auction house and cancellation time saved on the offer. The amount of the offer is deducted from the user's escrow account and transferred back to the user's wallet.
 
-### Execute Sale
+### Accept Offer
 
-Facilitates the sale of an NFT through a CPI call to auction house *execute_sale* and distributes rewards to the buyer and seller based on the configure reward rules by the auction house authority.
+Facilitates the sale of an NFT without requiring the seller to create a listing account and allowing to "accept" an outstanding offer, by CPI calls to auction house *sell* and *execute_sale* respectively. It then distributes rewards to the buyer and seller based on the configure reward rules by the auction house authority.
 
 ## Testing
 
