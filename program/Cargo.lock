@@ -1365,7 +1365,7 @@ dependencies = [
 
 [[package]]
 name = "hpl-reward-center-sdk"
-version = "0.1.0"
+version = "0.2.4"
 dependencies = [
  "anchor-client",
  "anchor-lang",
@@ -1777,7 +1777,7 @@ dependencies = [
 
 [[package]]
 name = "mpl-auction-house-sdk"
-version = "0.1.0"
+version = "1.2.4"
 dependencies = [
  "anchor-client",
  "anchor-lang",
