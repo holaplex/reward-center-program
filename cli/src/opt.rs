@@ -44,7 +44,7 @@ pub enum Command {
     },
 
     /// Create address lookup table
-    #[clap(name = "create-atl")]
+    #[clap(name = "create-alt")]
     CreateAddressTable {
         /// Optional Auction House address
         #[arg(short, long)]
