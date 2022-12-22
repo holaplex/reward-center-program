@@ -127,7 +127,7 @@ Allows an auction house (same as reward center if created along) authority to wi
 reward-center-cli withdraw-auction-house -A <AUCTION_HOUSE> -a <AMOUNT> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 ```
 
-### Get Reward center Treasury Balance
+### Get Reward Center treasury balance
 Fetches the current treasury balance held by the reward center.
 
 #### Usage
@@ -135,10 +135,18 @@ Fetches the current treasury balance held by the reward center.
 reward-center-cli balance -R <REWARD_CENTER> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 ```
 
-### Get Reward center state
+### Get Reward Center state
 Fetches the current state values of a reward center.
 
 #### Usage
 ```sh
 reward-center-cli show -R <REWARD_CENTER> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
+```
+
+### Create an address lookup table
+
+Generates a address lookup table for reducing the number of accounts needed to be sent with each transaction.
+
+```sh
+reward-center-cli create-atl --keypair <KEYPAIR> --rpc <RPC> --auction-house <AUCTION_HOUSE>
 ```
