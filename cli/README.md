@@ -100,7 +100,7 @@ Allows a reward center authority to edit the reward rules configuration.
 
 #### Usage
 ```sh
-reward-center-cli edit -c <CONFIG_FILE> -R <REWARD_CENTER> -a <AUCTION_HOUSE> -M <MINT_REWARDS> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
+reward-center-cli edit -c <CONFIG_FILE> -R <REWARD_CENTER> -a <AUCTION_HOUSE> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 ```
 
 ### Fund Reward Center
