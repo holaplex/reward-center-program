@@ -32,7 +32,6 @@ pub struct CreateRewardCenter<'info> {
     pub wallet: Signer<'info>,
 
     /// the mint of the token to use as rewards.
-    #[account(constraint = mint.decimals == auction_house_treasury_mint.decimals @ RewardCenterError::RewardMintDecimalMismatch)]
     pub mint: Account<'info, Mint>,
 
     // the mint of the accepted token currency for the associated auction house

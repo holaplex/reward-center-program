@@ -107,7 +107,7 @@ async fn buy_listing_success() {
         &reward_mint_pubkey,
         &reward_mint_authority_pubkey,
         Some(&reward_mint_authority_pubkey),
-        9,
+        7,
     )
     .unwrap();
 
@@ -121,16 +121,16 @@ async fn buy_listing_success() {
         &reward_center_reward_token_account,
         &reward_mint_authority_pubkey,
         &[],
-        100_000_000_000,
-        9,
+        100_000_000,
+        7,
     )
     .unwrap();
 
     let reward_center_params = reward_centers::create::CreateRewardCenterParams {
         reward_rules: RewardRules {
-            mathematical_operand: PayoutOperation::Multiple,
-            seller_reward_payout_basis_points: 1000,
-            payout_numeral: 5,
+            mathematical_operand: PayoutOperation::Divide,
+            seller_reward_payout_basis_points: 500,
+            payout_numeral: 7,
         },
     };
 
@@ -221,7 +221,7 @@ async fn buy_listing_success() {
     };
 
     let create_listing_params = CreateListingData {
-        price: reward_center_test::ONE_SOL,
+        price: reward_center_test::ONE_SOL * 7,
         token_size: 1,
         trade_state_bump,
         free_trade_state_bump,
@@ -304,7 +304,7 @@ async fn buy_listing_success() {
     };
 
     let buy_listing_params = BuyListingData {
-        price: reward_center_test::ONE_SOL,
+        price: reward_center_test::ONE_SOL * 7,
         token_size: 1,
         reward_mint: reward_mint_pubkey,
     };

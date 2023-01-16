@@ -1,7 +1,8 @@
 pub mod accounts;
 pub mod args;
 
-use accounts::*;
+pub use accounts::*;
+
 use anchor_client::solana_sdk::{instruction::Instruction, pubkey::Pubkey, system_program, sysvar};
 use anchor_lang::{prelude::*, solana_program::instruction::AccountMeta, InstructionData};
 use args::*;
