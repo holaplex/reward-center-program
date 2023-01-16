@@ -92,7 +92,7 @@ Creates an address table lookup account to facilitate adding more addresses at s
 
 #### Usage
 ```sh
-reward-center-cli create-atl  -a <AUCTION_HOUSE> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
+reward-center-cli create-alt  -a <AUCTION_HOUSE> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 ```
 
 ### Edit Reward Center
@@ -100,7 +100,7 @@ Allows a reward center authority to edit the reward rules configuration.
 
 #### Usage
 ```sh
-reward-center-cli edit -c <CONFIG_FILE> -R <REWARD_CENTER> -a <AUCTION_HOUSE> -M <MINT_REWARDS> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
+reward-center-cli edit -c <CONFIG_FILE> -R <REWARD_CENTER> -a <AUCTION_HOUSE> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 ```
 
 ### Fund Reward Center
@@ -148,5 +148,5 @@ reward-center-cli show -R <REWARD_CENTER> -k <KEYPAIR> -r <RPC> -T <TIMEOUT>
 Generates a address lookup table for reducing the number of accounts needed to be sent with each transaction.
 
 ```sh
-reward-center-cli create-atl --keypair <KEYPAIR> --rpc <RPC> --auction-house <AUCTION_HOUSE>
+reward-center-cli create-alt --keypair <KEYPAIR> --rpc <RPC> --auction-house <AUCTION_HOUSE>
 ```
