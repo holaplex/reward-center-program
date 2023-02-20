@@ -424,7 +424,7 @@ pub fn handler<'info>(
 
     // Buyer transfer
     let reward_center_reward_token_balance = ctx.accounts.reward_center_reward_token_account.amount;
-    if reward_center_reward_token_balance >= buyer_payout {
+    if buyer_payout > 0 && reward_center_reward_token_balance >= buyer_payout {
         transfer(
             CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
@@ -445,7 +445,7 @@ pub fn handler<'info>(
     // Seller transfer
     ctx.accounts.reward_center_reward_token_account.reload()?;
     let reward_center_reward_token_balance = ctx.accounts.reward_center_reward_token_account.amount;
-    if reward_center_reward_token_balance >= seller_payout {
+    if seller_payout > 0 && reward_center_reward_token_balance >= seller_payout {
         transfer(
             CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
