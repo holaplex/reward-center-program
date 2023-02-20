@@ -110,7 +110,7 @@ pub struct CloseListing<'info> {
     pub auction_house_program: Program<'info, AuctionHouseProgram>,
 }
 
-pub fn handler(ctx: Context<CloseListing>) -> Result<()> {
+pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, CloseListing<'info>>) -> Result<()> {
     let reward_center = &ctx.accounts.reward_center;
     let auction_house = &ctx.accounts.auction_house;
     let metadata = &ctx.accounts.metadata;
@@ -150,7 +150,7 @@ pub fn handler(ctx: Context<CloseListing>) -> Result<()> {
             accounts: cancel_listing_ctx_accounts,
             instruction_data: close_listing_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
-            remaining_accounts: None,
+            remaining_accounts: Some(ctx.remaining_accounts),
         });
 
     invoke_signed(

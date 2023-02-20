@@ -45,8 +45,8 @@ pub mod reward_center {
         withdraw::reward_center::handler(ctx, withdraw_reward_center_funds_params)
     }
 
-    pub fn create_listing(
-        ctx: Context<CreateListing>,
+    pub fn create_listing<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateListing<'info>>,
         create_listing_params: CreateListingParams,
     ) -> Result<()> {
         listings::create::handler(ctx, create_listing_params)
@@ -59,7 +59,9 @@ pub mod reward_center {
         listings::update::handler(ctx, update_listing_params)
     }
 
-    pub fn close_listing(ctx: Context<CloseListing>) -> Result<()> {
+    pub fn close_listing<'info>(
+        ctx: Context<'_, '_, '_, 'info, CloseListing<'info>>,
+    ) -> Result<()> {
         listings::close::handler(ctx)
     }
 
