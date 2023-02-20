@@ -7,6 +7,7 @@ use mpl_auction_house::{
 
 use crate::{
     constants::{LISTING, REWARD_CENTER},
+    errors::RewardCenterError,
     state::{Listing, RewardCenter},
 };
 
@@ -33,6 +34,7 @@ pub struct UpdateListing<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref(),
         ],
+        constraint = update_listing_params.new_price > 0 @ RewardCenterError::PriceInvalid,
         bump = listing.bump,
     )]
     pub listing: Account<'info, Listing>,

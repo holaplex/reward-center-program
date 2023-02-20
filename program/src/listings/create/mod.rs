@@ -45,6 +45,7 @@ pub struct CreateListing<'info> {
             metadata.key().as_ref(),
             reward_center.key().as_ref(),
         ],
+        constraint = create_listing_params.price > 0 @ RewardCenterError::PriceInvalid,
         bump,
     )]
     pub listing: Account<'info, Listing>,

@@ -51,4 +51,8 @@ pub enum RewardCenterError {
     // 6011
     #[msg("The given token account has insufficient funds")]
     InsufficientFunds,
+
+    // 6012
+    #[msg("The listing price cannot be zero")]
+    PriceInvalid,
 }
