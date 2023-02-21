@@ -85,7 +85,7 @@ pub fn process_create_address_table_lookup(
     let extend_lookup_table_ix = extend_lookup_table(
         address_lookup_table_pubkey,
         keypair.pubkey(),
-        keypair.pubkey(),
+        Some(keypair.pubkey()),
         addresses,
     );
 
