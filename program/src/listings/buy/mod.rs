@@ -96,6 +96,7 @@ pub struct BuyListing<'info> {
 
     /// CHECK: assertion with mpl_auction_house assert_metadata_valid
     /// Metaplex metadata account decorating SPL mint account.
+    #[account(mut)]
     pub metadata: UncheckedAccount<'info>,
 
     /// Auction House treasury mint account.

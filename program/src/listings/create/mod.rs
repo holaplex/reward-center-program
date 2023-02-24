@@ -176,8 +176,8 @@ pub struct CreateListing<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn handler(
-    ctx: Context<CreateListing>,
+pub fn handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, CreateListing<'info>>,
     CreateListingParams {
         token_size,
         trade_state_bump,
@@ -244,7 +244,7 @@ pub fn handler(
             accounts: create_listing_ctx_accounts,
             instruction_data: create_listing_params.data(),
             auctioneer_authority: ctx.accounts.reward_center.key(),
-            remaining_accounts: None,
+            remaining_accounts: Some(ctx.remaining_accounts),
         });
 
     invoke_signed(
