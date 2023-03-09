@@ -11,6 +11,8 @@ pub fn setup_program<'a>() -> ProgramTest {
     let mut program = ProgramTest::new("hpl_reward_center", hpl_reward_center::id(), None);
     program.add_program("mpl_auction_house", mpl_auction_house::id(), None);
     program.add_program("mpl_token_metadata", mpl_token_metadata::id(), None);
+    program.add_program("mpl_token_auth_rules", mpl_token_auth_rules::id(), None);
+    program.set_compute_max_units(u64::MAX);
 
     program
 }

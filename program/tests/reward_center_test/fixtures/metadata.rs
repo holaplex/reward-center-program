@@ -1,5 +1,5 @@
 use mpl_testing_utils::{solana::airdrop, utils::Metadata};
-use mpl_token_metadata::state::{Collection, Creator, Uses};
+use mpl_token_metadata::state::{Collection, Creator, PrintSupply, TokenStandard, Uses};
 use solana_program_test::ProgramTestContext;
 use solana_sdk::signature::Signer;
 
@@ -44,7 +44,7 @@ pub async fn create<'a>(
     }]);
 
     test_metadata
-        .create_v2(
+        .create_via_builder(
             context,
             name.to_string(),
             symbol.to_string(),
@@ -54,7 +54,18 @@ pub async fn create<'a>(
             is_mutable,
             collection,
             uses,
+            true,
+            TokenStandard::NonFungible,
+            None,
+            None,
+            Some(0),
+            Some(PrintSupply::Zero),
         )
+        .await
+        .unwrap();
+
+    test_metadata
+        .mint_via_builder(context, 1, None)
         .await
         .unwrap();
 

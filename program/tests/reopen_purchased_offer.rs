@@ -39,7 +39,7 @@ use spl_token::{
 };
 
 #[tokio::test]
-async fn reopen_purchased_listing_success() {
+async fn reopen_purchased_offer_success() {
     let program = reward_center_test::setup_program();
     let mut context = program.start_with_context().await;
     let rent = context.banks_client.get_rent().await.unwrap();

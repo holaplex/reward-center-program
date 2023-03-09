@@ -1680,6 +1680,7 @@ dependencies = [
  "mpl-auction-house",
  "mpl-auction-house-sdk",
  "mpl-testing-utils",
+ "mpl-token-auth-rules",
  "mpl-token-metadata",
  "serde_json",
  "shellexpand 3.0.0",
