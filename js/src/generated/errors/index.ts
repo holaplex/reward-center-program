@@ -226,6 +226,66 @@ createErrorFromCodeLookup.set(0x1779, () => new BumpMismatchError());
 createErrorFromNameLookup.set('BumpMismatch', () => new BumpMismatchError());
 
 /**
+ * TokenOwnerMismatch: 'The given token account owner does not match'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class TokenOwnerMismatchError extends Error {
+  readonly code: number = 0x177a;
+  readonly name: string = 'TokenOwnerMismatch';
+  constructor() {
+    super('The given token account owner does not match');
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, TokenOwnerMismatchError);
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x177a, () => new TokenOwnerMismatchError());
+createErrorFromNameLookup.set('TokenOwnerMismatch', () => new TokenOwnerMismatchError());
+
+/**
+ * InsufficientFunds: 'The given token account has insufficient funds'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InsufficientFundsError extends Error {
+  readonly code: number = 0x177b;
+  readonly name: string = 'InsufficientFunds';
+  constructor() {
+    super('The given token account has insufficient funds');
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InsufficientFundsError);
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x177b, () => new InsufficientFundsError());
+createErrorFromNameLookup.set('InsufficientFunds', () => new InsufficientFundsError());
+
+/**
+ * PriceInvalid: 'The listing price cannot be zero'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class PriceInvalidError extends Error {
+  readonly code: number = 0x177c;
+  readonly name: string = 'PriceInvalid';
+  constructor() {
+    super('The listing price cannot be zero');
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, PriceInvalidError);
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x177c, () => new PriceInvalidError());
+createErrorFromNameLookup.set('PriceInvalid', () => new PriceInvalidError());
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

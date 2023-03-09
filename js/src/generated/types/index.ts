@@ -8,3 +8,4 @@ export * from './EditRewardCenterParams';
 export * from './PayoutOperation';
 export * from './RewardRules';
 export * from './UpdateListingParams';
+export * from './WithdrawRewardCenterFundsParams';

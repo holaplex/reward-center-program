@@ -1,6 +1,6 @@
 {
   "name": "@holaplex/hpl-reward-center",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "HPL Reward Center JavaScript API.",
   "main": "dist/src/generated/index.js",
   "types": "dist/src/generated/index.d.ts",
@@ -38,17 +38,17 @@
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-core": "^0.0.5",
-    "@solana/web3.js": "^1.35.1",
-    "bn.js": "^5.2.0"
+    "@solana/web3.js": "^1.73.2",
+    "bn.js": "^5.2.1"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.19.0",
+    "@metaplex-foundation/solita": "^0.19.4",
     "@types/tape": "^4.13.2",
-    "eslint": "^8.3.0",
-    "prettier": "^2.5.1",
-    "rimraf": "^3.0.2",
+    "eslint": "^8.34.0",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.1.2",
     "spok": "^1.4.3",
-    "tape": "^5.5.2",
-    "typescript": "^4.6.2"
+    "tape": "^5.6.3",
+    "typescript": "^4.9.5"
   }
 }

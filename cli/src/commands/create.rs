@@ -29,7 +29,9 @@ use solana_sdk::{
     signature::Keypair, signer::Signer, system_instruction::create_account,
     transaction::Transaction,
 };
-use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
+use spl_associated_token_account::{
+    get_associated_token_address, instruction::create_associated_token_account,
+};
 use spl_token::{instruction::initialize_mint, native_mint, state::Mint};
 
 use crate::{
@@ -97,6 +99,7 @@ pub fn generate_create_rewards_mint_ixs(
         rewards_mint_authority,
         &mint_auth_rewards_mint_token_account,
         rewards_mint,
+        &spl_token::ID,
     );
 
     Ok(vec![

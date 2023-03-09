@@ -1,20 +1,28 @@
 use crate::{solana::create_associated_token_account, utils::*};
 use mpl_token_metadata::{
     id, instruction,
-    state::{Collection, Creator, Data, DataV2, Uses, PREFIX},
+    instruction::{builders::*, CreateArgs, InstructionBuilder, MintArgs},
+    pda::{find_master_edition_account, find_metadata_account, find_token_record_account},
+    processor::AuthorizationData,
+    state::{
+        AssetData, Collection, CollectionDetails, Creator, DataV2, PrintSupply, TokenStandard, Uses,
+    },
 };
 use solana_program::borsh::try_from_slice_unchecked;
 use solana_program_test::*;
 use solana_sdk::{
     pubkey::Pubkey, signature::Signer, signer::keypair::Keypair, transaction::Transaction,
-    transport,
 };
+use spl_associated_token_account::get_associated_token_address;
 
 #[derive(Debug)]
 pub struct Metadata {
     pub mint: Keypair,
-    pub pubkey: Pubkey,
     pub token: Keypair,
+    pub ata: Pubkey,
+    pub pubkey: Pubkey,
+    pub master_edition: Pubkey,
+    pub token_record: Pubkey,
 }
 
 impl Default for Metadata {
@@ -26,16 +34,21 @@ impl Default for Metadata {
 impl Metadata {
     pub fn new() -> Self {
         let mint = Keypair::new();
-        let mint_pubkey = mint.pubkey();
-        let program_id = id();
+        // for builder functions, this is the token owner
+        let token = Keypair::new();
 
-        let metadata_seeds = &[PREFIX.as_bytes(), program_id.as_ref(), mint_pubkey.as_ref()];
-        let (pubkey, _) = Pubkey::find_program_address(metadata_seeds, &id());
+        let (pubkey, _) = find_metadata_account(&mint.pubkey());
+        let (master_edition, _) = find_master_edition_account(&mint.pubkey());
+        let ata = get_associated_token_address(&token.pubkey(), &mint.pubkey());
+        let (token_record, _) = find_token_record_account(&mint.pubkey(), &ata);
 
-        Metadata {
+        Self {
             mint,
             pubkey,
-            token: Keypair::new(),
+            token,
+            ata,
+            token_record,
+            master_edition,
         }
     }
 
@@ -57,7 +70,7 @@ impl Metadata {
         seller_fee_basis_points: u16,
         is_mutable: bool,
         amount: u64,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         create_mint(context, &self.mint, &context.payer.pubkey(), None).await?;
 
         let token = create_associated_token_account(context, &self.token, &self.mint.pubkey())
@@ -74,7 +87,7 @@ impl Metadata {
         .await?;
 
         let tx = Transaction::new_signed_with_payer(
-            &[instruction::create_metadata_accounts(
+            &[instruction::create_metadata_accounts_v3(
                 id(),
                 self.pubkey,
                 self.mint.pubkey(),
@@ -88,9 +101,109 @@ impl Metadata {
                 seller_fee_basis_points,
                 false,
                 is_mutable,
+                None,
+                None,
+                None,
             )],
             Some(&context.payer.pubkey()),
             &[&context.payer],
+            context.last_blockhash,
+        );
+
+        context.banks_client.process_transaction(tx).await
+    }
+
+    pub async fn mint_via_builder(
+        &self,
+        context: &mut ProgramTestContext,
+        amount: u64,
+        authorization_data: Option<AuthorizationData>,
+    ) -> Result<(), BanksClientError> {
+        let ix = MintBuilder::new()
+            .token(self.ata)
+            .token_owner(self.token.pubkey())
+            .metadata(self.pubkey)
+            .master_edition(self.master_edition)
+            .token_record(self.token_record)
+            .mint(self.mint.pubkey())
+            .authority(context.payer.pubkey())
+            .payer(context.payer.pubkey())
+            .system_program(solana_sdk::system_program::ID)
+            .sysvar_instructions(solana_sdk::sysvar::instructions::ID)
+            .spl_token_program(spl_token::id())
+            .spl_ata_program(spl_associated_token_account::id())
+            .build(MintArgs::V1 {
+                amount,
+                authorization_data,
+            })
+            .unwrap()
+            .instruction();
+
+        let tx = Transaction::new_signed_with_payer(
+            &[ix],
+            Some(&context.payer.pubkey()),
+            &[&context.payer],
+            context.last_blockhash,
+        );
+
+        context.banks_client.process_transaction(tx).await
+    }
+
+    pub async fn create_via_builder(
+        &self,
+        context: &mut ProgramTestContext,
+        name: String,
+        symbol: String,
+        uri: String,
+        creators: Option<Vec<Creator>>,
+        seller_fee_basis_points: u16,
+        is_mutable: bool,
+        collection: Option<Collection>,
+        uses: Option<Uses>,
+        primary_sale_happened: bool,
+        token_standard: TokenStandard,
+        collection_details: Option<CollectionDetails>,
+        rule_set: Option<Pubkey>,
+        decimals: Option<u8>,
+        print_supply: Option<PrintSupply>,
+    ) -> Result<(), BanksClientError> {
+        let ix = CreateBuilder::new()
+            .metadata(self.pubkey)
+            .master_edition(self.master_edition)
+            .mint(self.mint.pubkey())
+            .authority(context.payer.pubkey())
+            .payer(context.payer.pubkey())
+            .update_authority(context.payer.pubkey())
+            .system_program(solana_sdk::system_program::ID)
+            .sysvar_instructions(solana_sdk::sysvar::instructions::ID)
+            .spl_token_program(spl_token::id())
+            .initialize_mint(true)
+            .update_authority_as_signer(true)
+            .build(CreateArgs::V1 {
+                asset_data: AssetData {
+                    primary_sale_happened,
+                    token_standard,
+                    symbol,
+                    name,
+                    uri,
+                    seller_fee_basis_points,
+                    creators,
+                    is_mutable,
+                    collection,
+                    uses,
+                    collection_details,
+                    rule_set,
+                },
+                decimals,
+                print_supply,
+            })
+            .unwrap()
+            .instruction();
+
+        let tx = Transaction::new_signed_with_payer(
+            &[ix],
+            Some(&context.payer.pubkey()),
+            &[&context.payer, &self.mint],
             context.last_blockhash,
         );
 
@@ -108,15 +221,19 @@ impl Metadata {
         is_mutable: bool,
         collection: Option<Collection>,
         uses: Option<Uses>,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         create_mint(context, &self.mint, &context.payer.pubkey(), None).await?;
-
-        let token =
-            create_associated_token_account(context, &self.token, &self.mint.pubkey()).await?;
+        create_token_account(
+            context,
+            &self.token,
+            &self.mint.pubkey(),
+            &context.payer.pubkey(),
+        )
+        .await?;
         mint_tokens(
             context,
             &self.mint.pubkey(),
-            &token,
+            &self.token.pubkey(),
             1,
             &context.payer.pubkey(),
             None,
@@ -124,7 +241,7 @@ impl Metadata {
         .await?;
 
         let tx = Transaction::new_signed_with_payer(
-            &[instruction::create_metadata_accounts_v2(
+            &[instruction::create_metadata_accounts_v3(
                 id(),
                 self.pubkey,
                 self.mint.pubkey(),
@@ -140,6 +257,7 @@ impl Metadata {
                 is_mutable,
                 collection,
                 uses,
+                None,
             )],
             Some(&context.payer.pubkey()),
             &[&context.payer],
@@ -152,7 +270,7 @@ impl Metadata {
     pub async fn update_primary_sale_happened_via_token(
         &self,
         context: &mut ProgramTestContext,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         let tx = Transaction::new_signed_with_payer(
             &[instruction::update_primary_sale_happened_via_token(
                 id(),
@@ -176,20 +294,23 @@ impl Metadata {
         uri: String,
         creators: Option<Vec<Creator>>,
         seller_fee_basis_points: u16,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         let tx = Transaction::new_signed_with_payer(
-            &[instruction::update_metadata_accounts(
+            &[instruction::update_metadata_accounts_v2(
                 id(),
                 self.pubkey,
                 context.payer.pubkey(),
                 None,
-                Some(Data {
+                Some(DataV2 {
                     name,
                     symbol,
                     uri,
                     creators,
                     seller_fee_basis_points,
+                    collection: None,
+                    uses: None,
                 }),
+                None,
                 None,
             )],
             Some(&context.payer.pubkey()),
@@ -211,7 +332,7 @@ impl Metadata {
         is_mutable: bool,
         collection: Option<Collection>,
         uses: Option<Uses>,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         let tx = Transaction::new_signed_with_payer(
             &[instruction::update_metadata_accounts_v2(
                 id(),
@@ -246,7 +367,7 @@ impl Metadata {
         collection_mint: Pubkey,
         collection_master_edition_account: Pubkey,
         collection_authority_record: Option<Pubkey>,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         let tx = Transaction::new_signed_with_payer(
             &[instruction::verify_collection(
                 id(),
@@ -274,7 +395,7 @@ impl Metadata {
         collection_mint: Pubkey,
         collection_master_edition_account: Pubkey,
         collection_authority_record: Option<Pubkey>,
-    ) -> transport::Result<()> {
+    ) -> Result<(), BanksClientError> {
         let tx = Transaction::new_signed_with_payer(
             &[instruction::unverify_collection(
                 id(),

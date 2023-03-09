@@ -7,3 +7,4 @@ export * from './createOffer';
 export * from './createRewardCenter';
 export * from './editRewardCenter';
 export * from './updateListing';
+export * from './withdrawRewardCenterFunds';
