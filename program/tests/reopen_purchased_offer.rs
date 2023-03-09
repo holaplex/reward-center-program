@@ -282,11 +282,17 @@ async fn reopen_purchased_offer_success() {
     .unwrap();
 
     // Creating Associated Token accounts
-    let create_buyer_reward_token_ix =
-        create_associated_token_account(&wallet, &buyer_pubkey, &reward_mint_pubkey);
+    let create_buyer_reward_token_ix = create_associated_token_account(
+        &metadata_owner_address,
+        &buyer_pubkey,
+        &reward_mint_pubkey,
+    );
 
-    let create_seller_reward_token_ix =
-        create_associated_token_account(&wallet, &metadata_owner_address, &reward_mint_pubkey);
+    let create_seller_reward_token_ix = create_associated_token_account(
+        &metadata_owner_address,
+        &metadata_owner_address,
+        &reward_mint_pubkey,
+    );
 
     let buyer_token_account = get_associated_token_address(&buyer.pubkey(), &metadata_mint_address);
 
@@ -322,7 +328,7 @@ async fn reopen_purchased_offer_success() {
             accept_offer,
         ],
         Some(&metadata_owner.pubkey()),
-        &[&context.payer, &metadata_owner],
+        &[&metadata_owner],
         context.last_blockhash,
     );
 
