@@ -16,9 +16,9 @@ env_logger = "0.10.0"
 hpl-reward-center = { path = "../program", features = ["no-entrypoint"] }
 hpl-reward-center-sdk = { path = "../sdk/reward-center" }
 log = "0.4.17"
-mpl-auction-house = { git = "https://github.com/metaplex-foundation/metaplex-program-library", features = ["cpi", "no-entrypoint"] }
+mpl-auction-house = { version = "1.4.0", features = ["cpi", "no-entrypoint"] }
 mpl-auction-house-sdk = { path = "../sdk/auction-house" }
-mpl-token-metadata = { version = "1.8.4", features = ["no-entrypoint"] }
+mpl-token-metadata = { version = "1.9.0", features = ["no-entrypoint"] }
 retry = "2.0.0"
 serde = { version = "1.0.145", features = ["derive"] }
 serde_json = "1.0.86"

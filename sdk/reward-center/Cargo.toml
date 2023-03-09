@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 hpl-reward-center = { path = "./../../program", features = ["no-entrypoint"]}
-mpl-auction-house = { git = "https://github.com/metaplex-foundation/metaplex-program-library", features = ["no-entrypoint"]}
+mpl-auction-house = { version = "1.4.0", features = ["no-entrypoint"]}
 anchor-lang = "0.26.0"
 anchor-client = "0.26.0"
 spl-associated-token-account = { version = "1.1.2", features = ["no-entrypoint"] }

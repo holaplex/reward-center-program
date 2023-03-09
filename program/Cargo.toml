@@ -23,8 +23,8 @@ default = []
 solana-program = "1.14"
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
-mpl-auction-house = { git = "https://github.com/metaplex-foundation/metaplex-program-library", features = ["cpi", "no-entrypoint"] }
-mpl-token-metadata = { version = "1.8.4", features = [ "no-entrypoint" ] }
+mpl-auction-house = { version = "1.4.0", features = ["cpi", "no-entrypoint"] }
+mpl-token-metadata = { version = "1.9.0", features = [ "no-entrypoint" ] }
 
 [dev-dependencies]
 anchor-client = "0.26.0"
@@ -37,7 +37,7 @@ solana-program-test = "1.14"
 solana-sdk = "1.14"
 env_logger="0.10.0"
 spl-associated-token-account = { version = "1.1.2", features = ["no-entrypoint"] }
-mpl-token-metadata = { version="1.8.3", features = [ "no-entrypoint" ] }
+mpl-token-metadata = { version="1.9.0", features = [ "no-entrypoint" ] }
 spl-token = { version = "3.5",  features = ["no-entrypoint"] }
 
 [profile.release]
